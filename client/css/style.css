@@ -287,3 +287,115 @@ canvas#game {
   cursor: pointer;
 }
 .vibes-boot-actions button:hover { color: var(--accent); border-color: var(--accent); }
+
+/* — vibes_aim floating chart panel — */
+#vibes-chart {
+  position: fixed;
+  right: 14px;
+  top: 14px;
+  width: min(360px, 38vw);
+  z-index: 15;          /* above the canvas, below the aim-bridge chip (z=30) */
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-3);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  font-family: var(--font-ui);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+#vibes-chart[hidden] { display: none; }
+#vibes-chart[data-collapsed="1"] .vc-body { display: none; }
+
+.vc-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.vc-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--fs-kicker);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.vc-ticker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+  border-left: 4px solid var(--aapl);
+  padding-left: 6px;
+}
+#vibes-chart[data-ticker="AAPL"] .vc-ticker { border-left-color: var(--aapl); }
+#vibes-chart[data-ticker="NVDA"] .vc-ticker { border-left-color: var(--nvda); }
+.vc-price {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.vc-change.pos { color: var(--gain); }
+.vc-change.neg { color: var(--loss); }
+.vc-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-left: auto;
+}
+.vc-status.stale { color: var(--warn); }
+.vc-tickers, .vc-ranges {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-2);
+  overflow: hidden;
+}
+.vc-tickers button, .vc-ranges button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.vc-tickers button:last-child, .vc-ranges button:last-child { border-right: 0; }
+.vc-tickers button:hover, .vc-ranges button:hover { color: var(--fg); }
+.vc-tickers button.active, .vc-ranges button.active {
+  background: var(--accent);
+  color: #04140c;
+}
+
+.vc-body {
+  position: relative;
+  height: 200px;
+  background: var(--bg-2);
+}
+.vc-body canvas { display: block; width: 100% !important; height: 100% !important; }
+
+/* collapse toggle (small caret on the right) */
+#vibes-chart .vc-toggle {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 0;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0;
+}

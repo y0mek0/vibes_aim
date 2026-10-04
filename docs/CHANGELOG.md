@@ -184,3 +184,31 @@
 - **No visual screenshot** in this environment. The boot banner and the floating HUD chip exist in code and in the design system, but I have not run a real browser to confirm they render. Queued for Stage 6/7 when the chart widget lands.
 - The Supabase test uses a small PostgREST emulator. It is good enough to prove the store contract, but it does not exercise the real `Prefer: count=exact` semantics on `HEAD` requests with RLS — those are the responsibility of the real Supabase project.
 - The `vibes:hit` event is only emitted when the engine's `markHit` runs. In the valotrainer modes that count pellets instead of orbs (e.g. bots), hits still call `markHit` once per pull, so the bridge will mint one unit per pull. This is the same cadence the engine shows to the player, so it matches the on-screen feedback.
+
+## Stage 6 — Mini chart widget (2026-10-04)
+
+- `client/js/chart.js` — floating corner chart panel. Loads `lightweight-charts@4.1.0` from the existing importmap (no `npm install`), draws AAPL/NVDA candles with one-second tick updates from `/market/quote`. Range switch (1D/5D), ticker switch (AAPL/NVDA), live/stale status badge, pre-IPO handling (no chart, "awaiting market"). Exports pure helpers `accentColor`, `fmtPrice`, `fmtChange`, `buildSeriesData`, `buildStatus`, `buildHeader` and network wrappers `fetchCandles` / `fetchQuote` for testability. Auto-mounts from `queueMicrotask` so the panel appears without any user action.
+- `client/index.html` — added `<div id="vibes-chart">` with a head (kicker, ticker, price, change, status, ticker buttons, range buttons) and a body div for the chart canvas. The chart panel sits at z-index 15, the aim-bridge HUD chip sits at z-index 30, the engine overlay is below — so the chart is visible on the arena but never blocks the menu or the chip.
+- `client/css/style.css` — chart-panel styles appended. Uses design tokens (`--bg-2`, `--fg`, `--accent`, etc.), sharp corners, mono font for prices, accent-tinted left border on the ticker label that re-tints when you switch from AAPL (silver) to NVDA (green).
+- Importmap updated: `"lightweight-charts":"https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"`. The chart ships as a single ~160KB standalone production build, no separate CSS file needed.
+- `tests/chart.test.mjs` — 12 assertions. 7 pure-function tests (`accentColor` per ticker, `fmtPrice` for null/undefined/NaN, `fmtChange` sign and format, `buildSeriesData` ms→s conversion, `buildStatus` pre-ipo/error/stub/connecting/live, `buildHeader` positive/negative/pre-ipo/null). 5 integration tests against the live server: `/market/candles/AAPL?range=1D` shape matches `buildSeriesData` input, `/market/quote/AAPL` shape matches `buildHeader` input, OPENAI quote is pre-ipo (header returns "—"), OPENAI candles returns empty array (no throw), `/market/symbols` lists AAPL and NVDA.
+
+### Bug fixes in this stage
+
+- `client/js/chart.js` first imported `./src/api.js` and `client/js/aim-bridge.js` had the same path. Both files live in `client/js/`, so `./src/api.js` would resolve to `client/js/src/api.js` — which does not exist. The browser would have failed to import silently. Fixed: changed to `../src/api.js` in both files. The unit test caught this immediately because Node's resolver is strict about paths. Lesson: **if a module is meant to run in the browser AND be unit-tested in Node, the import paths must be Node-correct from the start.** Browsers are forgiving until they aren't.
+- First `chart.test.mjs` used `node:vm` and a 130-line DOM shim to drive `mountChart` end-to-end. Worked once, then broke under maintenance. Replaced with a two-layer test: pure-function tests on the exported helpers (no DOM, no chart lib, no vm) and a small integration test that boots the server and asserts the wire contract. Lesson: when a test framework starts to dominate the test, the right move is to push the logic out of the UI module into pure functions, not to keep the vm shim.
+
+### Evidence
+
+- `npm test` → exit 0. Thirteen `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`, `client-bridge`, `supabase`, `chart`.
+- `node --check` exit 0 on every new file: `client/js/chart.js`, `tests/chart.test.mjs`.
+- `imports.test.mjs` and `dom.test.mjs` still pass after the new files were added (engine id lookups unchanged, all new module imports resolve).
+- Real CDN reachable: `https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js` returns 200 with 160,094 bytes. No API key involved.
+- `grep -RIE "FINNHUB_TOKEN|finhub_token" client/` still returns 0 matches. Chart module never touches the provider key.
+
+### Limits of this stage
+
+- **No visual screenshot** in this environment. The chart panel exists in code and in the design system, but I have not run a real browser to confirm it renders. The pure-function tests prove the inputs and outputs are right; only a browser proves pixels.
+- WebSocket streaming is not wired. The chart polls `/market/quote` every 1s, which is fine for an MVP and is what `Finnhub` is rate-limited for. Real WebSocket upgrade is queued.
+- The chart only handles AAPL and NVDA. SPCX, OPENAI, ANTHROPIC are visible in `/market/symbols` but not as buttons. Adding more tickers is a button-array change; no logic change.

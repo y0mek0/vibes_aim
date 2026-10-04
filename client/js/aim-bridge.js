@@ -6,8 +6,8 @@
 // server uses (sessionId, hitId) for idempotency, so a network blip that
 // causes a retry will not double-mint.
 
-import { api } from './src/api.js';
-import { getSessionId } from './src/session.js';
+import { api } from '../src/api.js';
+import { getSessionId } from '../src/session.js';
 
 const ACTIVE_TICKER_KEY = 'vibes_aim.activeTicker.v1';
 const DEFAULT_TICKER = 'AAPL';

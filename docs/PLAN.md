@@ -70,7 +70,15 @@ Stage 5 — Aim bridge. Sub-steps (DONE 2026-10-04, 12/12 test suites green, 4 d
 - 5.4 `tests/supabase.test.mjs` with in-process PostgREST emulator — DONE (9 assertions). Bug fix: `rpc()` now serialises body to JSON before `fetch`.
 - 5.5 Visual screenshot smoke — DEFERRED (no headless browser).
 
-Stage 6 next:
+Stage 6 — Mini chart widget. Sub-steps (DONE 2026-10-04, 13/13 test suites green, 4 documents updated, committed):
+
+- 6.1 `client/js/chart.js` with TV Lightweight Charts via importmap — DONE.
+- 6.2 Polling `/quote` every 1s + stale label after 5s — DONE.
+- 6.3 AAPL/NVDA ticker switcher, 1D/5D range switcher, pre-IPO handling — DONE.
+- 6.4 `tests/chart.test.mjs` — DONE (12 assertions, 7 pure + 5 wire).
+- 6.5 Bug fix: chart.js + aim-bridge.js had wrong relative import paths (`./src/api.js` instead of `../src/api.js`). Caught by Node's strict ESM resolver.
+
+Stage 7 next: full trading terminal (portfolio, order, long/short, leverage, liquidation preview).
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.

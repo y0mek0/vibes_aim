@@ -47,9 +47,9 @@
 
 ## Stage 6 — Mini chart widget
 
-- [ ] TradingView Lightweight Charts in a corner panel on the arena.
-- [ ] Live updates from the WebSocket adapter; stale label after N seconds without a tick. (WebSocket part requires Finnhub; until then we poll /quote every 1s.)
-- [ ] Visual screenshot smoke.
+- [x] TradingView Lightweight Charts in a corner panel on the arena. → `client/js/chart.js`, loaded via importmap (no `npm install`).
+- [x] Live updates; stale label after 5s without a tick. → polls `/market/quote` every 1s (WebSocket upgrade queued for after Finnhub token is wired).
+- [ ] **Visual screenshot smoke** — no headless browser in this env. Queued for Stage 7/8.
 
 ## Stage 4 — Client state + persistence
 

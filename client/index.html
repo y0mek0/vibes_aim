@@ -13,11 +13,34 @@
 <link rel="stylesheet" href="css/upstream.css">
 <link rel="stylesheet" href="css/style.css">
 <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "lightweight-charts":"https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"
+}}
 </script>
 </head>
 <body>
 <canvas id="game"></canvas>
+
+<!-- vibes_aim: floating chart panel. Lives above the canvas, below the aim-bridge chip. -->
+<div id="vibes-chart" hidden>
+  <div class="vc-head">
+    <span class="vc-kicker">// chart</span>
+    <span class="vc-ticker" data-vc-ticker>AAPL</span>
+    <span class="vc-price" data-vc-price>—</span>
+    <span class="vc-change" data-vc-change>—</span>
+    <span class="vc-status" data-vc-status></span>
+    <div class="vc-tickers" role="tablist" aria-label="ticker">
+      <button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button>
+      <button type="button" data-vc-ticker-btn="NVDA">NVDA</button>
+    </div>
+    <div class="vc-ranges" role="tablist" aria-label="range">
+      <button type="button" data-vc-range-btn="1D" class="active">1D</button>
+      <button type="button" data-vc-range-btn="5D">5D</button>
+    </div>
+  </div>
+  <div class="vc-body" data-vc-body></div>
+</div>
 <div id="startfade"></div>
 <div id="vignette"></div>
 <div id="scope"></div>
@@ -179,6 +202,8 @@
 
 <!-- vibes_aim bridge (auto-registers the aim-bridge and boots the server-availability check) -->
 <script type="module" src="js/aim-bridge.js"></script>
+<!-- vibes_aim chart (TradingView Lightweight Charts, polled from /market/quote) -->
+<script type="module" src="js/chart.js"></script>
 <script type="module" src="js/main.js"></script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>
