@@ -4,16 +4,17 @@
 
 ## Stage 1 — Clone valotrainer and strip brand markers
 
-- [ ] Pin the valotrainer commit we will base on, record SHA in CHANGELOG.
-- [ ] Copy only the engine files we need (`core/ballistics`, `core/gunplay`, `core/crosshair`, `core/stats`, `core/stalker`, `modes/gridshot`, `modes/flick`).
-- [ ] Remove or replace brand markers (mentions, links, original screenshots) without breaking the aim loop.
-- [ ] Verify static server still serves the trimmed repo with no console errors (paste exit code in CHANGELOG).
-- [ ] First commit on `main` with a clear message.
+- [x] Pin the valotrainer commit we will base on, record SHA in CHANGELOG. → `ded498f5eb54867bd3d55648774984f6e3a90004`
+- [x] Copy only the engine files we need → under `client/js/{core,data,three,ui,fx}` + main/game/build
+- [ ] Remove or replace brand markers (mentions, links, original screenshots) without breaking the aim loop. → deferred to Stage 2 (CSS) and Stage 4 (HTML menu/HUD).
+- [x] Verify static server still serves the trimmed repo with no console errors. → all 19 paths return 200; `node --check` exit 0 for all 17 engine modules. Visual check deferred to Stage 10.
+- [x] First commit on `main` with a clear message. → about to commit Stage 1.
 
 ## Stage 2 — Design system
 
 - [ ] Run `ui-ux-pro-max --design-system` for a trading-game aesthetic, persist to `design-system/MASTER.md`.
 - [ ] Lock AAPL palette (gray/silver), NVDA palette (green neon), accent tokens, typography (Geist Mono for numbers, Geist Sans for UI).
+- [ ] Replace `client/css/style.css` with a real vibes_aim stylesheet; verify `tests/css.test.mjs` passes.
 - [ ] Verify tokens are referenced by at least one CSS rule and one component, paste `grep` output in CHANGELOG.
 
 ## Stage 3 — Server
