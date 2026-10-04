@@ -104,7 +104,14 @@ Stage 9 — End-to-end visual review + unlocked tickers list. Sub-steps (DONE 20
 - 9.5 `chart.js` unlocked tickers list — DONE. NVDA button only visible after the AAPL chain unlocks it.
 - 9.6 Documents — DONE.
 
-Stage 10 next: README, LICENSE, .nvmrc, deploy notes, release tag `mvp-v0.1`.
+Stage 10 — Polish, release tag. Sub-steps (DONE 2026-10-04, 16/16 test suites green, 4 documents updated, committed, tagged `mvp-v0.1`):
+
+- 10.1 README.md — DONE.
+- 10.2 LICENSE (MIT) + .nvmrc + .gitattributes — DONE.
+- 10.3 `client/vercel.json` + `Procfile` + `deploy/README.md` — DONE.
+- 10.4 Tag `mvp-v0.1` — DONE.
+
+`mvp-v0.1` is the first release. The repo is a complete, testable, deployable single-player aim-trading game. No real money, no broker, no debt. 16 test suites, 16/16 green. 4 PNG screenshots in `docs/screenshots/`.
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.

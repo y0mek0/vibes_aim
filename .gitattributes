@@ -1,0 +1,21 @@
+* text=auto
+
+# Force LF for source files; CRLF warnings are noise in this repo.
+*.js        eol=lf
+*.mjs       eol=lf
+*.json      eol=lf
+*.css       eol=lf
+*.html      eol=lf
+*.md        eol=lf
+*.yml       eol=lf
+*.yaml      eol=lf
+*.sql       eol=lf
+*.py        eol=lf
+*.sh        eol=lf
+
+# Binary assets (keep gitattributes sane for them).
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary

@@ -305,3 +305,44 @@
 - The visual smoke requires Python + Playwright + Chromium. In environments without these, the test is skipped — `npm test` stays green, but no real screenshots are produced. CI would need a Playwright-image.
 - `precise_session` is still the server's "any winning trade" proxy. Real accuracy tracking from the client is queued.
 - `hold_60s` is still 1 second. Real 60-second session timer is queued.
+
+## Stage 10 — Polish, deploy notes, release tag `mvp-v0.1` (2026-10-04)
+
+- `README.md` — first-time contributor guide. Run instructions, the
+  `aim → ticker → trade` flow, the architecture tree, the deploy story,
+  a section on what is **not** in this release (no real money, no
+  broker, no withdrawals, no deposits), acknowledgements to valotrainer
+  (MIT), Lightweight Charts (Apache-2.0), Finnhub, and Supabase.
+- `LICENSE` — MIT. Names the valotrainer-derived files and the upstream
+  MIT license they inherit.
+- `.nvmrc` — pins Node.js 20. The server and the test suite both run
+  on Node 20+; the visual smoke uses the system Python.
+- `.gitattributes` — `eol=lf` for source files, `binary` for PNG/JPG.
+  Silences the CRLF warnings the repo has had since Stage 1.
+- `client/vercel.json` — Vercel static-site config. Cache-Control for
+  `/js/*` and `/css/*` is 1 day, for everything else 5 minutes. No
+  build step, no env vars.
+- `Procfile` — Render / Heroku / Fly one-liner: `web: node
+  server/src/index.js`.
+- `deploy/README.md` — copy-paste recipes for Vercel + Render + Supabase
+  + Finnhub, the `ORIGIN` CORS rule that catches most first-time deploys,
+  the `/health` health check, and a 3-step "is my deploy healthy" smoke.
+
+### Evidence
+
+- `npm test` → exit 0. Sixteen `ALL PASS` in a row (still the same suite
+  as Stage 9 — no test churn this stage).
+- `cat client/vercel.json | python -m json.tool` parses cleanly.
+- `cat .nvmrc` → `20`.
+- `node --check` exit 0 on every JS file in the repo.
+
+### Limits of this stage
+
+- No CI configuration. `.github/workflows/test.yml` would be a one-day
+  Stage 11 add: it would run `npm test` on every push and on PRs, and
+  optionally boot the visual smoke if Playwright is installed.
+- No release artefacts (e.g. a Docker image). The server is small
+  enough that a multi-stage Dockerfile is a 30-line file, but I left
+  it out because Render's free tier deploys from source just as well.
+- No production-grade observability. The server logs to stdout. A
+  real deploy would want to pipe those to a log aggregator.

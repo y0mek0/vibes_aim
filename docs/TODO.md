@@ -99,17 +99,47 @@
 - [ ] **`precise_session` real accuracy** — currently a server proxy (any winning trade). Real accuracy tracking from the client is queued.
 - [ ] **`hold_60s` real 60s** — currently 1 second MVP. Real session timer queued.
 
-## Stage 10 — Polish, release tag
+## Stage 10 — Polish, release tag (DONE 2026-10-04)
 
-- [ ] README.md, LICENSE, .nvmrc, deploy instructions.
-- [ ] Tag `mvp-v0.1`.
-- [ ] Optional: host on Vercel + Render free tier.
+- [x] README.md — DONE.
+- [x] LICENSE (MIT) — DONE.
+- [x] .nvmrc — DONE.
+- [x] `.gitattributes` (eol=lf for source) — DONE.
+- [x] `client/vercel.json` + `Procfile` + `deploy/README.md` — DONE.
+- [x] Tag `mvp-v0.1` — DONE (annotated tag at HEAD).
+- [ ] CI on GitHub Actions — Stage 11.
 
-## Stage 10 — Polish, release tag
+## Stage 11 backlog (post-v0.1)
 
-- [ ] README.md, LICENSE, .nvmrc, deploy instructions.
-- [ ] Tag `mvp-v0.1`.
-- [ ] Optional: host on Vercel + Render free tier.
+- [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
+- [ ] CI: optional Playwright job for the visual smoke.
+- [ ] `precise_session` real accuracy tracking (server proxy now).
+- [ ] `hold_60s` real 60-second session timer (1s MVP now).
+- [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
+- [ ] Docker image for the server.
+- [ ] Push to GitHub. Currently the repo is local-only (no `git remote`).
+
+
+## Stage 10 — Polish, release tag (DONE 2026-10-04)
+
+- [x] README.md — DONE.
+- [x] LICENSE (MIT) — DONE.
+- [x] .nvmrc — DONE.
+- [x] `.gitattributes` (eol=lf for source) — DONE.
+- [x] `client/vercel.json` + `Procfile` + `deploy/README.md` — DONE.
+- [x] Tag `mvp-v0.1` — DONE (annotated tag at HEAD).
+- [ ] CI on GitHub Actions — Stage 11.
+
+## Stage 11 backlog (post-v0.1)
+
+- [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
+- [ ] CI: optional Playwright job for the visual smoke.
+- [ ] `precise_session` real accuracy tracking (server proxy now).
+- [ ] `hold_60s` real 60-second session timer (1s MVP now).
+- [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
+- [ ] Docker image for the server.
+- [ ] Push to GitHub. Currently the repo is local-only (no `git remote`).
+
 
 ## Anti-cheat (already covered in Stage 3)
 
