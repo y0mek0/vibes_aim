@@ -37,13 +37,13 @@
 
 ## Stage 5 — Aim integration (re-numbered after Stage 3 inserted)
 
-- [ ] Wire `client/js/main.js` (or a new `client/js/aim-bridge.js`) to call `store.recordAimHit({ hitId, ticker, accuracy, streak })` on every engine hit. Engine already exposes a hit path through the FX spark callback or by hooking `markHit` in `game.js`. We will use the latter.
-- [ ] Each hit POSTs to `/aim/hit`; server grants a fractional AAPL unit. Endpoint behavior is already covered by `tests/server.test.mjs` (mints, idempotency, rate limit, streak bonus, accuracy penalty).
-- [ ] `client/js/main.js` imports `client/src/api.js` + `client/src/store.js` and shows a small "+0.0008 AAPL" chip on each hit, sourced from `store.state.lastHit`.
-- [ ] **NEW (from Stage 4):** Add a small integration test that boots the server in-process, mints one hit, and asserts the response body shape matches what the client `store.recordAimHit` expects. (Endpoint test already covers status codes; this test covers the field shape.)
-- [ ] **NEW (from Stage 4):** mocked PostgREST test for `server/src/db/supabase.js` — boot a tiny in-process HTTP server that returns canned rows, point `SUPABASE_URL` at it, and assert the store behaves like the in-memory one for hit-mint, idempotency, open-trade, close-trade, claim-mission, and unlock-NVDA paths.
-- [ ] **NEW (from Stage 4 MISTAKE):** if `VIBES_API_BASE` is unreachable, show a one-line warning on the boot screen rather than failing silently.
-- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke. Open the page, take a PNG, save under `docs/screenshots/`, reference in CHANGELOG.
+- [x] Wire the engine to the client store: 1-line patch in `markHit(head)` emits `vibes:hit` on `window`. `client/js/aim-bridge.js` listens, POSTs `/aim/hit`, renders HUD chip.
+- [x] Each hit POSTs to `/aim/hit`; server grants a fractional AAPL unit. Endpoint behavior covered by `tests/server.test.mjs` (mints, idempotency, rate limit, streak bonus, accuracy penalty).
+- [x] Bridge shows a small "+0.0008 AAPL" chip on each hit, sourced from the server's `unit` field.
+- [x] **`tests/client-bridge.test.mjs`** — 8 assertions, real HTTP exchange, confirms response shape matches what `client/src/api.js` reads.
+- [x] **`tests/supabase.test.mjs`** — 9 assertions against a mocked PostgREST. Confirms hit-mint, idempotency, open/close trade, claim-mission, unlock-NVDA paths.
+- [x] **Boot screen with server-availability banner** — `client/index.html` + `client/css/style.css`. Shows when `/health` is unreachable, hides otherwise. Skip button always available.
+- [ ] **Visual screenshot smoke.** No headless browser in this environment. Queued for Stage 6/7 when the chart widget lands.
 
 ## Stage 6 — Mini chart widget
 

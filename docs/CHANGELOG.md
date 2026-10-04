@@ -158,3 +158,29 @@
 - `client/index.html` still does not actually call `client/src/api.js` or `client/src/store.js`. The aim loop still goes through the engine's internal `boot()` without POSTing. Wiring the engine to the server is Stage 5.
 - Visual screenshot smoke: not done in this stage. The client code did not change in any visible way yet. Will be required at Stage 6/7 once we wire the chart.
 - `client/src/store.js` is not imported by `client/js/main.js` yet, so the test suite only proves it parses. Real integration lands in Stage 5.
+
+## Stage 5 — Aim bridge + boot banner + shape tests + Supabase mocked test (2026-10-04)
+
+- `client/js/game.js` — 1-line patch inside `markHit(head)`. Emits a `vibes:hit` CustomEvent on `window` with `{ head, accuracy, streak, ts }`. The rest of the engine is untouched. The event is wrapped in a try/catch so a bridge failure can never affect aim feedback.
+- `client/js/aim-bridge.js` — listens for `vibes:hit`, generates a per-session monotonic `hitId`, POSTs to `/aim/hit`, renders a small floating HUD chip showing the last unit + running total. Maintains a set of in-flight `hitId`s so a network blip that causes a retry can never double-submit the same id within a frame. The active ticker is `vibes_aim.activeTicker.v1` in localStorage (defaults to `AAPL`). The chip uses our design tokens and the same cubic-bezier transition as the rest of the UI.
+- `client/index.html` — boot banner overlay (`#vibes-boot`) that runs `fetch(window.VIBES_API_BASE + '/health')` with 3 retries. If the server is unreachable, the user sees a one-line explanation and a Skip button. If reachable, the banner hides before the engine menu is interactive. The banner is also wired in front of `js/main.js` so the engine's menu still renders behind it.
+- `client/css/style.css` — boot-banner styles appended. Same tokens as the rest of the system. No new colors, no new fonts.
+- `tests/client-bridge.test.mjs` — boots the server in-process and sends the exact POST shape that `client/js/aim-bridge.js` produces. 8 assertions: `/aim/hit` happy path, idempotency on duplicate `hitId`, streak bonus, `/portfolio` shape (with AAPL balance > 0), `/missions` shape (6 entries with the right fields), `/missions/claim` returns 400 before threshold, `/portfolio/preview` shape, `/portfolio/order` requires `confirmLiquidation`.
+- `tests/supabase.test.mjs` — small in-process PostgREST emulator and the `createSupabaseStore` against it. 9 assertions: store backend is `supabase` when env present, `getOrCreatePlayer` mints with 1000 stable, `addStable` floors at 0, `recordHit` idempotent on `(sessionId, hitId)` (Postgres 23505 → `{ duplicate: true, entry }`), `addTickerUnits` / `getBalance` / `getAllBalances` round-trip, `countHits` and `totalEarnedViaAim` aggregate correctly, `openTrade` / `listTrades` / `closeTrade` round-trip, `unlock` / `isUnlocked` / `listUnlocks` round-trip, `addStable` on a fresh player creates them.
+
+### Bug fixes in this stage
+
+- `server/src/db/supabase.js` `rpc()` was passing `body` to `fetch()` as a JS object. `fetch` expects a string. Added `JSON.stringify` when the body is a non-string. Caught by the new Supabase test.
+- `tests/supabase.test.mjs` initially used the wrong filter syntax for PostgREST: it checked `eq.id` as a key instead of `id=eq.value` (the value carries the prefix). Fixed by parsing `searchParams` for values starting with `eq.`. Documented in MISTAKES.
+
+### Evidence
+
+- `npm test` → exit 0. Twelve `ALL PASS` in a row: `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`, `client-bridge`, `supabase`.
+- `node --check` exit 0 on every file added this stage: `client/js/aim-bridge.js`, `tests/client-bridge.test.mjs`, `tests/supabase.test.mjs`.
+- Live smoke of the boot banner requires a real browser; not done in this environment. The server-side `/health` smoke is already on record (Stage 3).
+
+### Limits of this stage
+
+- **No visual screenshot** in this environment. The boot banner and the floating HUD chip exist in code and in the design system, but I have not run a real browser to confirm they render. Queued for Stage 6/7 when the chart widget lands.
+- The Supabase test uses a small PostgREST emulator. It is good enough to prove the store contract, but it does not exercise the real `Prefer: count=exact` semantics on `HEAD` requests with RLS — those are the responsibility of the real Supabase project.
+- The `vibes:hit` event is only emitted when the engine's `markHit` runs. In the valotrainer modes that count pellets instead of orbs (e.g. bots), hits still call `markHit` once per pull, so the bridge will mint one unit per pull. This is the same cadence the engine shows to the player, so it matches the on-screen feedback.

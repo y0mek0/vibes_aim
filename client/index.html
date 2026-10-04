@@ -177,6 +177,47 @@
   <p>vibes_aim needs a mouse and pointer lock. Open it on a laptop or desktop.</p>
 </div></div>
 
+<!-- vibes_aim bridge (auto-registers the aim-bridge and boots the server-availability check) -->
+<script type="module" src="js/aim-bridge.js"></script>
 <script type="module" src="js/main.js"></script>
+<!-- boot banner: shown until the server is reachable, then hidden -->
+<div id="vibes-boot" hidden>
+  <div class="vibes-boot-card">
+    <div class="vibes-boot-kicker">// vibes_aim</div>
+    <div class="vibes-boot-title">Connecting to market data</div>
+    <div class="vibes-boot-sub" data-vibes-boot-sub>Looking for the server on <span data-vibes-boot-base>http://127.0.0.1:3000</span>…</div>
+    <div class="vibes-boot-actions">
+      <button type="button" data-vibes-boot-retry>Retry</button>
+      <button type="button" data-vibes-boot-skip>Continue without server</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+  // Tiny client-side bootstrap. Runs after aim-bridge + main are queued.
+  const bootEl = document.getElementById('vibes-boot');
+  const subEl = bootEl && bootEl.querySelector('[data-vibes-boot-sub]');
+  const baseEl = bootEl && bootEl.querySelector('[data-vibes-boot-base]');
+  const retryEl = bootEl && bootEl.querySelector('[data-vibes-boot-retry]');
+  const skipEl  = bootEl && bootEl.querySelector('[data-vibes-boot-skip]');
+  const base = (window.VIBES_API_BASE || 'http://127.0.0.1:3000').replace(/\/$/, '');
+  if (baseEl) baseEl.textContent = base;
+  let dismissed = false;
+  function show(msg) { if (!bootEl || dismissed) return; bootEl.hidden = false; if (subEl && msg) subEl.innerHTML = msg; }
+  function hide() { if (bootEl) bootEl.hidden = true; }
+  async function check(retries = 3, delayMs = 800) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const r = await fetch(base + '/health', { cache: 'no-store' });
+        if (r.ok) { hide(); return true; }
+      } catch (_) { /* keep trying */ }
+      if (i < retries - 1) await new Promise((r2) => setTimeout(r2, delayMs));
+    }
+    show(`Could not reach the server at <strong>${base}</strong>. Run <code>node server/src/index.js</code> on that host, or click <em>Continue without server</em> to use the menu only.`);
+    return false;
+  }
+  retryEl && retryEl.addEventListener('click', () => { show('Retrying…'); check(); });
+  skipEl  && skipEl.addEventListener('click',  () => { dismissed = true; hide(); });
+  check();
+</script>
 </body>
 </html>

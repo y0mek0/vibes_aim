@@ -655,6 +655,13 @@ export function boot() {
     const hm = $('hitmarker');
     hm.classList.toggle('head', !!head);
     replayAnim(hm, 'show');
+    // vibes_aim bridge: emit a window event the client-side aim-bridge.js
+    // listens for. The bridge POSTs to /aim/hit. Server is authoritative.
+    try {
+      const acc = stats.raw.shots > 0 ? stats.raw.hits / stats.raw.shots : 0;
+      const detail = { head: !!head, accuracy: acc, streak: shotStreak, ts: Date.now() };
+      window.dispatchEvent(new CustomEvent('vibes:hit', { detail }));
+    } catch (_) { /* never let bridge failures affect the engine */ }
   }
   function showBanner(t) { const b = $('banner'); b.textContent = t; replayAnim(b, 'show'); }
 

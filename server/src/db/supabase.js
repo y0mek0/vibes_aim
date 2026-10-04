@@ -40,7 +40,12 @@ export function createSupabaseStore({ url, serviceKey }) {
 
   async function rpc(table, query = '', init = {}) {
     const u = new URL(`${url.replace(/\/$/, '')}/rest/v1/${table}${query}`);
-    const res = await fetch(u, { ...init, headers: { ...headers, ...(init.headers || {}) } });
+    // fetch() expects body as a string or stream; serialize if we got a JS value.
+    const finalInit = { ...init, headers: { ...headers, ...(init.headers || {}) } };
+    if (finalInit.body !== undefined && finalInit.body !== null && typeof finalInit.body !== 'string') {
+      finalInit.body = JSON.stringify(finalInit.body);
+    }
+    const res = await fetch(u, finalInit);
     const text = await res.text();
     let body = null; try { body = text ? JSON.parse(text) : null; } catch { /* keep text */ }
     if (!res.ok) {

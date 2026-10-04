@@ -229,3 +229,61 @@ canvas#game {
 
 .num.neg { color: var(--loss); }
 .num.pos { color: var(--gain); }
+
+/* — vibes_aim boot banner — */
+#vibes-boot {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(11, 13, 18, 0.78);
+  backdrop-filter: blur(6px);
+}
+#vibes-boot[hidden] { display: none; }
+.vibes-boot-card {
+  width: min(440px, 92vw);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-3);
+  padding: var(--space-5);
+  text-align: left;
+}
+.vibes-boot-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--fs-kicker);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 8px;
+}
+.vibes-boot-title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.vibes-boot-sub {
+  color: var(--fg-dim);
+  font-size: var(--fs-small);
+  margin-bottom: var(--space-4);
+}
+.vibes-boot-sub code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: rgba(125, 249, 197, 0.08);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+.vibes-boot-actions {
+  display: flex; gap: var(--space-2); justify-content: flex-end;
+}
+.vibes-boot-actions button {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-2);
+  cursor: pointer;
+}
+.vibes-boot-actions button:hover { color: var(--accent); border-color: var(--accent); }
