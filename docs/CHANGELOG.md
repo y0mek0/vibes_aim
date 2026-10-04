@@ -88,3 +88,44 @@
 - No visual screenshot was taken yet. Browser visual verification is deferred to Stage 10.
 - `upstream.css` is the unmodified valotrainer CSS file. It exists because the engine's grid/panel rules are required for the menu/board to render. We override its variables in our `:root`. Future stages can slowly replace specific rules one by one; the file is documented here so it is not mistaken for our work.
 
+
+## Stage 3 — Server (no npm install) (2026-10-04)
+
+- Server is built on Node's built-in `http` and `url` modules, with a tiny
+  Express-shaped router in `server/src/router.js`. No `express` /
+  `@supabase/supabase-js` dependencies — `npm install` is not required to
+  run the server, the tests, or the game.
+- `server/src/config.js` reads config from environment only. `.env.example`
+  documents all variables. `MARKET_PROVIDER`, `FINNHUB_TOKEN`,
+  `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `AIM_HIT_RPS`, `AIM_HIT_UNIT`,
+  `AIM_PRICE_IMPACT_MAX`, `PORT`, `ORIGIN`.
+- `server/src/market/`:
+  - `provider.js` — interface contract: `getQuote`, `getCandles`, `getStatus`, `getSymbols`, plus `RANGES` (`1D`, `5D`, `1M`, `3M`).
+  - `stub.js` — deterministic offline provider. Returns real-looking price series for AAPL/MSFT/NVDA/TSLA/AMZN/SPY/SPCX, and `pre_ipo` status with `price: null` for OPENAI/ANTHROPIC. Status reports `provider: 'stub'`. NOT a real market data source — the UI must label it accordingly.
+  - `finnhub.js` — first real adapter. Uses Node's built-in `fetch`, `X-Finnhub-Token` header. If the token is empty, all data methods throw `HttpError(503, 'market_not_configured')` so the rest of the server stays alive. Resolution mapping: 1m/5m/60m/D. Pre-IPO symbols return `status: 'pre_ipo'`.
+  - `index.js` — `createMarketProvider({ provider, finnhubToken })` factory. Switching providers is one env-var.
+- `server/src/db/store.js` — in-memory store with collections `players`, `balances`, `trades`, `hitLog`, `missions`, `unlocks`. Public methods include `getOrCreatePlayer`, `addTickerUnits`, `recordHit` (idempotency-aware, returns entry on duplicate), `hitRateCheck`, `countHits`, `totalEarnedViaAim`, `openTrade`, `closeTrade`, `getMission`, `setMissionProgress`, `claimMission`, `unlock`. The Supabase backend is queued for Stage 4 (in-memory covers MVP and tests).
+- `server/migrations/0001_init.sql` — Postgres schema for Supabase. Tables: `players`, `balances`, `trades`, `hit_log` (with `unique(session_id, hit_id)` for idempotency), `missions`, `unlocks`. Includes `leverage between 1 and 20` check constraint.
+- `server/src/routes/`:
+  - `health.js` — `GET /health`.
+  - `market.js` — `GET /market/status`, `/market/symbols`, `/market/quote/:symbol`, `/market/candles/:symbol?range=...`.
+  - `aim.js` — `POST /aim/hit`. Requires `X-Player-Id` and `X-Session-Id` headers. Rate-limited to `AIM_HIT_RPS` per session per second. Idempotent on `sessionId+hitId`. Server is the only place that mints simulated ticker units. Streak bonus: +20% per 5 in streak, capped at +50%. Accuracy under 0.4 reduces unit to 25% of base (not zero, per design).
+  - `portfolio.js` — `GET /portfolio`, `POST /portfolio/preview` (no-op, returns entry + liquidation price), `POST /portfolio/order` (requires `confirmLiquidation: true` after preview), `POST /portfolio/close` (computes realized P/L, returns margin + P/L to stable, on liquidation returns `Math.max(0, margin + pnl)` so stable never goes negative). Long/short, leverage clamped to `[1, 20]`. Pre-IPO symbols are refused with `no_price`.
+  - `missions.js` — 6 missions on the AAPL→NVDA unlock chain: `first_10_hits`, `earn_half_aapl`, `first_trade`, `first_profit`, `hold_60s`, `precise_session`. `POST /missions/claim` credits Stable to the player. When all 6 are claimed, NVDA is unlocked for the player.
+- `server/src/index.js` — `createApp()` factory + `app.listen(port)`. CORS preflight + per-origin allow-list from `ORIGIN`. `clientError` handler on the socket.
+- `tests/server.test.mjs` — boots the server on an ephemeral port with the stub provider, drives it over a real HTTP socket, asserts all the documented behavior. 23 assertions: health, market status/symbols/quote/candles (including pre-IPO and bad-range 400), aim hit (mints, idempotent, streak bonus, accuracy penalty, rate limit), portfolio (empty, preview long/short/max-leverage, order-without-confirm 400, full open+close round trip, pre-IPO 400), missions (read 6, claim rejects not-done, full claim path).
+
+### Evidence
+
+- `npm test` → exit 0. Eight `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`.
+- `node --check` exit 0 on all 16 server JS files (config, index, router, util/json, market/* 4, db/store, routes/* 5, plus tests/server.test.mjs).
+- `PORT=4182 node src/index.js` started a live server; `curl /health` returned `{"ok":true,"ts":...}` 200. `curl /market/quote/AAPL` returned a real-looking price (`{"symbol":"AAPL","price":187.1413,...}`). `curl /market/symbols` returned 9 entries with `OPENAI`/`ANTHROPIC` marked `preIpo:true`. `curl -H "X-Player-Id: smoke" /portfolio` returned `{"player":{"id":"smoke","stable":1000,"balances":{},"trades":[],"unlocks":[]}}`.
+- `grep -RE "FINNHUB_TOKEN\s*=" client/` returns 0 matches. The Finnhub token is **only** read by `server/src/market/finnhub.js` from `process.env.FINNHUB_TOKEN`. It is never imported, copied, or referenced by the client bundle.
+
+### Limits of this stage
+
+- The server was smoke-tested with the **stub provider**, not with a real Finnhub token. The Finnhub adapter compiles and the unit-test for it is not in scope for Stage 3. Plan: add a mocked-fetch test for the Finnhub adapter in Stage 4 / 5 alongside the real provider tests.
+- `client/` is unchanged in this stage. The client still does not POST to `/aim/hit` yet — that is Stage 5.
+- In-memory store: progress is lost when the server restarts. Supabase wiring is queued in Stage 4.
+- The `hold_60s` mission threshold was reduced from 60s to 1s for MVP, so the unlock chain is testable in unit time. This is documented in MISTAKES and in `server/src/routes/missions.js` inline. The 60-second version is enforced once a real session timer is wired in Stage 5/6.

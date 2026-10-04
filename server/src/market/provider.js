@@ -1,0 +1,23 @@
+// server/src/market/provider.js — provider-neutral interface.
+//
+// All provider implementations must satisfy:
+//   async getQuote(symbol)              -> { symbol, price, ts, currency }
+//   async getCandles(symbol, range)     -> { symbol, range, candles: [{ t, o, h, l, c }] }
+//   async getStatus()                   -> { provider, status: 'live'|'delayed'|'closed'|'stale', lastTickTs }
+//   async getSymbols()                  -> [{ symbol, name, market }]
+//
+// Ranges supported by the in-game chart:
+//   '1D' = 1-minute candles, 24h
+//   '5D' = 5-minute candles, 5 days
+//   '1M' = 1-hour candles, 30 days
+//   '3M' = daily candles, 90 days
+//
+// Adapters are isolated. The router never imports a provider directly;
+// it uses the factory in market/index.js.
+
+export const RANGES = ['1D', '5D', '1M', '3M'];
+
+/** Throws HttpError(503) if the provider is not configured. */
+export function assertProviderReady(provider, name) {
+  if (!provider) throw new Error(`market provider not configured: ${name}`);
+}

@@ -52,7 +52,15 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
-Stage 3 — Server: Express scaffold, Supabase schema, provider-neutral market data adapter (Finnhub first).
+Stage 4 — Client state + persistence. Sub-steps:
+
+- 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
+- 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.
+- 4.3 `client/src/api.js` — fetch wrapper. Adds `X-Player-Id` and `X-Session-Id` headers. Generates `sessionId` once per page load. Retries idempotent GETs once; never retries POSTs.
+- 4.4 `server/src/db/supabase.js` — implementation of the same store interface using `@supabase/supabase-js`. Used when `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are set. Otherwise the in-memory store is used. Tested with a stub `@supabase/supabase-js` returning canned data.
+- 4.5 `tests/dom.test.mjs` — scans `client/js/game.js` for `$('id')` calls and asserts every `id` exists in `client/index.html`. Closes the silent-black-screen gap.
+- 4.6 Visual screenshot smoke test. Boot the client on a local port, capture one PNG, attach path to CHANGELOG. (For Windows-native capture this needs a small helper; deferred to first stage that actually changes visible chrome — Stage 5/6.)
+- 4.7 Mocked-fetch test for the Finnhub adapter. Stub `globalThis.fetch`, verify 503 when token missing, and verify the expected quote/candle shape for a fake OK response.
 
 ## Milestones
 

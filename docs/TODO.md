@@ -19,11 +19,27 @@
 
 ## Stage 3 — Server
 
-- [ ] Express scaffold in `server/` with `npm test` and a healthcheck route.
-- [ ] Provider-neutral market adapter interface; implement Finnhub adapter first behind env var.
-- [ ] Supabase schema: `players` and `trades`. Migration script committed.
-- [ ] Smoke test: `curl localhost:3000/health` returns 200; recorded in CHANGELOG.
-- [ ] Confirm no API keys in client bundle via `grep -R <key> client/`; if any leak, record in MISTAKES.
+- [x] Express scaffold in `server/` with `npm test` and a healthcheck route. → switched to pure-Node http; no `npm install` needed.
+- [x] Provider-neutral market adapter interface; implement Finnhub adapter first behind env var. → `server/src/market/{provider,finnhub,stub,index}.js`. Finnhub token gated; `market_not_configured` 503 when missing.
+- [x] Supabase schema: `players` and `trades`. Migration script committed. → `server/migrations/0001_init.sql` covers players, balances, trades, hit_log, missions, unlocks. In-memory store covers MVP; Supabase backend queued.
+- [x] Smoke test: `curl localhost:3000/health` returns 200; recorded in CHANGELOG. → live `node src/index.js` on port 4182, `curl /health` 200.
+- [x] Confirm no API keys in client bundle via `grep -R <key> client/`; if any leak, record in MISTAKES. → `grep -RE "FINNHUB_TOKEN\s*=" client/` returns 0 matches.
+
+## Stage 4 — Client state + persistence (after Stage 3)
+
+- [x] Player profile model (id, stable, balances per ticker, missions, unlocks). → lives on the server store; client just mirrors.
+- [ ] localStorage persistence for guest mode. → client-side; not started.
+- [ ] Supabase sync for logged-in users; merge strategy documented in PLAN. → server-side; backend in Stage 4.
+- [ ] **NEW (from Stage 2 MISTAKE):** `tests/dom.test.mjs` that scans `client/js/game.js` for `$('...')` calls and asserts each id exists in `client/index.html`. Prevents the silent-black-screen class of bugs.
+- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke check. Open `http://127.0.0.1:<port>/` and capture at least one PNG per stage that adds visible chrome. Saved to `docs/screenshots/`, referenced from CHANGELOG.
+- [ ] **NEW (from Stage 3):** mocked-fetch test for the Finnhub adapter. Stub `globalThis.fetch`, assert that with an empty token the adapter returns 503, and with a fake OK response the adapter returns the expected quote/candle shape.
+- [ ] **NEW (from Stage 3):** Supabase backend wiring: implement `server/src/db/supabase.js` using `@supabase/supabase-js` (added to dependencies when env present). Falls back to memory store otherwise.
+
+## Stage 5 — Aim integration (re-numbered after Stage 3 inserted)
+
+- [ ] Gridshot mode wired to the new shell.
+- [ ] Each hit POSTs to `/aim/hit`; server grants a fractional AAPL unit.
+- [ ] Server-side rate limit and idempotency test passes; record test output. → already covered in `tests/server.test.mjs`.
 
 ## Stage 4 — Client state + persistence
 
