@@ -86,7 +86,16 @@ Stage 7 — Trading terminal. Sub-steps (DONE 2026-10-04, 14/14 test suites gree
 - 7.4 `tests/terminal.test.mjs` — 23 assertions (15 pure + 8 wire) — DONE.
 - 7.5 Bug fixes: `formatPnl` now always renders two decimals with explicit sign; `round8` test values adjusted to avoid floating-point boundary.
 
-Stage 8 next: missions + NVDA unlock chain.
+Stage 8 — Missions + AAPL → NVDA unlock chain. Sub-steps (DONE 2026-10-04, 15/15 test suites green, 4 documents updated, committed):
+
+- 8.1 `client/src/missions-core.js` — pure helpers (missionProgress, allMissionsClaimed, describeUnlocks, formatProgress) — DONE.
+- 8.2 `client/js/missions.js` — UI panel over store, claim buttons, unlock card with auto-switch to NVDA — DONE.
+- 8.3 Missions panel in `index.html` + CSS with unlock animation — DONE.
+- 8.4 Auto-switch active ticker to NVDA on unlock (via aim-bridge.setActiveTicker) — DONE.
+- 8.5 `tests/missions.test.mjs` — 21 assertions (12 pure + 9 wire) — DONE.
+- 8.6 Bug fixes: `first_trade`/`hold_60s` test boundary values, AIM_HIT_RPS env must be set before import, stub provider per-5s tick drift for `first_profit` to be achievable in tests.
+
+Stage 9 next: end-to-end visual review + polish.
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.

@@ -241,3 +241,35 @@
 - The "Total" portfolio value currently uses the live `entryPrice` of the active ticker for every open position. In a real session with multiple tickers open, the value would use the actual mark of each ticker. The current heuristic is good enough for a single-ticker session, which is what the MVP supports.
 - Stop-loss, take-profit, and one-click close-all are queued for later. Only per-position Close is wired.
 - The terminal panel does not show the chart side-by-side yet; it has its own entry-price readout. A future stage can place the chart above the order ticket.
+
+## Stage 8 — Missions + AAPL → NVDA unlock chain (2026-10-04)
+
+- `client/src/missions-core.js` — pure helpers. `MISSIONS` (6 definitions matching the server's), `missionProgress(def, state)` for each kind (`first_10_hits` counts hits, `earn_half_aapl` caps at target 0.5, `first_trade` counts closed + liquidated, `first_profit` requires positive P/L, `hold_60s` checks long trade survival ≥1s, `precise_session` requires 0.7 accuracy). `allMissionsClaimed`, `describeUnlocks` (returns `[NVDA]` when ready), `formatProgress` (handles integer, fractional, and `done` cases).
+- `client/js/missions.js` — UI panel over the store. Renders 6 mission rows with progress bar, status, claim button. Top counter shows claimed/total. When all 6 are claimed, shows the NVDA unlock card with a "Switch to NVDA" button. Subscribes to the store, re-renders on every change. Calls `setActiveTicker('NVDA')` from `aim-bridge.js` so the next hit and the chart switch to NVDA without page reload.
+- `client/index.html` — `#vibes-missions` full-height panel, `#vibes-open-missions` button on the bottom-left, `data-vm-cancel` close button. The panel is a separate screen behind the engine menu.
+- `client/css/style.css` — missions panel + unlock-card styles. The unlock card has a left green border, a `vm-unlock-in` keyframe animation (opacity + 8px translateY over 320ms with the design cubic-bezier).
+- `server/src/market/stub.js` — added a per-5s tick drift on top of the per-day drift so live quotes move slightly between calls inside the same day. This makes paper trading deterministic enough for tests but lively enough for a real session, and it means `first_profit` is achievable in a unit test.
+- `tests/missions.test.mjs` — 21 assertions. 12 pure-function tests on `missions-core.js` (each mission's progress math, allMissionsClaimed, describeUnlocks, formatProgress, unknown-kind fallback). 9 integration tests against the live server: GET /missions returns 6 entries, claim before threshold → 400 not_done, 700 hits → earn_half_aapl claim succeeds, open + close round-trip completed, 4 more claims (first_10_hits, first_trade, first_profit, hold_60s), 6th claim (precise_session) succeeds, NVDA now in unlocks, already-claimed → 400 already_claimed, unknown kind → 404.
+
+### Bug fixes in this stage
+
+- First version of `first_trade` test asserted `progress === 2` for 3 trades (1 open, 1 closed, 1 liquidated). The client correctly clamps `progress` to the target (1) — the test was the bug, fixed to assert `progress === 1` and the label was updated to mention the clamp.
+- First version of `hold_60s` test used `closedAt - createdAt = 999ms`, just below the 1s threshold. The test was the bug, fixed to use 2500ms for the success case and 1999ms for the failure case. Lesson: when the threshold is a round number (1s), make the test values clearly above and clearly below, not on the boundary.
+- The integration test bombed out the first time with `HTTPError: 429 Too Many Requests` because `AIM_HIT_RPS=15` (the default) was not enough for 700 hits in a tight loop. Fixed by setting `process.env.AIM_HIT_RPS = '5000'` at the top of the test file, **before** the dynamic `import('../server/src/index.js')` so the config module reads the new value at import time. Lesson: env vars are read once at import. Set them before the import that pulls in the module that reads them.
+- The server stub provider used to be flat across minutes. With a 1s `hold_60s` MVP threshold the test opens and closes a trade in the same minute → `pnl = 0` → `first_profit` never reaches `done`. Added a per-5s `tickDrift` so a 6-second wait produces a different price. The integration test now sleeps 6s to bridge one tickKey boundary.
+
+### Evidence
+
+- `npm test` → exit 0. Fifteen `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`, `client-bridge`, `supabase`, `chart`, `terminal`, `missions`.
+- `node --check` exit 0 on every new file: `client/src/missions-core.js`, `client/js/missions.js`, `tests/missions.test.mjs`.
+- `imports.test.mjs` and `dom.test.mjs` still pass after the new files were added.
+- `grep -RIE "FINNHUB_TOKEN|finhub_token" client/` still returns 0 matches. Missions module never touches the provider key.
+- Full AAPL → NVDA chain proven end-to-end through the live server: hit 700 times, claim `earn_half_aapl` (+250 Stable), open + close a profitable trade (sleep 6s to bridge a tickKey), claim 5 more missions, NVDA appears in `/portfolio.unlocks`.
+
+### Limits of this stage
+
+- **No visual screenshot** in this environment. The missions panel and the unlock card exist in code and in the design system, but I have not run a real browser to confirm the unlock animation plays.
+- `precise_session` uses the server's "any winning trade" proxy. A future stage should track best accuracy from the client and POST it with each hit so the mission is honest.
+- `hold_60s` is 1 second for the MVP. The real 60-second requirement is queued behind a real session timer.
+- The unlock card's "Switch to NVDA" button is one-way: once the player switches the aim farm, they cannot return to AAPL without manually editing `localStorage.vibes_aim.activeTicker.v1`. Acceptable for MVP; a future tab can list all unlocked tickers.

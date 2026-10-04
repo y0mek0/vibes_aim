@@ -34,10 +34,17 @@ function lastTs(range) {
 
 function priceAt(symbol, ts) {
   const base = BASES[symbol] ?? 0;
-  // tiny deterministic drift: ~+/- 0.3% per day
+  // Deterministic per-day drift (~+/- 0.3%) plus a per-minute micro-drift
+  // so live quotes move slightly between calls inside the same day.
+  // Together they make paper trading deterministic enough for tests
+  // but lively enough for a real session.
   const dayKey = Math.floor(ts / 86_400_000);
-  const drift = Math.sin(dayKey * (symbol.charCodeAt(0) + 1)) * 0.003;
-  return Math.max(0, base * (1 + drift));
+  const dayDrift = Math.sin(dayKey * (symbol.charCodeAt(0) + 1)) * 0.003;
+  // Use a 5-second bucket so tests that wait 1-2s between open and close
+  // see a different price and can produce a non-zero pnl.
+  const tickKey = Math.floor(ts / 5_000);
+  const tickDrift = Math.cos(tickKey * 0.7 + symbol.charCodeAt(1)) * 0.0008;
+  return Math.max(0, base * (1 + dayDrift + tickDrift));
 }
 
 function candlesFor(symbol, range) {

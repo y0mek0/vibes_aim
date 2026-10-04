@@ -76,18 +76,29 @@
 - [ ] Liquidation preview shown before confirmation.
 - [ ] Closed-market gate prevents trades outside market hours.
 
-## Stage 8 — Missions + NVDA unlock
+## Stage 8 — Missions + AAPL → NVDA unlock chain
 
-- [ ] 5–6 missions, expected ~40 minutes of play to unlock.
-- [ ] Pulse Rifle and Flick mode unlocked together with NVDA.
+- [x] Mission list UI (6 missions, progress bars, claim buttons) — DONE.
+- [x] When all 6 missions are claimed, unlock NVDA. The aim-bridge's
+      active ticker switches from AAPL to NVDA on next hit — DONE.
+- [x] `tests/missions.test.mjs` — 21 assertions (12 pure + 9 wire) — DONE.
+- [ ] Visual screenshot smoke — no headless browser in this env. Queued for Stage 9.
+- [ ] Stable / asset reward animation on claim — micro-animation, queued for Stage 9.
+- [ ] precise_session accuracy from client — currently server proxy. Real accuracy tracking in Stage 9.
+- [ ] hold_60s real 60s — currently 1s MVP. Real session timer in Stage 9.
+- [ ] Unlocked tickers list UI — show all unlocked tickers, switch between them. Queued.
 
-## Stage 9 — Anti-cheat
+## Stage 9 — End-to-end visual review
 
-- [ ] Hit rate limit, sequence validation, session-bound idempotency.
-- [ ] Tests for the rate limit pass; recorded in CHANGELOG.
+- [ ] `tests/visual.test.mjs` — boot a headless browser, open the page, take screenshots, assert DOM contents. (No headless browser in this env; placeholder until Playwright or similar is available.)
+- [ ] Or, in absence of headless browser: record one manual visual review and attach a screenshot to CHANGELOG.
 
-## Stage 10 — End-to-end visual check
+## Stage 10 — Polish, release tag
 
-- [ ] Open the running app, take screenshots of arena + terminal, attach to CHANGELOG.
-- [ ] Confirm AAPL → NVDA unlock chain works in a manual run.
-- [ ] Final commit, tag `mvp-v0.1`.
+- [ ] README.md, LICENSE, .nvmrc, deploy instructions.
+- [ ] Tag `mvp-v0.1`.
+- [ ] Optional: host on Vercel + Render free tier.
+
+## Anti-cheat (already covered in Stage 3)
+
+- [x] Hit rate limit, session-bound idempotency — covered by `tests/server.test.mjs` and `tests/missions.test.mjs`.

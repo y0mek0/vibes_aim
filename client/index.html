@@ -94,7 +94,38 @@
 </div>
 
 <!-- Tab button that opens the terminal -->
+<button type="button" id="vibes-open-missions" class="vm-open-tab">Missions</button>
 <button type="button" id="vibes-open-terminal" class="vt-open-tab">Terminal</button>
+
+<!-- vibes_aim: missions panel. Hidden by default; the engine's menu
+     has a Missions button that shows it. The unlock card inside
+     appears once all 6 missions are claimed. -->
+<div id="vibes-missions" hidden>
+  <div class="vm-head">
+    <span class="vm-kicker">// missions</span>
+    <span class="vm-counter">Claimed <span class="num" data-vm-claimed>0</span> / <span data-vm-total>6</span></span>
+    <button type="button" class="vm-close-btn" data-vm-cancel>Close</button>
+  </div>
+  <div class="vm-body">
+    <table class="vm-table">
+      <thead>
+        <tr><th>Mission</th><th>Progress</th><th>Reward</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody data-vm-body></tbody>
+    </table>
+    <div class="vm-unlock" data-vm-unlock-card hidden>
+      <div class="vm-unlock-kicker">// chain complete</div>
+      <div class="vm-unlock-title">AAPL chain complete</div>
+      <div class="vm-unlock-text">
+        All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.
+      </div>
+      <div class="vm-unlock-actions">
+        <span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span>
+        <button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- vibes_aim: floating chart panel. Lives above the canvas, below the aim-bridge chip. -->
 <div id="vibes-chart" hidden>
@@ -280,6 +311,8 @@
 <script type="module" src="js/chart.js"></script>
 <!-- vibes_aim terminal (paper-trading UI) -->
 <script type="module" src="js/terminal.js"></script>
+<!-- vibes_aim missions panel (AAPL -> NVDA chain) -->
+<script type="module" src="js/missions.js"></script>
 <script type="module" src="js/main.js"></script>
 <script type="module">
   // Open / close the trading terminal. The terminal.js module auto-mounts
@@ -289,6 +322,13 @@
   const closeBtn = document.querySelector('[data-vt-cancel]');
   if (openBtn) openBtn.addEventListener('click', () => { if (panel) panel.hidden = false; });
   if (closeBtn) closeBtn.addEventListener('click', () => { if (panel) panel.hidden = true; });
+
+  // Same wiring for the missions panel.
+  const missionsPanel = document.getElementById('vibes-missions');
+  const missionsOpenBtn = document.getElementById('vibes-open-missions');
+  const missionsCloseBtn = document.querySelector('[data-vm-cancel]');
+  if (missionsOpenBtn) missionsOpenBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = false; });
+  if (missionsCloseBtn) missionsCloseBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = true; });
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>
