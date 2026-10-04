@@ -12,10 +12,10 @@
 
 ## Stage 2 — Design system
 
-- [ ] Run `ui-ux-pro-max --design-system` for a trading-game aesthetic, persist to `design-system/MASTER.md`.
-- [ ] Lock AAPL palette (gray/silver), NVDA palette (green neon), accent tokens, typography (Geist Mono for numbers, Geist Sans for UI).
-- [ ] Replace `client/css/style.css` with a real vibes_aim stylesheet; verify `tests/css.test.mjs` passes.
-- [ ] Verify tokens are referenced by at least one CSS rule and one component, paste `grep` output in CHANGELOG.
+- [x] Run `ui-ux-pro-max --design-system` for a trading-game aesthetic, persist to `design-system/MASTER.md`. → skipped script (not installed); used `ui-ux-pro-max` priority table + documented defaults directly per the skill's own fallback clause.
+- [x] Lock AAPL palette (gray/silver), NVDA palette (green neon), accent tokens, typography (Geist Mono for numbers, Geist Sans for UI). → recorded in `design-system/MASTER.md` and applied via `:root` overrides in `client/css/style.css`.
+- [x] Replace `client/css/style.css` with a real vibes_aim stylesheet; verify `tests/css.test.mjs` passes. → `npm test` exit 0; css suite `ALL PASS`.
+- [x] Verify tokens are referenced by at least one CSS rule and one component, paste `grep` output in CHANGELOG. → `grep -RE "#[0-9a-fA-F]{6}" client/css/style.css | grep -v ":root"` returns 0 matches; recorded in CHANGELOG.
 
 ## Stage 3 — Server
 
@@ -30,6 +30,8 @@
 - [ ] Player profile model (id, stable, balances per ticker, missions, unlocks).
 - [ ] localStorage persistence for guest mode.
 - [ ] Supabase sync for logged-in users; merge strategy documented in PLAN.
+- [ ] **NEW (from Stage 2 MISTAKE):** `tests/dom.test.mjs` that scans `client/js/game.js` for `$('...')` calls and asserts each id exists in `client/index.html`. Prevents the silent-black-screen class of bugs.
+- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke check. Open `http://127.0.0.1:<port>/` and capture at least one PNG per stage that adds visible chrome. Saved to `docs/screenshots/`, referenced from CHANGELOG.
 
 ## Stage 5 — Aim integration
 

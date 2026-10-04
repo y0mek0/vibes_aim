@@ -40,7 +40,7 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 - Stage 0 — Repo skeleton + this 4-document log + skill. (DONE)
 - Stage 1 — Clone valotrainer at pinned commit, strip brand markers, keep aim engine files. (DONE: code imported + tests green + static server 200. Brand pass deferred to Stage 2/4.)
-- Stage 2 — Design system: `ui-ux-pro-max` query, `design-system/MASTER.md`, palette tokens (AAPL gray/silver, NVDA green neon), typography.
+- Stage 2 — Design system: `ui-ux-pro-max` query, `design-system/MASTER.md`, palette tokens (AAPL gray/silver, NVDA green neon), typography. (DONE: MASTER.md, host page DOM skeleton, brand override CSS, all 7 test suites green, smoke check passed.)
 - Stage 3 — Server: Express + Supabase schema + market data adapter (Finnhub first) with provider-neutral interface.
 - Stage 4 — Client state: player profile, balances, inventory, missions, unlocks, persistent localStorage + Supabase sync.
 - Stage 5 — Aim integration: Gridshot mode wired, hit counter, weapon 1, hit → POST `/aim/hit` → server grants simulated AAPL.
@@ -52,7 +52,7 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
-Stage 2 — Design system: tokens, palette, typography, real `client/css/style.css`.
+Stage 3 — Server: Express scaffold, Supabase schema, provider-neutral market data adapter (Finnhub first).
 
 ## Milestones
 
