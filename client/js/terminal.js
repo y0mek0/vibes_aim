@@ -47,7 +47,8 @@ export function mountTerminal({ root, onClose } = {}) {
 
   const els = {};
   for (const [k, sel] of Object.entries(SELECTORS)) els[k] = panel.querySelector(sel);
-  panel.hidden = false;
+  // Do NOT auto-show the panel. The bottom-left tab opens it on demand.
+  // Showing on mount would cover the engine menu and the chart panel.
 
   const state = {
     ticker: 'AAPL',

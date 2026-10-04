@@ -95,7 +95,16 @@ Stage 8 — Missions + AAPL → NVDA unlock chain. Sub-steps (DONE 2026-10-04, 1
 - 8.5 `tests/missions.test.mjs` — 21 assertions (12 pure + 9 wire) — DONE.
 - 8.6 Bug fixes: `first_trade`/`hold_60s` test boundary values, AIM_HIT_RPS env must be set before import, stub provider per-5s tick drift for `first_profit` to be achievable in tests.
 
-Stage 9 next: end-to-end visual review + polish.
+Stage 9 — End-to-end visual review + unlocked tickers list. Sub-steps (DONE 2026-10-04, 16/16 test suites green, 4 documents updated, committed):
+
+- 9.1 `tests/visual_smoke.py` (Python Playwright) + `tests/visual.test.mjs` (Node runner) — DONE. 4 PNG screenshots in `docs/screenshots/`, 13 assertions.
+- 9.2 Auto-show bug in `mountMissions` / `mountTerminal` — FIXED. Panels now stay hidden until the user opens them.
+- 9.3 `.vm-unlock[hidden]` CSS specificity bug — FIXED. Unlock card hidden until all 6 are claimed.
+- 9.4 `client/src/bootstrap.js` warms the store before any UI mounts — DONE.
+- 9.5 `chart.js` unlocked tickers list — DONE. NVDA button only visible after the AAPL chain unlocks it.
+- 9.6 Documents — DONE.
+
+Stage 10 next: README, LICENSE, .nvmrc, deploy notes, release tag `mvp-v0.1`.
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.

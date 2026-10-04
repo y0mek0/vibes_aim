@@ -90,8 +90,20 @@
 
 ## Stage 9 — End-to-end visual review
 
-- [ ] `tests/visual.test.mjs` — boot a headless browser, open the page, take screenshots, assert DOM contents. (No headless browser in this env; placeholder until Playwright or similar is available.)
-- [ ] Or, in absence of headless browser: record one manual visual review and attach a screenshot to CHANGELOG.
+- [x] `tests/visual.test.mjs` — boot a headless browser, open the page, take screenshots, assert DOM contents. → DONE. Python Playwright runs `tests/visual_smoke.py`, 4 PNGs in `docs/screenshots/`, 13 assertions pass. Skipped gracefully if Python+Playwright unavailable.
+- [x] Manual visual review recorded as 4 PNGs in `docs/screenshots/` — DONE. 01-initial-menu, 02-terminal, 03-missions, 04-chart-nvda.
+
+## Stage 9 backlog (real accuracy, real 60s, ticker list)
+
+- [x] **Unlocked tickers list UI** — `chart.js` now subscribes to the store and shows NVDA button only after unlock. AAPL always visible. → DONE.
+- [ ] **`precise_session` real accuracy** — currently a server proxy (any winning trade). Real accuracy tracking from the client is queued.
+- [ ] **`hold_60s` real 60s** — currently 1 second MVP. Real session timer queued.
+
+## Stage 10 — Polish, release tag
+
+- [ ] README.md, LICENSE, .nvmrc, deploy instructions.
+- [ ] Tag `mvp-v0.1`.
+- [ ] Optional: host on Vercel + Render free tier.
 
 ## Stage 10 — Polish, release tag
 

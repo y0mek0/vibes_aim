@@ -12,6 +12,7 @@
 // not present (tests). In that case, mountChart returns a no-op handle.
 
 import { api } from '../src/api.js';
+import { store } from '../src/store.js';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
@@ -223,6 +224,20 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     loadCandles();
   }));
 
+  // The ticker buttons live in the markup (AAPL, NVDA). This re-renders
+  // them based on the player's unlocks. AAPL is always visible (it's the
+  // default ticker). NVDA (and any future ticker) is visible only after
+  // the unlock chain grants it. If the store has not loaded yet
+  // (unlocks is undefined), show AAPL only.
+  function refreshUnlockedTickers() {
+    const unlocked = store.state.unlocks;
+    for (const btn of els.tickerBtns) {
+      const t = btn.dataset.vcTickerBtn;
+      const visible = (t === 'AAPL') || (Array.isArray(unlocked) && unlocked.includes(t));
+      btn.hidden = !visible;
+    }
+  }
+
   function setActiveTicker(t) {
     if (!t) return;
     active.ticker = t;
@@ -248,9 +263,15 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     startPolling();
   });
 
+  // React to store updates: when the player unlocks a new ticker (e.g.
+  // NVDA after the AAPL chain), make its button visible.
+  const unsubStore = store.subscribe(() => { if (!stopped) refreshUnlockedTickers(); });
+  refreshUnlockedTickers();
+
   function unmount() {
     stopped = true;
     stopPolling();
+    try { unsubStore && unsubStore(); } catch (_) { /* noop */ }
     try { chart && chart.remove(); } catch (_) { /* noop */ }
     chart = null; series = null;
   }

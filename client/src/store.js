@@ -50,6 +50,10 @@ function createStore() {
       state.unlocks = snap.unlocks || [];
       state.missions = snap.missions || [];
     }
+    // Eagerly kick off a server refresh. mountMissions (and other panels)
+    // subscribe to the store; without this, the first render reads an
+    // empty state and shows "0/6 claimed" instead of the real data.
+    refresh().catch(() => { /* server may be down; keep guest snapshot */ });
   }
 
   async function recordAimHit({ hitId, ticker, accuracy, streak }) {

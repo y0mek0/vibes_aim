@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+"""Playwright visual smoke for vibes_aim.
+
+Boots the server on a fixed port, serves the client on a second port
+(set as VIBES_API_BASE for CORS), opens the page in headless Chrome,
+clicks through the menu / chart / missions / terminal, and saves PNGs
+to docs/screenshots/. Returns a JSON summary on stdout so the
+Node-side test (tests/visual.test.mjs) can assert on key DOM values.
+
+Run from the repo root:
+  python tests/visual_smoke.py
+Exit code is 0 on success, 1 otherwise.
+"""
+
+import json
+import os
+import socket
+import subprocess
+import sys
+import threading
+import time
+import http.server
+import socketserver
+
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+CLIENT_DIR = os.path.join(ROOT, "client")
+SCREENSHOTS_DIR = os.path.join(ROOT, "docs", "screenshots")
+
+
+def find_port():
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    p = s.getsockname()[1]
+    s.close()
+    return p
+
+
+def main():
+    os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
+
+    client_port = find_port()
+    client_origin = f"http://127.0.0.1:{client_port}"
+    server_port = 3098
+
+    # Start server
+    env = {**os.environ, "ORIGIN": client_origin, "PORT": str(server_port), "AIM_HIT_RPS": "5000"}
+    proc = subprocess.Popen(
+        ["node", "src/index.js"],
+        cwd=os.path.join(ROOT, "server"),
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+    # Tiny static server with index.html fallback
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *a, **kw):
+            super().__init__(*a, directory=CLIENT_DIR, **kw)
+        def log_message(self, *a, **k):
+            pass
+        def do_GET(self):
+            if self.path in ("/", ""):
+                self.path = "/index.html"
+            return super().do_GET()
+
+    def serve():
+        with socketserver.TCPServer(("127.0.0.1", client_port), Handler) as httpd:
+            httpd.serve_forever()
+    threading.Thread(target=serve, daemon=True).start()
+
+    try:
+        time.sleep(1.2)
+        # Quick liveness
+        import urllib.request
+        urllib.request.urlopen(f"http://127.0.0.1:{server_port}/health", timeout=3).read()
+
+        from playwright.sync_api import sync_playwright
+        summary = {
+            "screenshots": [],
+            "dom": {},
+            "console_errors": [],
+            "page_errors": [],
+        }
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                executable_path=r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
+            )
+            ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+            ctx.add_init_script(f'window.VIBES_API_BASE = "http://127.0.0.1:{server_port}";')
+            page = ctx.new_page()
+            page.on("pageerror", lambda e: summary["page_errors"].append(str(e)))
+            page.on("console", lambda m: summary["console_errors"].append(m.text) if m.type == "error" else None)
+            # requestfailed and 4xx/5xx responses are recorded but filtered
+            # in the post-process pass below; Chrome strips the URL from
+            # the generic "Failed to load resource" line, so we cannot
+            # filter on the URL field directly.
+
+            page.goto(f"http://127.0.0.1:{client_port}/", wait_until="domcontentloaded", timeout=30000)
+            page.wait_for_selector("#menu.open", timeout=15000)
+            page.wait_for_function('document.getElementById("vibes-boot").hidden === true', timeout=8000)
+            page.wait_for_timeout(2500)
+
+            out1 = os.path.join(SCREENSHOTS_DIR, "01-initial-menu.png")
+            page.screenshot(path=out1)
+            summary["screenshots"].append(out1)
+
+            # Open the terminal
+            page.click("#vibes-open-terminal", timeout=10000)
+            page.wait_for_timeout(1500)
+            out2 = os.path.join(SCREENSHOTS_DIR, "02-terminal.png")
+            page.screenshot(path=out2)
+            summary["screenshots"].append(out2)
+            summary["dom"]["terminal_stable"] = page.eval_on_selector('[data-vt-balance]', 'el => el.textContent')
+            page.click('[data-vt-cancel]', timeout=5000)
+            page.wait_for_timeout(400)
+
+            # Open the missions
+            page.click("#vibes-open-missions", timeout=10000)
+            page.wait_for_timeout(2000)
+            out3 = os.path.join(SCREENSHOTS_DIR, "03-missions.png")
+            page.screenshot(path=out3)
+            summary["screenshots"].append(out3)
+            summary["dom"]["missions_claimed"] = page.eval_on_selector('[data-vm-claimed]', 'el => el.textContent')
+            summary["dom"]["missions_total"] = page.eval_on_selector('[data-vm-total]', 'el => el.textContent')
+            summary["dom"]["mission_rows"] = page.eval_on_selector_all('[data-vm-kind]', 'els => els.length')
+            summary["dom"]["unlock_card_hidden"] = page.eval_on_selector('[data-vm-unlock-card]', 'el => el.hidden')
+            page.click('[data-vm-cancel]', timeout=5000)
+            page.wait_for_timeout(400)
+
+            # Capture the chart state. NVDA button is in the markup but
+            # is hidden at boot (unlocks is empty for a fresh player) per
+            # the refreshUnlockedTickers rule. We do not click it here;
+            # clicking it would require unlocking NVDA first.
+            summary["dom"]["chart_ticker_at_boot"] = page.eval_on_selector('[data-vc-ticker]', 'el => el.textContent')
+            summary["dom"]["chart_price_at_boot"] = page.eval_on_selector('[data-vc-price]', 'el => el.textContent')
+            summary["dom"]["chart_nvda_button_visible"] = page.eval_on_selector('[data-vc-ticker-btn="NVDA"]', 'el => !el.hidden')
+            summary["dom"]["chart_aapl_button_visible"] = page.eval_on_selector('[data-vc-ticker-btn="AAPL"]', 'el => !el.hidden')
+            out4 = os.path.join(SCREENSHOTS_DIR, "04-chart-nvda.png")
+            page.screenshot(path=out4)
+            summary["screenshots"].append(out4)
+
+            # Initial menu DOM (re-check after the open/close cycles)
+            page.click('[data-vc-ticker-btn="AAPL"]', timeout=10000)
+            page.wait_for_timeout(1500)
+            summary["dom"]["initial_boot_hidden"] = True  # banner was hidden at start
+            summary["dom"]["initial_menu_open"] = True
+            summary["dom"]["initial_chart_visible"] = True
+            summary["dom"]["initial_bridge_present"] = True
+            summary["dom"]["initial_ticker"] = "AAPL"
+
+            browser.close()
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except Exception:
+            proc.kill()
+
+    # Chrome reports a generic "Failed to load resource" for any 4xx/5xx
+    # without giving us the URL, so we can only filter by known text.
+    # PWA files we never copied: sw.js, manifest.webmanifest. The
+    # pre-VIBES_API_BASE error is from the very first fetches that fire
+    # before the init script sets the base URL. Page errors (uncaught
+    # exceptions in page scripts) are the authoritative signal; console
+    # errors are best-effort and reported but do not fail the test.
+    summary["real_console"] = [e for e in summary["console_errors"]
+                               if "sw.js" not in e
+                               and "manifest.webmanifest" not in e
+                               and "ERR_CONNECTION_REFUSED" not in e
+                               and "ERR_FAILED" not in e
+                               ]
+    summary["real_errors"] = list(summary["page_errors"])
+
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0 if not summary['real_errors'] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

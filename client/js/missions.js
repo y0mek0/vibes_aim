@@ -25,7 +25,10 @@ function setText(el, value) { if (el) el.textContent = value; }
 export function mountMissions({ root, onTickerUnlocked } = {}) {
   const panel = root || document.querySelector(SELECTORS.root);
   if (!panel) return { unmount() {}, state: null };
-  panel.hidden = false;
+  // Do NOT auto-show the panel here. The user opens it via the bottom-left
+  // tab button. Showing on mount would cover the engine menu and the chart
+  // panel. The host page is expected to set `hidden` on the markup; we
+  // leave it alone.
 
   const els = {};
   for (const [k, sel] of Object.entries(SELECTORS)) els[k] = panel.querySelector(sel);

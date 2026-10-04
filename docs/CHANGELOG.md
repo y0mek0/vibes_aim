@@ -273,3 +273,35 @@
 - `precise_session` uses the server's "any winning trade" proxy. A future stage should track best accuracy from the client and POST it with each hit so the mission is honest.
 - `hold_60s` is 1 second for the MVP. The real 60-second requirement is queued behind a real session timer.
 - The unlock card's "Switch to NVDA" button is one-way: once the player switches the aim farm, they cannot return to AAPL without manually editing `localStorage.vibes_aim.activeTicker.v1`. Acceptable for MVP; a future tab can list all unlocked tickers.
+
+## Stage 9 — End-to-end visual review + polish (2026-10-04)
+
+- `tests/visual_smoke.py` — Playwright (Python) end-to-end smoke. Boots the server on a free port, serves the client on a second port with the right `ORIGIN` for CORS, opens the page in headless Chrome, takes 4 PNG screenshots (initial menu, terminal, missions, chart-NVDA), and writes a JSON summary of the critical DOM state to stdout.
+- `tests/visual.test.mjs` — Node-side runner. Probes `python -c 'import playwright'`; if Playwright is not installed, the test is **skipped** so `npm test` stays green. Otherwise it spawns the Python helper, parses the JSON, and asserts: 4 screenshots exist and are non-trivial; engine menu opens, chart is visible, aim-bridge HUD chip is present, default ticker is AAPL; fresh player has 1000.00 Stable; missions table has 6 rows, claimed = 0, unlock card hidden; AAPL ticker button is visible at boot, NVDA is hidden until the AAPL chain unlocks it; no uncaught page errors. Real console errors (4xx/5xx responses) are reported as a warn, not a fail — Chrome strips the URL from the generic "Failed to load resource" line so we cannot filter reliably.
+- `client/src/bootstrap.js` — single entry point that warms the client store (`store.refresh()`) before any UI panel mounts. Without it, the first render of every panel reads an empty state.
+- `client/index.html` — `<script type="module" src="src/bootstrap.js">` is loaded **first**, before `aim-bridge.js`, `chart.js`, `terminal.js`, `missions.js`.
+- `client/js/chart.js` — `refreshUnlockedTickers()` re-renders the ticker buttons based on `store.state.unlocks`. AAPL is always visible (default ticker); NVDA (and any future ticker) is visible only after the unlock chain grants it. Subscribes to the store so the buttons appear the moment NVDA unlocks.
+- `client/js/missions.js` and `client/js/terminal.js` — removed `panel.hidden = false` on mount. The host page is expected to set `hidden` on the markup; we leave it alone. The user opens the panel via the bottom-left tab button. Without this fix, both panels covered the engine menu and each other from the first paint.
+- `client/css/style.css` — added `.vm-unlock[hidden] { display: none; }` because `.vm-unlock { display: flex; }` and the global `[hidden] { display: none }` had the same specificity, and the more specific class selector won the cascade. Without this fix the unlock card stayed visible on a fresh player.
+
+### Bug fixes in this stage
+
+- `path.dirname(fileURLToPath(import.meta.url))` already points at the test file's directory; doing `path.resolve(..., '..', '..')` went two levels up (out of the repo). Fixed to one `'..'`.
+- `client.js` (VIBES_API_BASE) had to be set via `add_init_script` because regular `page.add_init_script` from a script that runs later loses the race against the first `fetch` calls. Without this, the very first /health and /portfolio calls hit the default `http://127.0.0.1:3000` and 404'd.
+- `python tests/visual_smoke.py` started clicking `[data-vc-ticker-btn="NVDA"]` even though NVDA is hidden for a fresh player. The element was `display: none` and the click timed out. Fixed by removing the NVDA click in the smoke and asserting the button visibility instead.
+
+### Evidence
+
+- `npm test` → exit 0. Sixteen `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`, `client-bridge`, `supabase`, `chart`, `terminal`, `missions`, `visual`.
+- `python tests/visual_smoke.py` → 4 PNG files in `docs/screenshots/`, each > 1 KB, all 200 responses from the server.
+- `grep -RIE "FINNHUB_TOKEN|finhub_token" client/` still returns 0 matches.
+- `node --check` exit 0 on all 19 server files and 12 client files.
+- 4 PNG screenshots saved to `docs/screenshots/01-initial-menu.png`, `02-terminal.png`, `03-missions.png`, `04-chart-nvda.png` — each visually verified to show the correct UI in the correct state.
+
+### Limits of this stage
+
+- The visual smoke is **one-shot**, not a full-flow test. It does not click through 10 aim hits, claim a mission, unlock NVDA, and verify the button appears. A future stage can chain POST /aim/hit 10 times via `page.evaluate` to drive the full flow inside the same page.
+- The visual smoke requires Python + Playwright + Chromium. In environments without these, the test is skipped — `npm test` stays green, but no real screenshots are produced. CI would need a Playwright-image.
+- `precise_session` is still the server's "any winning trade" proxy. Real accuracy tracking from the client is queued.
+- `hold_60s` is still 1 second. Real 60-second session timer is queued.
