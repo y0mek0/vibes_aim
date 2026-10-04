@@ -6,13 +6,13 @@ import http from 'node:http';
 import { URL } from 'node:url';
 import { config } from './config.js';
 import { createMarketProvider } from './market/index.js';
-import { createStore } from './db/store.js';
+import { pickStore } from './db/supabase.js';
 import { mountRoutes } from './routes/index.js';
 import { sendJson, HttpError } from './util/json.js';
 
 export function createApp(deps = {}) {
   const market = deps.market ?? createMarketProvider(config.market);
-  const store = deps.store ?? createStore(config.supabase);
+  const store = deps.store ?? pickStore(config.supabase);
   const router = mountRoutes({ market, store, config });
 
   // CORS preflight and headers for the configured origin.

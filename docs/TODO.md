@@ -28,18 +28,28 @@
 ## Stage 4 — Client state + persistence (after Stage 3)
 
 - [x] Player profile model (id, stable, balances per ticker, missions, unlocks). → lives on the server store; client just mirrors.
-- [ ] localStorage persistence for guest mode. → client-side; not started.
-- [ ] Supabase sync for logged-in users; merge strategy documented in PLAN. → server-side; backend in Stage 4.
-- [ ] **NEW (from Stage 2 MISTAKE):** `tests/dom.test.mjs` that scans `client/js/game.js` for `$('...')` calls and asserts each id exists in `client/index.html`. Prevents the silent-black-screen class of bugs.
-- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke check. Open `http://127.0.0.1:<port>/` and capture at least one PNG per stage that adds visible chrome. Saved to `docs/screenshots/`, referenced from CHANGELOG.
-- [ ] **NEW (from Stage 3):** mocked-fetch test for the Finnhub adapter. Stub `globalThis.fetch`, assert that with an empty token the adapter returns 503, and with a fake OK response the adapter returns the expected quote/candle shape.
-- [ ] **NEW (from Stage 3):** Supabase backend wiring: implement `server/src/db/supabase.js` using `@supabase/supabase-js` (added to dependencies when env present). Falls back to memory store otherwise.
+- [x] localStorage persistence for guest mode. → `client/src/persist.js` with safe fallback.
+- [x] Supabase sync for logged-in users; merge strategy documented in PLAN. → `server/src/db/supabase.js` (PostgREST, no `npm install`); `pickStore` switches by env.
+- [x] **`tests/dom.test.mjs`** — 59 engine id lookups, all present in `client/index.html`.
+- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke check. Open `http://127.0.0.1:<port>/` and capture at least one PNG per stage that adds visible chrome. Saved to `docs/screenshots/`, referenced from CHANGELOG. (Not done in Stage 4 — no visible chrome changed.)
+- [x] **`tests/finnhub.test.mjs`** — 7 mocked-fetch assertions.
+- [x] Supabase backend wiring: `server/src/db/supabase.js` (no `@supabase/supabase-js` dep; uses PostgREST + `Prefer` headers). Falls back to memory store otherwise. Not yet exercised by tests — queued for Stage 5.
 
 ## Stage 5 — Aim integration (re-numbered after Stage 3 inserted)
 
-- [ ] Gridshot mode wired to the new shell.
-- [ ] Each hit POSTs to `/aim/hit`; server grants a fractional AAPL unit.
-- [ ] Server-side rate limit and idempotency test passes; record test output. → already covered in `tests/server.test.mjs`.
+- [ ] Wire `client/js/main.js` (or a new `client/js/aim-bridge.js`) to call `store.recordAimHit({ hitId, ticker, accuracy, streak })` on every engine hit. Engine already exposes a hit path through the FX spark callback or by hooking `markHit` in `game.js`. We will use the latter.
+- [ ] Each hit POSTs to `/aim/hit`; server grants a fractional AAPL unit. Endpoint behavior is already covered by `tests/server.test.mjs` (mints, idempotency, rate limit, streak bonus, accuracy penalty).
+- [ ] `client/js/main.js` imports `client/src/api.js` + `client/src/store.js` and shows a small "+0.0008 AAPL" chip on each hit, sourced from `store.state.lastHit`.
+- [ ] **NEW (from Stage 4):** Add a small integration test that boots the server in-process, mints one hit, and asserts the response body shape matches what the client `store.recordAimHit` expects. (Endpoint test already covers status codes; this test covers the field shape.)
+- [ ] **NEW (from Stage 4):** mocked PostgREST test for `server/src/db/supabase.js` — boot a tiny in-process HTTP server that returns canned rows, point `SUPABASE_URL` at it, and assert the store behaves like the in-memory one for hit-mint, idempotency, open-trade, close-trade, claim-mission, and unlock-NVDA paths.
+- [ ] **NEW (from Stage 4 MISTAKE):** if `VIBES_API_BASE` is unreachable, show a one-line warning on the boot screen rather than failing silently.
+- [ ] **NEW (from Stage 2 MISTAKE):** visual screenshot smoke. Open the page, take a PNG, save under `docs/screenshots/`, reference in CHANGELOG.
+
+## Stage 6 — Mini chart widget
+
+- [ ] TradingView Lightweight Charts in a corner panel on the arena.
+- [ ] Live updates from the WebSocket adapter; stale label after N seconds without a tick. (WebSocket part requires Finnhub; until then we poll /quote every 1s.)
+- [ ] Visual screenshot smoke.
 
 ## Stage 4 — Client state + persistence
 

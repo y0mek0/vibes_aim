@@ -129,3 +129,32 @@
 - `client/` is unchanged in this stage. The client still does not POST to `/aim/hit` yet — that is Stage 5.
 - In-memory store: progress is lost when the server restarts. Supabase wiring is queued in Stage 4.
 - The `hold_60s` mission threshold was reduced from 60s to 1s for MVP, so the unlock chain is testable in unit time. This is documented in MISTAKES and in `server/src/routes/missions.js` inline. The 60-second version is enforced once a real session timer is wired in Stage 5/6.
+
+## Stage 4 — Client state + persistence + DOM-id test + Finnhub mock (2026-10-04)
+
+- `client/src/api.js` — fetch wrapper. Adds `X-Player-Id` and `X-Session-Id` headers. Generates a guest `playerId` once and caches it. Never retries POSTs (idempotency lives server-side via hitId). `ApiError` class for typed errors.
+- `client/src/session.js` — one `sessionId` per page load, kept in `sessionStorage` so a hard refresh keeps the same id (matches the server's idempotency window). A new tab starts fresh.
+- `client/src/persist.js` — `loadGuestSnapshot` / `saveGuestSnapshot` / `clearGuestSnapshot` over `localStorage`. Safe in private mode (returns null on read, no-op on write). Only persists the fields that matter: `player`, `balances`, `trades`, `unlocks`, `missions`, `savedAt`. No third-party state lib.
+- `client/src/store.js` — single source of truth on the client. Public methods: `bootstrap`, `refresh`, `recordAimHit`, `previewOrder`, `openOrder`, `closeOrder`, `claimMission`, `fetchQuote`, `fetchCandles`, `fetchSymbols`, `fetchMarketStatus`, `reset`, `subscribe(fn)`. Pulls `/portfolio` + `/missions` in parallel. Optimistic local update of `balances` after a hit, then a full `refresh()` after every order/claim to keep server as the authority.
+- `server/src/db/supabase.js` — store-compatible implementation backed by Supabase PostgREST, built on the project's `fetch` so we don't need a `npm install`. Methods match `store.js` exactly. `recordHit` translates Postgres `23505 unique_violation` to `{ duplicate: true, entry: existing }`. `countHits` uses the `Prefer: count=exact` HEAD request. `pickStore(supabaseConfig)` returns the Supabase store if `url`+`serviceKey` are both present, otherwise the in-memory store. Without env, the server boots on `memory` — exactly what the tests rely on.
+- `tests/dom.test.mjs` — scans `client/js/game.js` for `getElementById('x')`, `getElementById("x")`, `$('x')`, `$("x")` lookups, then asserts every id exists in `client/index.html`. Catches the silent-black-screen class of bug. Found **59 id lookups** in the engine, all present in the host page.
+- `tests/finnhub.test.mjs` — mocked-fetch test for the Finnhub adapter. Stubs `globalThis.fetch` and asserts 7 cases: empty token → 503; happy `/quote` returns `{symbol, price, ts, currency}` and uses `X-Finnhub-Token`; pre-IPO symbols return null price without hitting the network; happy `/stock/candle` returns ms timestamps; upstream 403 → 502; unknown symbol → 400; `getStatus` reports `unconfigured` vs `live` based on token.
+- `server/src/index.js` updated to use `pickStore` so the in-memory vs Supabase choice is one env-var.
+- `package.json` updated: `npm test` now runs 10 suites (was 8).
+
+### Evidence
+
+- `npm test` → exit 0. Ten `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`.
+- `node --check` exit 0 on all 7 new files: `client/src/session.js`, `client/src/api.js`, `client/src/persist.js`, `client/src/store.js`, `server/src/db/supabase.js`, `tests/dom.test.mjs`, `tests/finnhub.test.mjs`.
+- `node -e "import('./server/src/db/supabase.js').then(m => console.log(m.pickStore({}).backend))"` → `memory` (no env = in-memory, no real Supabase call made).
+- `node -e "import('./server/src/db/supabase.js').then(m => console.log(m.pickStore({url:'https://fake', serviceKey:'x'}).backend))"` → `supabase` (env present = real backend; the tests do not exercise this path).
+- `grep -RIE "FINNHUB_TOKEN|finhub_token" client/` → 0 matches. The provider token is **only** referenced in `server/src/market/finnhub.js`. It cannot leak into the client bundle.
+- Live server smoke (already in Stage 3 CHANGELOG): `curl /health`, `/market/quote/AAPL`, `/market/symbols`, `/portfolio` all return 200 with expected shapes. The `pickStore` swap does not change any of those responses, because no env is set.
+
+### Limits of this stage
+
+- The Supabase backend is **implemented** and `node --check` is clean, but it is **not exercised by `npm test`**. Adding a mocked-fetch test for the Supabase store (with a fake PostgREST server) is queued for Stage 5.
+- `client/index.html` still does not actually call `client/src/api.js` or `client/src/store.js`. The aim loop still goes through the engine's internal `boot()` without POSTing. Wiring the engine to the server is Stage 5.
+- Visual screenshot smoke: not done in this stage. The client code did not change in any visible way yet. Will be required at Stage 6/7 once we wire the chart.
+- `client/src/store.js` is not imported by `client/js/main.js` yet, so the test suite only proves it parses. Real integration lands in Stage 5.

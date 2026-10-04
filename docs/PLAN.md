@@ -52,7 +52,17 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
-Stage 4 — Client state + persistence. Sub-steps:
+Stage 4 — Client state + persistence. Sub-steps (DONE 2026-10-04, 10/10 test suites green, 4 documents updated, committed):
+
+- 4.1 `client/src/store.js` — DONE.
+- 4.2 `client/src/persist.js` — DONE.
+- 4.3 `client/src/api.js` — DONE.
+- 4.4 `server/src/db/supabase.js` (store-compatible) — DONE, not yet exercised by tests.
+- 4.5 `tests/dom.test.mjs` — DONE (59 id lookups, all present).
+- 4.6 Visual screenshot smoke — deferred to Stage 5/6 when visible chrome changes.
+- 4.7 `tests/finnhub.test.mjs` — DONE (7 mocked-fetch assertions).
+
+Stage 5 next:
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.
