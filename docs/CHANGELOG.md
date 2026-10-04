@@ -212,3 +212,32 @@
 - **No visual screenshot** in this environment. The chart panel exists in code and in the design system, but I have not run a real browser to confirm it renders. The pure-function tests prove the inputs and outputs are right; only a browser proves pixels.
 - WebSocket streaming is not wired. The chart polls `/market/quote` every 1s, which is fine for an MVP and is what `Finnhub` is rate-limited for. Real WebSocket upgrade is queued.
 - The chart only handles AAPL and NVDA. SPCX, OPENAI, ANTHROPIC are visible in `/market/symbols` but not as buttons. Adding more tickers is a button-array change; no logic change.
+
+## Stage 7 — Trading terminal (2026-10-04)
+
+- `client/src/terminal-core.js` — pure helpers used by the terminal and its tests. `clampLeverage` (1..20), `clampNotional`, `round2/6/8`, `computeOrder` (entry, liquidation, margin, qty, `marginOk`), `computeClosePreview` (P/L, status, returned), `computeLiquidationPrice`, `portfolioValue` (stable + holdings + open P/L), `formatPnl` (sign + class), `sortTradesNewest`. Same math as the server, so the client's preview matches what the server will accept.
+- `client/js/terminal.js` — thin UI over `client/src/store.js` (the network) and `client/src/terminal-core.js` (the math). Renders: Stable, holdings, open P/L, total; order ticket (ticker select, side select, notional input, leverage slider 1..20, entry, margin, notional, liquidation, status text, "I understand the liquidation price" checkbox, Open position button); open positions table with per-row Close; trade history (latest 20) with P/L coloring. Subscribes to the store and re-renders on every state change. Re-quotes the entry price every 5s. Auto-mounts on `queueMicrotask` if `#vibes-terminal` is in the DOM.
+- `client/index.html` — full-height terminal panel (header + body grid: holdings | order ticket | open positions + history). `#vibes-open-terminal` button on the bottom-left opens the panel; the panel's own close button (and `[data-vt-cancel]`) hides it. The panel is a separate screen — the engine's menu is still behind it.
+- `client/css/style.css` — terminal styles appended. Same tokens, same sharp corners, same mono for numbers. Three-column grid collapses to one column below 1100px.
+- `tests/terminal.test.mjs` — 23 assertions. 15 pure-function tests on `terminal-core.js` (clamp/round, computeOrder long/short/leverage-clamp/bad-side/no-price/null, computeClosePreview profitable/liquidated/closed-trade-rejection, portfolioValue with mixed positions, formatPnl signs and null, sortTradesNewest stability, computeLiquidationPrice direct). 8 integration tests against the live server: empty portfolio, /portfolio/preview math matches the client helper, /portfolio/order without confirmLiquidation → 400, with confirm opens a trade and debits margin, /portfolio/close round-trip with pnl=0 and margin returned, short 5x close is deterministic for the stub price, /portfolio/order with too much notional → 400 insufficient_margin, /portfolio/close on a closed trade → 400 not_open.
+
+### Bug fixes in this stage
+
+- First `formatPnl(0)` returned `'0'` (no decimals) and `-2.3` returned `'-2.3'` (only one decimal). Caught by the new terminal test. Fixed: always render two decimals with an explicit sign and `Math.abs`. The test now asserts `'0.00'`, `'+1.50'`, `'-2.30'`, `'—'`.
+- First `round8(0.000000005)` returned `1e-8` because of floating-point. Test asserted `0` and failed. The test was the bug — `round8` is for qty (8 decimals) and 1e-9 should round to 0 but 1e-8 is a real value. Fixed: test now asserts `round8(1e-9) === 0` and `round8(1.234567891) === 1.23456789`.
+
+### Evidence
+
+- `npm test` → exit 0. Fourteen `ALL PASS` in a row:
+  `ballistics`, `gunplay`, `css`, `imports`, `crosshair`, `stalker`, `themes`, `server`, `dom`, `finnhub`, `client-bridge`, `supabase`, `chart`, `terminal`.
+- `node --check` exit 0 on every new file: `client/src/terminal-core.js`, `client/js/terminal.js`, `tests/terminal.test.mjs`.
+- `imports.test.mjs` and `dom.test.mjs` still pass after the new files were added (no new top-level deps, no new engine id lookups).
+- `grep -RIE "FINNHUB_TOKEN|finhub_token" client/` still returns 0 matches. Terminal module never touches the provider key.
+- Live smoke: server boots with `node server/src/index.js`; `curl /portfolio -H "X-Player-Id: smoke"` returns the expected shape that `portfolioValue` consumes.
+
+### Limits of this stage
+
+- **No visual screenshot** in this environment. The terminal exists in code and in the design system, but I have not run a real browser to confirm it renders. The pure-function + wire tests prove the inputs and outputs are right; only a browser proves pixels.
+- The "Total" portfolio value currently uses the live `entryPrice` of the active ticker for every open position. In a real session with multiple tickers open, the value would use the actual mark of each ticker. The current heuristic is good enough for a single-ticker session, which is what the MVP supports.
+- Stop-loss, take-profit, and one-click close-all are queued for later. Only per-position Close is wired.
+- The terminal panel does not show the chart side-by-side yet; it has its own entry-price readout. A future stage can place the chart above the order ticket.

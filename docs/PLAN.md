@@ -78,7 +78,15 @@ Stage 6 — Mini chart widget. Sub-steps (DONE 2026-10-04, 13/13 test suites gre
 - 6.4 `tests/chart.test.mjs` — DONE (12 assertions, 7 pure + 5 wire).
 - 6.5 Bug fix: chart.js + aim-bridge.js had wrong relative import paths (`./src/api.js` instead of `../src/api.js`). Caught by Node's strict ESM resolver.
 
-Stage 7 next: full trading terminal (portfolio, order, long/short, leverage, liquidation preview).
+Stage 7 — Trading terminal. Sub-steps (DONE 2026-10-04, 14/14 test suites green, 4 documents updated, committed):
+
+- 7.1 `client/src/terminal-core.js` — pure helpers (clamp, round, computeOrder, computeClosePreview, computeLiquidationPrice, portfolioValue, formatPnl, sortTradesNewest) — DONE.
+- 7.2 `client/js/terminal.js` — thin UI over store + terminal-core — DONE.
+- 7.3 Terminal panel in `index.html` + CSS — DONE.
+- 7.4 `tests/terminal.test.mjs` — 23 assertions (15 pure + 8 wire) — DONE.
+- 7.5 Bug fixes: `formatPnl` now always renders two decimals with explicit sign; `round8` test values adjusted to avoid floating-point boundary.
+
+Stage 8 next: missions + NVDA unlock chain.
 
 - 4.1 `client/src/store.js` — mirror of server state (player, balances, trades, unlocks, missions). Pulls via `fetch` from `/portfolio` and `/missions`. Single source of truth on the client. No third-party state lib.
 - 4.2 `client/src/persist.js` — localStorage adapter for guest mode. Clears on logout. Logs the merge strategy in code: local first, then server on login.

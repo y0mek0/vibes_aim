@@ -22,6 +22,80 @@
 <body>
 <canvas id="game"></canvas>
 
+<!-- vibes_aim: trading terminal. A separate full-height panel; open
+     via a tab, close via the panel's own button. Hidden by default. -->
+<div id="vibes-terminal" hidden>
+  <div class="vt-head">
+    <span class="vt-kicker">// terminal</span>
+    <span class="vt-balance-line">Stable <span class="num" data-vt-balance>—</span></span>
+    <span class="vt-portfolio-line">Holdings <span class="num" data-vt-portfolio-value>—</span> · Open P/L <span class="num" data-vt-open-pnl>—</span> · Total <span class="num" data-vt-portfolio-total>—</span></span>
+    <button type="button" class="vt-close-btn" data-vt-cancel>Close</button>
+  </div>
+
+  <div class="vt-body">
+    <section class="vt-section vt-holdings">
+      <h3>Holdings</h3>
+      <table class="vt-table">
+        <thead><tr><th>Ticker</th><th>Qty</th></tr></thead>
+        <tbody data-vt-holdings></tbody>
+      </table>
+    </section>
+
+    <section class="vt-section vt-order">
+      <h3>Order ticket</h3>
+      <div class="vt-row">
+        <label>Ticker</label>
+        <select data-vt-ot-ticker>
+          <option value="AAPL">AAPL</option>
+          <option value="NVDA">NVDA</option>
+        </select>
+        <label>Side</label>
+        <select data-vt-ot-side>
+          <option value="long">long</option>
+          <option value="short">short</option>
+        </select>
+      </div>
+      <div class="vt-row">
+        <label>Notional</label>
+        <input type="number" min="10" step="10" value="100" data-vt-ot-notional>
+        <label>Leverage</label>
+        <input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage>
+        <span class="num" data-vt-ot-leverage-num>1x</span>
+      </div>
+      <div class="vt-row vt-readout">
+        <span>Entry <span class="num" data-vt-ot-entry>—</span></span>
+        <span>Margin <span class="num" data-vt-ot-margin>—</span></span>
+        <span>Notional <span class="num" data-vt-ot-notional-total>—</span></span>
+        <span class="neg">Liquidation <span class="num" data-vt-ot-liq>—</span></span>
+      </div>
+      <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
+      <div class="vt-confirm">
+        <label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label>
+        <button type="button" class="vt-btn vt-btn-primary" data-vt-ot-submit disabled>Open position</button>
+      </div>
+    </section>
+
+    <section class="vt-section vt-positions">
+      <h3>Open positions</h3>
+      <table class="vt-table">
+        <thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Liq</th><th></th></tr></thead>
+        <tbody data-vt-positions-body></tbody>
+      </table>
+    </section>
+
+    <section class="vt-section vt-history">
+      <h3>Trade history</h3>
+      <table class="vt-table">
+        <thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Status</th></tr></thead>
+        <tbody data-vt-history-body></tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<!-- Tab button that opens the terminal -->
+<button type="button" id="vibes-open-terminal" class="vt-open-tab">Terminal</button>
+
 <!-- vibes_aim: floating chart panel. Lives above the canvas, below the aim-bridge chip. -->
 <div id="vibes-chart" hidden>
   <div class="vc-head">
@@ -204,7 +278,18 @@
 <script type="module" src="js/aim-bridge.js"></script>
 <!-- vibes_aim chart (TradingView Lightweight Charts, polled from /market/quote) -->
 <script type="module" src="js/chart.js"></script>
+<!-- vibes_aim terminal (paper-trading UI) -->
+<script type="module" src="js/terminal.js"></script>
 <script type="module" src="js/main.js"></script>
+<script type="module">
+  // Open / close the trading terminal. The terminal.js module auto-mounts
+  // on first load; this just toggles the panel's `hidden` attribute.
+  const panel = document.getElementById('vibes-terminal');
+  const openBtn = document.getElementById('vibes-open-terminal');
+  const closeBtn = document.querySelector('[data-vt-cancel]');
+  if (openBtn) openBtn.addEventListener('click', () => { if (panel) panel.hidden = false; });
+  if (closeBtn) closeBtn.addEventListener('click', () => { if (panel) panel.hidden = true; });
+</script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>
   <div class="vibes-boot-card">
