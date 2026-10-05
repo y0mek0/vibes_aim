@@ -52,6 +52,22 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.10 — server-sent events for live market ticks (DONE 2026-10-05)
+
+**Verified evidence:** `node tests/stream.test.mjs` (6 pure assertions) and `node tests/stream-wire.test.mjs` (real HTTP, 11 wire assertions) exit 0. Full `npm test` exits 0 / `ALL PASS` including strict visual smoke (no console / network / static-host 4xx-5xx).
+
+**Scope:** add a provider-neutral SSE feed of latest ticks so the client can move off 1Hz HTTP requests when the browser supports `EventSource`. The polling fallback stays so older servers and static-only hosts keep working. When Finnhub is wired in later, only the provider's `subscribe()` method needs to be implemented; the server and tests do not change.
+
+**Acceptance criteria:**
+
+- `GET /market/stream/:symbol` writes `event: tick` SSE frames, sends `Content-Type: text/event-stream`, and sends a 15s heartbeat comment.
+- Unknown symbol returns 400 JSON; pre-IPO symbols still stream with `price: null, status: 'pre_ipo'`.
+- The client `openQuoteStream(ticker, onTick)` resolves the API origin via `api.baseUrl()` so cross-origin static hosts route SSE correctly; polling remains as a strict fallback.
+- A ticker change closes and reopens the SSE stream; `unmount` stops it cleanly.
+- `npm test` stays green including the strict visual smoke.
+
+**Out of scope:** native Finnhub WebSocket integration, third-party SSE libs, sticky-session scaling notes.
+
 ### Stage 11.9 — server Docker image (DONE 2026-10-05)
 
 **Verified evidence:** `node --check server/src/index.js` exited 0; local `PORT=4174 node server/src/index.js` answered `GET /health` with `200 {"ok":true,"ts":...}`. Full `npm test` exited 0. The Docker image itself is not built locally because Docker is not installed on this machine; CI users can verify with `docker build -t vibes_aim-server ./server` and `docker run --rm -p 3000:3000 vibes_aim-server`.

@@ -407,6 +407,18 @@
 - Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
 - Full `npm test` → exit 0 / `ALL PASS`.
 
+## Stage 11.10 — Server-Sent Events for live market ticks (2026-10-05)
+
+- Added `GET /market/stream/:symbol` to the server. Frames are `event: tick` with JSON data; the response is `text/event-stream` and includes a 15-second heartbeat so reverse proxies do not kill the connection. Unknown symbols return a 400 JSON `unknown_symbol`; pre-IPO symbols still stream with `price: null, status: 'pre_ipo'`.
+- Provider interface now documents an optional `subscribe(symbol, listener)` method. The stream module uses it when present and otherwise falls back to a 1Hz `getQuote()` poll, so SSE works for every provider including the deterministic stub. When the real Finnhub provider lands, only its `subscribe()` needs to be wired — no server or test changes.
+- Added `openQuoteStream(ticker, onTick)` to the chart module. It resolves the API origin via `api.baseUrl()` so cross-origin static hosts route SSE correctly (EventSource cannot use `mode:'cors'` the way fetch can) and falls back silently to polling if the stream is unavailable. The chart now starts the stream after the initial candles load, stops it on `unmount`, and reopens it when the player switches ticker.
+
+### Evidence
+
+- `node tests/stream.test.mjs` → 6/6 pass.
+- `node tests/stream-wire.test.mjs` → 11/11 pass over a real HTTP server.
+- Full `npm test` → exit 0 / `ALL PASS`, including the strict visual smoke that previously reported a 404 for `/market/stream/AAPL` because the SSE URL was relative.
+
 ## Stage 11.9 — Server Docker image (2026-10-05)
 
 - Added `server/Dockerfile` and `server/Dockerfile.test`, both based on `node:20-alpine` to match `.nvmrc`. The server has zero npm dependencies, so the production image copies only `server/src` and runs `node src/index.js` as the unprivileged `node` user with a `/health` container health check. The test image runs `npm test` in the same base.

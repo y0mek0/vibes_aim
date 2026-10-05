@@ -125,6 +125,7 @@
 - [ ] Docker image for the server.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 - [x] Server Docker image — minimal `node:20-alpine` Dockerfile with `/health` health check and a `Dockerfile.test` for `npm test`; documented in `deploy/README.md`. → DONE 2026-10-05.
+- [x] Server-Sent Events for live market ticks — `GET /market/stream/:symbol` plus client `openQuoteStream`, with polling fallback. → DONE 2026-10-05.
 
 
 ## Stage 10 — Polish, release tag (DONE 2026-10-04)
@@ -151,6 +152,7 @@
 - [ ] Docker image for the server.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 - [x] Server Docker image — minimal `node:20-alpine` Dockerfile with `/health` health check and a `Dockerfile.test` for `npm test`; documented in `deploy/README.md`. → DONE 2026-10-05.
+- [x] Server-Sent Events for live market ticks — `GET /market/stream/:symbol` plus client `openQuoteStream`, with polling fallback. → DONE 2026-10-05.
 
 
 ## Anti-cheat (already covered in Stage 3)
