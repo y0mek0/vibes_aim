@@ -59,11 +59,17 @@ export function missionsRoutes(r, { store }) {
 }
 
 async function readState(playerId, store) {
+  const player = await store.getOrCreatePlayer(playerId);
   const trades = await store.listTrades(playerId);
   const balances = await store.getAllBalances(playerId);
   const hits = await store.countHits(playerId);
   const earnedAapl = await store.totalEarnedViaAim(playerId, 'AAPL');
-  return { trades, balances, hits, earnedAapl };
+  return {
+    trades, balances, hits, earnedAapl,
+    // Missing data is a valid state for existing players created before
+    // the precision field. It must resolve to zero, never NaN/null.
+    preciseBest: Number.isFinite(Number(player.preciseBest)) ? Number(player.preciseBest) : 0,
+  };
 }
 
 async function checkMission(def, state, store) {

@@ -7,6 +7,21 @@ import { sendJson, HttpError, round, clamp } from '../util/json.js';
 
 const MAX_LEVERAGE = 20;
 
+// Unlock check: AAPL is always farmable. Pre-IPO tickers (OPENAI,
+// ANTHROPIC) are checked separately by the market layer (returns price:
+// null), so we skip them here. Any other ticker must be unlocked by the
+// player (default unlocks are empty, so a fresh player cannot preview
+// or open a position on TSLA / NVDA / etc.).
+const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
+async function assertTickerUnlocked(store, playerId, ticker) {
+  if (ticker === 'AAPL') return;
+  if (PRE_IPO.has(ticker)) return; // pre-IPO tickers are checked via price
+  const unlocks = await store.listUnlocks(playerId);
+  if (!unlocks.some((u) => u.ticker === ticker)) {
+    throw new HttpError(400, 'ticker_locked', `Ticker ${ticker} is not unlocked. Complete the AAPL chain to unlock NVDA.`);
+  }
+}
+
 export function portfolioRoutes(r, { market, store }) {
   // GET /portfolio?playerId=... — current state snapshot
   r.get('/portfolio', async (req, res, _params, query) => {
@@ -26,10 +41,14 @@ export function portfolioRoutes(r, { market, store }) {
 
   // POST /portfolio/preview — given ticker/side/leverage/notional, return
   // the entry and liquidation price without opening a position.
-  r.post('/portfolio/preview', async (_req, res, _params, _query, body) => {
+  r.post('/portfolio/preview', async (req, res, _params, _query, body) => {
     const { ticker, side, leverage, notional } = body || {};
     if (!ticker || !side) throw new HttpError(400, 'bad_request', 'ticker and side required');
     if (!['long', 'short'].includes(side)) throw new HttpError(400, 'bad_side');
+    // Unlock check: read X-Player-Id from headers (preview is usually
+    // sent from the chart panel which knows the player).
+    const playerId = req.headers['x-player-id'];
+    if (playerId) await assertTickerUnlocked(store, playerId, ticker);
     const lev = clamp(Number(leverage) || 1, 1, MAX_LEVERAGE);
     const q = await market.getQuote(ticker);
     if (q.price == null) throw new HttpError(400, 'no_price', `${ticker} is awaiting market`);
@@ -39,7 +58,7 @@ export function portfolioRoutes(r, { market, store }) {
     sendJson(res, 200, {
       ticker, side, leverage: lev, entry, liquidationPrice: liq,
       notional: round(size * lev, 6),
-      margin: round(size, 6),
+      margin: round(size / lev, 6),
     });
   });
 
@@ -50,6 +69,7 @@ export function portfolioRoutes(r, { market, store }) {
     const { ticker, side, leverage, notional, confirmLiquidation } = body || {};
     if (!ticker || !side) throw new HttpError(400, 'bad_request', 'ticker and side required');
     if (!['long', 'short'].includes(side)) throw new HttpError(400, 'bad_side');
+    await assertTickerUnlocked(store, playerId, ticker);
     const lev = clamp(Number(leverage) || 1, 1, MAX_LEVERAGE);
     const q = await market.getQuote(ticker);
     if (q.price == null) throw new HttpError(400, 'no_price', `${ticker} is awaiting market`);
@@ -60,7 +80,10 @@ export function portfolioRoutes(r, { market, store }) {
       throw new HttpError(400, 'confirm_required', 'Call /portfolio/preview first, then POST with confirmLiquidation:true');
     }
     const size = Number(notional) || entry;
-    const margin = size; // simplified: margin = notional / leverage
+    // Margin = notional / leverage. With leverage 5x and notional 100,
+    // you commit 20 as margin and control 100 of position. Matches
+    // client/src/terminal-core.js#computeOrder and the /close return.
+    const margin = size / lev;
     const player = await store.getOrCreatePlayer(playerId);
     if (player.stable < margin) throw new HttpError(400, 'insufficient_margin', `need ${margin.toFixed(2)} stable, have ${player.stable.toFixed(2)}`);
     await store.addStable(playerId, -margin);

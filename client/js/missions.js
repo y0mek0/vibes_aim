@@ -145,10 +145,21 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
   return { unmount, state: () => ({ unlockedThisSession, lastUnlocks: [...lastUnlocks] }) };
 }
 
-// Auto-mount when this module is loaded in a real browser.
+// Auto-mount after the panel markup is definitely available. Module scripts
+// are deferred, but several independent modules boot in parallel; using the
+// DOM readiness boundary avoids a rare visual-test race where the aim menu
+// was ready before this panel had subscribed to the store.
+function autoMountMissions() {
+  const panel = document.getElementById('vibes-missions');
+  if (!panel || panel.dataset.vmMounted === 'true') return;
+  panel.dataset.vmMounted = 'true';
+  mountMissions({ root: panel });
+}
+
 if (typeof document !== 'undefined') {
-  queueMicrotask(() => {
-    const panel = document.getElementById('vibes-missions');
-    if (panel) mountMissions({ root: panel });
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoMountMissions, { once: true });
+  } else {
+    queueMicrotask(autoMountMissions);
+  }
 }

@@ -13,6 +13,19 @@ export function aimRoutes(r, { store, config }) {
     if (!hitId || typeof hitId !== 'string') throw new HttpError(400, 'missing_hit_id', 'hitId is required');
     if (!ticker || typeof ticker !== 'string') throw new HttpError(400, 'missing_ticker', 'ticker is required');
 
+    // Unlock check: AAPL is always farmable. Pre-IPO tickers (OPENAI,
+    // ANTHROPIC) are valid hit targets — the server mints their unit but
+    // the chart shows no price. Any other ticker requires an unlock
+    // record. This makes the AAPL -> NVDA chain real: you cannot bypass
+    // the missions by POSTing directly to /aim/hit with a different
+    // ticker. Tickers the player has never heard of (typo) are caught
+    // here before they reach the rate limiter.
+    const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
+    const unlocks = await store.listUnlocks(playerId);
+    if (ticker !== 'AAPL' && !PRE_IPO.has(ticker) && !unlocks.some((u) => u.ticker === ticker)) {
+      throw new HttpError(400, 'ticker_locked', `Ticker ${ticker} is not unlocked. Complete the AAPL chain to unlock NVDA.`);
+    }
+
     // Rate limit (per session, sliding window)
     const rate = await store.hitRateCheck({ sessionId, windowMs: 1000, maxInWindow: config.aim.hitRps });
     if (!rate.allowed) {

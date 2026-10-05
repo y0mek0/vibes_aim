@@ -224,7 +224,7 @@ async function main() {
   await step(async () => {
     const r = await client.request({
       method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': 'p3' },
-      body: { ticker: 'NVDA', side: 'short', leverage: 20 },
+      body: { ticker: 'AAPL', side: 'short', leverage: 20 },
     });
     assert.equal(r.status, 200);
     // liq = entry * (1 + 1/20)
@@ -351,6 +351,69 @@ async function main() {
     // test verifies the *claim* code path runs without error and that /portfolio reflects unlocks.
     assert.ok(Array.isArray(port_.body.unlocks));
     ok(`missions claim path runs (unlocks count=${port_.body.unlocks.length}, hasNVDA=${hasNvda})`);
+  });
+
+  // ---- Unlock check (Stage 11.3) -------------------------------------
+  // AAPL is always farmable. NVDA / TSLA / etc. are refused with 400
+  // ticker_locked for a fresh player. Pre-IPO tickers (OPENAI/ANTHROPIC)
+  // are valid hit targets — the chart shows no price, the server still
+  // mints their unit. The check runs BEFORE the rate limiter and BEFORE
+  // the mint, so a flood of locked-ticker requests cannot burn the
+  // player's rate budget.
+  await step(async () => {
+    const r = await client.request({
+      method: 'POST', path: '/aim/hit',
+      headers: { 'X-Player-Id': 'locked-player', 'X-Session-Id': 's-locked' },
+      body: { hitId: 'lk-1', ticker: 'NVDA', accuracy: 0.8, streak: 0, ts: Date.now() },
+    });
+    assert.equal(r.status, 400);
+    assert.equal(r.body.error, 'ticker_locked');
+    ok('POST /aim/hit with locked ticker -> 400 ticker_locked');
+  });
+
+  // AAPL still works for the same player.
+  await step(async () => {
+    const r = await client.request({
+      method: 'POST', path: '/aim/hit',
+      headers: { 'X-Player-Id': 'locked-player', 'X-Session-Id': 's-locked' },
+      body: { hitId: 'lk-2', ticker: 'AAPL', accuracy: 0.8, streak: 0, ts: Date.now() },
+    });
+    assert.equal(r.status, 200);
+    ok('POST /aim/hit with AAPL works for the same locked player');
+  });
+
+  // /portfolio/preview and /portfolio/order also gate on unlocks.
+  await step(async () => {
+    const r = await client.request({
+      method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': 'locked-player' },
+      body: { ticker: 'TSLA', side: 'long', leverage: 1, notional: 100 },
+    });
+    assert.equal(r.status, 400);
+    assert.equal(r.body.error, 'ticker_locked');
+    ok('POST /portfolio/preview with locked ticker -> 400 ticker_locked');
+  });
+
+  await step(async () => {
+    const r = await client.request({
+      method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': 'locked-player' },
+      body: { ticker: 'TSLA', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
+    });
+    assert.equal(r.status, 400);
+    assert.equal(r.body.error, 'ticker_locked');
+    ok('POST /portfolio/order with locked ticker -> 400 ticker_locked');
+  });
+
+  // Pre-IPO tickers (OPENAI/ANTHROPIC) are valid hit targets; the
+  // server still mints their unit but the chart shows no price.
+  await step(async () => {
+    const r = await client.request({
+      method: 'POST', path: '/aim/hit',
+      headers: { 'X-Player-Id': 'pre-ipo-player', 'X-Session-Id': 's-pre' },
+      body: { hitId: 'pre-1', ticker: 'OPENAI', accuracy: 0.8, streak: 0, ts: Date.now() },
+    });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.ticker, 'OPENAI');
+    ok('POST /aim/hit with pre-IPO ticker (OPENAI) -> 200');
   });
 
   server.close();

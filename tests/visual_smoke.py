@@ -42,7 +42,11 @@ def main():
 
     client_port = find_port()
     client_origin = f"http://127.0.0.1:{client_port}"
-    server_port = 3098
+    # Never use a fixed API port here. A prior test/helper can leave a
+    # process alive briefly; fixed 3098 could make the browser talk to a
+    # stale backend while this process fails to bind. A fresh OS-assigned
+    # port isolates every visual run.
+    server_port = find_port()
 
     # Start server
     env = {**os.environ, "ORIGIN": client_origin, "PORT": str(server_port), "AIM_HIT_RPS": "5000"}
@@ -66,7 +70,11 @@ def main():
             return super().do_GET()
 
     def serve():
-        with socketserver.TCPServer(("127.0.0.1", client_port), Handler) as httpd:
+        # ES modules are fetched concurrently by Chrome. A single-threaded
+        # TCPServer can refuse parallel imports, leaving an incomplete UI
+        # (for example, missions.js never mounts). ThreadingHTTPServer
+        # serves the complete module graph deterministically.
+        with http.server.ThreadingHTTPServer(("127.0.0.1", client_port), Handler) as httpd:
             httpd.serve_forever()
     threading.Thread(target=serve, daemon=True).start()
 
@@ -82,6 +90,8 @@ def main():
             "dom": {},
             "console_errors": [],
             "page_errors": [],
+            "request_failures": [],
+            "error_responses": [],
         }
 
         with sync_playwright() as p:
@@ -95,6 +105,12 @@ def main():
             page = ctx.new_page()
             page.on("pageerror", lambda e: summary["page_errors"].append(str(e)))
             page.on("console", lambda m: summary["console_errors"].append(m.text) if m.type == "error" else None)
+            page.on("requestfailed", lambda r: summary["request_failures"].append({
+                "url": r.url, "failure": r.failure,
+            }))
+            page.on("response", lambda r: summary["error_responses"].append({
+                "url": r.url, "status": r.status,
+            }) if r.status >= 400 else None)
             # requestfailed and 4xx/5xx responses are recorded but filtered
             # in the post-process pass below; Chrome strips the URL from
             # the generic "Failed to load resource" line, so we cannot
@@ -121,7 +137,33 @@ def main():
 
             # Open the missions
             page.click("#vibes-open-missions", timeout=10000)
-            page.wait_for_timeout(2000)
+            # Do not rely on a wall-clock sleep: the panel renders from
+            # store refresh asynchronously. Wait for all six rows so the
+            # DOM summary and screenshot cannot race a late render.
+            try:
+                page.wait_for_function(
+                    'document.querySelectorAll("[data-vm-kind]").length === 6',
+                    timeout=10000,
+                )
+            except Exception as exc:
+                # Emit focused state on failure so a visual flake has
+                # actionable evidence instead of a generic timeout.
+                summary["mission_debug"] = page.evaluate("""() => {
+                  const panel = document.getElementById('vibes-missions');
+                  const body = panel && panel.querySelector('[data-vm-body]');
+                  return {
+                    readyState: document.readyState,
+                    panelExists: !!panel,
+                    panelHidden: panel ? panel.hidden : null,
+                    mounted: panel ? panel.dataset.vmMounted || null : null,
+                    rows: document.querySelectorAll('[data-vm-kind]').length,
+                    tbodyChildren: body ? body.children.length : null,
+                    moduleScripts: [...document.querySelectorAll('script[type="module"]')].map((s) => s.src || 'inline'),
+                  };
+                }""")
+                summary["real_errors"] = list(summary["page_errors"])
+                print(json.dumps(summary, ensure_ascii=False, indent=2))
+                raise RuntimeError(f"missions rows did not render: {summary['mission_debug']}") from exc
             out3 = os.path.join(SCREENSHOTS_DIR, "03-missions.png")
             page.screenshot(path=out3)
             summary["screenshots"].append(out3)

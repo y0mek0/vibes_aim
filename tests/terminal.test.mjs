@@ -57,16 +57,19 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   ok('round2/6/8 round correctly');
 }
 {
-  // computeOrder happy path: long 5x, notional 500, entry 100
+  // computeOrder happy path: long 5x, notional 500, entry 100.
+  // margin = notional / leverage = 100. With balance 200 < 100, margin is
+  // enough but the previous version used margin = notional. We assert
+  // the new (correct) formula.
   const r = computeOrder({ side: 'long', leverage: 5, notional: 500, entryPrice: 100, balance: 200 });
   assert.equal(r.ok, true);
   assert.equal(r.entry, 100);
   assert.equal(r.liquidationPrice, 80); // entry * (1 - 1/5) = 80
-  assert.equal(r.margin, 500);
-  assert.equal(r.notional, 2500);
-  assert.equal(r.qty, 5); // 500 / 100
-  assert.equal(r.marginOk, false); // 200 < 500
-  ok('computeOrder long 5x returns correct math + flags margin shortage');
+  assert.equal(r.margin, 100);          // 500 / 5
+  assert.equal(r.notional, 2500);       // 500 * 5
+  assert.equal(r.qty, 5);               // 500 / 100
+  assert.equal(r.marginOk, true);       // 200 >= 100
+  ok('computeOrder long 5x returns correct math (margin = notional / leverage)');
 }
 {
   // short 20x: liq = entry * (1 + 1/20)
@@ -258,7 +261,7 @@ async function integration() {
   ok('POST /portfolio/order without confirm -> 400');
 
   // 4. /portfolio/order with confirmLiquidation: true opens a trade.
-  //    Player has 1000 stable; notional 500 at 5x -> margin 500. Stable drops to 500.
+  //    Player has 200 stable; notional 100 at 5x -> margin 20. Stable drops to 180.
   const o2 = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 100, confirmLiquidation: true },
@@ -268,7 +271,7 @@ async function integration() {
   const tradeId = o2.body.trade.id;
 
   const p2 = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });
-  assert.equal(p2.body.player.stable, 100);  // 200 - margin(100)
+  assert.equal(p2.body.player.stable, 180);  // 200 - margin(20) = 200 - 100/5
   assert.equal(p2.body.trades.length, 1);
   assert.equal(p2.body.trades[0].id, tradeId);
   ok('POST /portfolio/order opens a trade and debits margin from Stable');
@@ -316,8 +319,9 @@ async function integration() {
   ok(`POST /portfolio/close (short): status ${expected} (deterministic for stub price)`);
 
   // 7. Insufficient margin returns 400
-  // The player has stable = 1000 - 500 (consumed in step 4) + 500 (returned in step 5)
-  //                                 - 200 (step 6 margin) + (margin + pnl) on close
+  // The player starts with 200 Stable; the earlier long and short positions
+  // debit and refund `notional / leverage`. Exact P/L may vary by stub tick,
+  // so use the current server balance rather than hard-coding a remainder.
   // This is hard to predict exactly. We instead just try to open with
   // notional larger than current stable and expect 400.
   const p3 = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });

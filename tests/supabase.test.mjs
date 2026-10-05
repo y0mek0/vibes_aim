@@ -191,16 +191,24 @@ async function main() {
   // 1. getOrCreatePlayer mints a new player
   const p1 = await store.getOrCreatePlayer('p1');
   assert.equal(p1.id, 'p1');
-  assert.equal(Number(p1.stable), 1000);
-  ok('getOrCreatePlayer mints new player with 1000 stable');
+  assert.equal(Number(p1.stable), 200);
+  ok('getOrCreatePlayer mints new player with 200 stable');
 
-  // 2. addStable updates player
+  // 2. recordAccuracy keeps the highest valid session accuracy. This is
+  // the value precise_session reads after a real /aim/hit.
+  const p1a = await store.recordAccuracy('p1', 0.72);
+  assert.equal(p1a.preciseBest, 0.72);
+  const p1b = await store.recordAccuracy('p1', 0.5);
+  assert.equal(p1b.preciseBest, 0.72, 'lower accuracy never reduces best');
+  ok('recordAccuracy persists and only raises preciseBest');
+
+  // 3. addStable updates player
   await store.addStable('p1', 500);
-  const p1b = await store.getOrCreatePlayer('p1');
-  assert.equal(Number(p1b.stable), 1500);
-  await store.addStable('p1', -2000); // floor at 0
   const p1c = await store.getOrCreatePlayer('p1');
-  assert.equal(Number(p1c.stable), 0, 'stable floored at 0');
+  assert.equal(Number(p1c.stable), 700);
+  await store.addStable('p1', -2000); // floor at 0
+  const p1d = await store.getOrCreatePlayer('p1');
+  assert.equal(Number(p1d.stable), 0, 'stable floored at 0');
   ok('addStable applies deltas and floors at 0');
 
   // 3. recordHit mints; duplicate returns the existing entry. Note:
@@ -260,7 +268,7 @@ async function main() {
   // 9. addStable on a fresh player creates them
   const p2 = await store.addStable('p-fresh', 100);
   assert.equal(p2.id, 'p-fresh');
-  assert.equal(Number(p2.stable), 1100);
+  assert.equal(Number(p2.stable), 300);
   ok('addStable creates a new player on first write');
 
   fakeServer.close();

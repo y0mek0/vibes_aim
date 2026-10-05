@@ -52,6 +52,21 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.3–11.4 — market unlock enforcement and margin consistency (DONE 2026-10-05)
+
+**Verified evidence:** `node tests/server.test.mjs`, `node tests/terminal.test.mjs`, and `npm test` all exited 0. `npm run test:slow` held a real position for 60020 ms and exited 0. Visual smoke passed three consecutive isolated runs after its server-concurrency repair.
+
+**Scope:** enforce the AAPL → NVDA progression gate for minting/trading and make client preview, server order debit, and server close refund use one leverage formula: `margin = position notional / leverage`.
+
+**Acceptance criteria:**
+
+- `POST /aim/hit`, `/portfolio/preview`, and `/portfolio/order` return `400 ticker_locked` for locked market tickers, while AAPL remains available to a fresh player.
+- Pre-IPO ticker orders retain the explicit `400 no_price` result rather than being mislabeled as a lock.
+- Client order preview, server preview, server debit, and server close refund agree on margin.
+- Targeted server and terminal tests plus the full `npm test` chain pass without DEBUG output.
+
+**Out of scope for this stage:** market-hours gate, chart/UI polish, active-ticker hint, README changes, CI changes.
+
 Stage 4 — Client state + persistence. Sub-steps (DONE 2026-10-04, 10/10 test suites green, 4 documents updated, committed):
 
 - 4.1 `client/src/store.js` — DONE.

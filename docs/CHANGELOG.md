@@ -367,3 +367,20 @@
 - The CI workflow will not have run yet until the next push. After the first push, the user can tighten the ruleset to require the `test / node-test` status check by adding a `required_status_checks` rule.
 - No `dependabot.yml` or `codeql.yml` yet. Both are 10-line adds if the user wants Renovate-style dependency PRs or security scanning.
 - The README mentions "no `npm install`" — the CI workflow honours this because `actions/setup-node` does not run `npm ci` unless the user runs it; `npm test` here is a no-deps chain of `node tests/*.test.mjs`.
+
+## Stage 11.3–11.4 — Progression gate, honest accuracy, margin integrity, visual-test stability (2026-10-05)
+
+- **Server-authoritative progression:** AAPL remains available for a fresh player. Locked market tickers are rejected with `400 ticker_locked` by `/aim/hit`, `/portfolio/preview`, and `/portfolio/order`. Pre-IPO order requests retain `400 no_price` rather than being misclassified as locked.
+- **Real accuracy state:** `preciseBest` is written from valid aim hits, included in mission state, and persisted through both the memory and Supabase stores. Added `server/migrations/0002_add_precise_best.sql` for existing Supabase databases.
+- **Single leverage formula:** client preview, server preview, server order debit, and close refund all use `margin = position size / leverage`. A 100 Stable position at 5× reserves 20 Stable and returns that margin at flat close; the old inconsistent debit/refund loss is removed.
+- **Stable default consistency:** both memory and Supabase new-player paths start at 200 Stable; tests were corrected from obsolete 1000-Stable assumptions.
+- **Visual-smoke repair:** the Python helper now serves browser ES modules via `ThreadingHTTPServer`, uses ephemeral backend ports, and waits for the six mission rows. This removes the intermittent `ERR_CONNECTION_REFUSED` module-import race that left the missions panel unmounted.
+
+### Evidence
+
+- `node tests/server.test.mjs` → exit 0, including locked ticker, AAPL baseline, and Pre-IPO behavior.
+- `node tests/terminal.test.mjs` → exit 0, including preview/order/close margin agreement.
+- `node tests/missions.test.mjs` and `node tests/supabase.test.mjs` → exit 0, including a real `accuracy: 0.9` hit and monotonic Supabase `preciseBest` persistence.
+- `npm run test:slow` → exit 0; real wall-clock hold recorded as `60020ms`.
+- `node tests/visual.test.mjs` run three times consecutively → exit 0 each time.
+- Final `npm test` → exit 0; all configured suites reported `ALL PASS`, including visual smoke with 6 mission rows.

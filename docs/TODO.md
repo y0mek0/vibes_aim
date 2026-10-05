@@ -96,8 +96,10 @@
 ## Stage 9 backlog (real accuracy, real 60s, ticker list)
 
 - [x] **Unlocked tickers list UI** — `chart.js` now subscribes to the store and shows NVDA button only after unlock. AAPL always visible. → DONE.
-- [ ] **`precise_session` real accuracy** — currently a server proxy (any winning trade). Real accuracy tracking from the client is queued.
-- [ ] **`hold_60s` real 60s** — currently 1 second MVP. Real session timer queued.
+- [x] **`precise_session` real accuracy** — highest valid aim-hit accuracy is server-recorded as `preciseBest`; memory and Supabase paths persist it. → DONE 2026-10-05.
+- [x] **`hold_60s` real 60s** — position must be open at least 60,000 ms. Dedicated real-time `npm run test:slow` recorded 60,020 ms. → DONE 2026-10-05.
+- [x] **Server ticker unlock gate** — locked ticker aim minting and paper-trade preview/order return `400 ticker_locked`; AAPL remains baseline; Pre-IPO orders remain `no_price`. → DONE 2026-10-05.
+- [x] **Leverage margin consistency** — preview, debit, and refund share `margin = size / leverage`. → DONE 2026-10-05.
 
 ## Stage 10 — Polish, release tag (DONE 2026-10-04)
 

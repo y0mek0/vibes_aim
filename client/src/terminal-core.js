@@ -47,7 +47,10 @@ export function computeOrder({ side, leverage, notional, entryPrice, balance } =
   const lev = clampLeverage(leverage);
   const size = clampNotional(notional, Number.POSITIVE_INFINITY);
   if (size <= 0) return { ok: false, error: 'bad_input' };
-  const margin = size; // simplified: margin = notional / leverage
+  // Margin = notional / leverage. With leverage 5x and notional 100,
+  // you commit 20 as margin and control 100 of position. This matches
+  // server/src/routes/portfolio.js which uses the same formula.
+  const margin = size / lev;
   const qty = size / entryPrice;
   const liq = computeLiquidationPrice(side, entryPrice, lev);
   const marginOk = balance == null ? true : (Number(balance) >= margin);

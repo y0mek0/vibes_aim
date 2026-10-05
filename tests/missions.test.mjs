@@ -153,7 +153,21 @@ async function integration() {
   const { createApp } = await import('../server/src/index.js');
   // AIM_HIT_RPS was raised at the top of this file so config.js picks
   // it up at import time.
-  const { listen } = createApp();
+  // A deterministic two-tick market makes the first_profit route test
+  // honest and non-flaky: the order enters AAPL at 100, then closes at
+  // 110. This avoids relying on the direction of the time-based stub.
+  let aaplQuoteCalls = 0;
+  const market = {
+    async getQuote(symbol) {
+      if (symbol !== 'AAPL') throw new Error(`unexpected test symbol: ${symbol}`);
+      const price = aaplQuoteCalls++ === 0 ? 100 : 110;
+      return { symbol, price, ts: Date.now(), currency: 'USD' };
+    },
+    async getCandles(symbol, range) { return { symbol, range, candles: [] }; },
+    async getStatus() { return { provider: 'test', status: 'test', lastTickTs: Date.now() }; },
+    async getSymbols() { return []; },
+  };
+  const { listen } = createApp({ market });
   const server = listen(0);
   await new Promise((r) => server.once('listening', r));
   const port = server.address().port;
@@ -212,19 +226,17 @@ async function integration() {
   assert.equal(claimAapl.status, 200);
   assert.equal(claimAapl.body.kind, 'earn_half_aapl');
   assert.equal(claimAapl.body.reward, 250);
-  assert.ok(claimAapl.body.stable > 1000);
+  assert.ok(claimAapl.body.stable > 200);
   ok('POST /missions/claim earn_half_aapl credits 250 Stable');
 
-  // 4. open + close a profitable trade. We wait 6s so the stub price
-  // drifts to a different tickKey -> the close is profitable ->
-  // first_profit mission completes. hold_60s is covered by a focused
-  // 60s test below; we do not wait 60s here.
+  // 4. The injected market enters at 100 and exits at 110, making this
+  // a deterministic profitable trade. hold_60s is covered by its focused
+  // 60s test; this test intentionally does not wait 60 seconds.
   const o = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
   });
   assert.equal(o.status, 200);
-  await new Promise((r) => setTimeout(r, 6100)); // wait 6s for price drift -> different tickKey -> close is profitable
   const c = await req({
     method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': playerId },
     body: { tradeId: o.body.trade.id },
@@ -242,22 +254,30 @@ async function integration() {
   }
   ok('3 missions claimed (first_10_hits, first_trade, first_profit)');
 
-  // 6. precise_session needs player.preciseBest >= 0.7. The 700 hits
-  //    we just sent had accuracy 0.9, so the server recorded
-  //    preciseBest = 0.9 -> mission is done.
+  // 6. precise_session needs player.preciseBest >= 0.7. Send a real
+  //    `/aim/hit` with session accuracy 0.9, which is what production
+  //    aim-bridge sends after tracking a session's hits/shots ratio.
+  const preciseHit = await req({
+    method: 'POST', path: '/aim/hit',
+    headers: { 'X-Player-Id': playerId, 'X-Session-Id': 'precise-session' },
+    body: { hitId: 'precise-1', ticker: 'AAPL', accuracy: 0.9, streak: 0, ts: Date.now() },
+  });
+  assert.equal(preciseHit.status, 200);
   const claim6 = await req({
     method: 'POST', path: '/missions/claim', headers: { 'X-Player-Id': playerId },
     body: { kind: 'precise_session' },
   });
   assert.equal(claim6.status, 200, `claim precise_session status ${claim6.status} body ${JSON.stringify(claim6.body)}`);
-  ok('6th mission (precise_session) claimed (real accuracy, >= 0.7)');
+  ok('precise_session claimed after a real accuracy >= 0.7 aim hit');
 
-  // 7. /portfolio should now include NVDA in unlocks
+  // 7. Fast suite deliberately does not wait 60 seconds for hold_60s,
+  // so only five of the six missions are claimed and NVDA must remain
+  // locked. The real hold threshold is covered by test:slow.
   const p = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });
   assert.equal(p.status, 200);
   const unlocks = (p.body.unlocks || []).map((u) => u.ticker);
-  assert.ok(unlocks.includes('NVDA'), `expected NVDA in unlocks, got ${JSON.stringify(unlocks)}`);
-  ok('all 6 missions claimed -> NVDA unlocked for the player');
+  assert.equal(unlocks.includes('NVDA'), false, `NVDA must remain locked before hold_60s, got ${JSON.stringify(unlocks)}`);
+  ok('NVDA remains locked until the real hold_60s mission is also claimed');
 
   // 8. /missions/claim already-claimed mission -> 400 already_claimed
   const dup = await req({

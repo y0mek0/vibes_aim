@@ -62,6 +62,15 @@ export function createSupabaseStore({ url, serviceKey }) {
 
   function eqFilter(col, val) { return `${col}=eq.${encodeURIComponent(val)}`; }
   function select(cols) { return cols ? `select=${encodeURIComponent(cols)}` : 'select=*'; }
+  function toPlayer(row) {
+    if (!row) return null;
+    return {
+      ...row,
+      stable: Number(row.stable),
+      // Backward-compatible for a row created before migration 0002.
+      preciseBest: Number.isFinite(Number(row.precise_best)) ? Number(row.precise_best) : 0,
+    };
+  }
 
   return {
     backend: 'supabase',
@@ -69,15 +78,15 @@ export function createSupabaseStore({ url, serviceKey }) {
     // ----- players -----
     async getOrCreatePlayer(playerId) {
       const rows = await rpc(TABLE.players, `?${eqFilter('id', playerId)}&limit=1`);
-      if (rows && rows[0]) return rows[0];
+      if (rows && rows[0]) return toPlayer(rows[0]);
       const now = new Date().toISOString();
-      const body = [{ id: playerId, stable: 1000, created_at: now, updated_at: now }];
+      const body = [{ id: playerId, stable: 200, precise_best: 0, created_at: now, updated_at: now }];
       const inserted = await rpc(TABLE.players, `?${select()}`, { method: 'POST', body });
-      return inserted && inserted[0];
+      return toPlayer(inserted && inserted[0]);
     },
     async getPlayer(playerId) {
       const rows = await rpc(TABLE.players, `?${eqFilter('id', playerId)}&limit=1`);
-      return rows && rows[0] ? rows[0] : null;
+      return rows && rows[0] ? toPlayer(rows[0]) : null;
     },
     async addStable(playerId, amount) {
       const cur = await this.getOrCreatePlayer(playerId);
@@ -87,7 +96,20 @@ export function createSupabaseStore({ url, serviceKey }) {
         `?${eqFilter('id', playerId)}`,
         { method: 'PATCH', body: { stable: next, updated_at: now },
           headers: { 'Prefer': 'return=representation' } });
-      return rows && rows[0] ? rows[0] : { ...cur, stable: next, updated_at: now };
+      return rows && rows[0] ? toPlayer(rows[0]) : { ...cur, stable: next, updated_at: now };
+    },
+    async recordAccuracy(playerId, accuracy) {
+      const cur = await this.getOrCreatePlayer(playerId);
+      const next = Number(accuracy);
+      if (!Number.isFinite(next) || next < 0 || next <= cur.preciseBest) return cur;
+      const now = new Date().toISOString();
+      const rows = await rpc(TABLE.players,
+        `?${eqFilter('id', playerId)}`,
+        { method: 'PATCH', body: { precise_best: round6(next), updated_at: now },
+          headers: { 'Prefer': 'return=representation' } });
+      return rows && rows[0]
+        ? toPlayer(rows[0])
+        : { ...cur, preciseBest: round6(next), updated_at: now };
     },
 
     // ----- balances -----

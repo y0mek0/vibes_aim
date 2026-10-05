@@ -3,7 +3,8 @@
 
 create table if not exists players (
   id text primary key,
-  stable numeric(18, 6) not null default 1000,
+  stable numeric(18, 6) not null default 200,
+  precise_best numeric(8, 6) not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
