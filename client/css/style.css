@@ -1510,6 +1510,10 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .app-shell > #vibes-terminal .vt-convert-quote { display: flex; justify-content: space-between; gap: 12px; margin: 14px 0; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--dash-muted); font: 10px var(--font-mono); }
 #menu .app-shell > #vibes-terminal .vt-convert-quote b,
 #menu .app-shell > #vibes-terminal .vt-convert-quote strong { color: var(--fg); font-weight: 600; }
+#menu .app-shell > #vibes-terminal .vt-spot-toggle { margin-top: 12px; }
+#menu .app-shell > #vibes-terminal .vt-spot-toggle button { min-height: 31px; border: 0; background: var(--bg-3); color: var(--dash-muted); font: 11px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+#menu .app-shell > #vibes-terminal .vt-spot-toggle button:hover,
+#menu .app-shell > #vibes-terminal .vt-spot-toggle button.active { background: rgba(246, 212, 71, .12); color: var(--yellow); }
 #menu .app-shell > #vibes-terminal .vt-convert-actions { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
 #menu .app-shell > #vibes-terminal .vt-convert-actions .vt-status { min-height: 0; font-size: 10px; }
 @media (max-width: 760px) {

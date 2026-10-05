@@ -87,6 +87,11 @@ function createStore() {
     await refresh();
     return r;
   }
+  async function tradeSpot({ ticker, side, units }) {
+    const r = await api.post('/portfolio/spot', { ticker, side, units });
+    await refresh();
+    return r;
+  }
   async function claimMission(kind) {
     const r = await api.post('/missions/claim', { kind });
     await refresh();
@@ -128,6 +133,7 @@ function createStore() {
     openOrder,
     closeOrder,
     convertAsset,
+    tradeSpot,
     claimMission,
     fetchQuote,
     fetchCandles,

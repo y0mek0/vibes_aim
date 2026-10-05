@@ -256,7 +256,42 @@ async function integration() {
   assert.ok(convertAfter.body.player.stable > convertBefore.body.player.stable);
   ok('POST /portfolio/convert sells earned AAPL units into USD without opening a position');
 
-  // 3. /portfolio/preview: long 5x AAPL
+  // 3. direct spot BUY then SELL: USD and AAPL balances move, while no
+  // leveraged trade is created or touched.
+  const spotPlayer = 'term-spot-player';
+  const spotBefore = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': spotPlayer } });
+  const spotBuy = await req({
+    method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': spotPlayer },
+    body: { ticker: 'AAPL', side: 'buy', units: 0.01 },
+  });
+  assert.equal(spotBuy.status, 200);
+  assert.equal(spotBuy.body.market, 'spot');
+  assert.equal(spotBuy.body.side, 'buy');
+  assert.equal(spotBuy.body.balance, 0.01);
+  assert.ok(spotBuy.body.player.stable < spotBefore.body.player.stable);
+  const spotAfterBuy = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': spotPlayer } });
+  assert.equal(spotAfterBuy.body.trades.length, 0);
+  assert.equal(spotAfterBuy.body.balances.AAPL, 0.01);
+  const spotSell = await req({
+    method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': spotPlayer },
+    body: { ticker: 'AAPL', side: 'sell', units: 0.01 },
+  });
+  assert.equal(spotSell.status, 200);
+  assert.equal(spotSell.body.side, 'sell');
+  assert.equal(spotSell.body.balance, 0);
+  const spotAfterSell = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': spotPlayer } });
+  assert.equal(spotAfterSell.body.trades.length, 0);
+  assert.equal(spotAfterSell.body.balances.AAPL, 0);
+  assert.equal(spotAfterSell.body.player.stable, spotBefore.body.player.stable);
+  const spotBadSell = await req({
+    method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': spotPlayer },
+    body: { ticker: 'AAPL', side: 'sell', units: 0.01 },
+  });
+  assert.equal(spotBadSell.status, 400);
+  assert.equal(spotBadSell.body.error, 'insufficient_asset');
+  ok('POST /portfolio/spot BUY/SELL moves USD and AAPL without leveraged trades');
+
+  // 4. /portfolio/preview: long 5x AAPL
   const prev = await req({
     method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 500 },

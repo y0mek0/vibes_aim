@@ -25,6 +25,8 @@ const SELECTORS = {
   convertUsd:    '[data-vt-convert-usd]',
   convertStatus: '[data-vt-convert-status]',
   convertSubmit: '[data-vt-convert-submit]',
+  spotSide:      '[data-vt-spot-side]',
+  spotQuoteLabel:'[data-vt-spot-quote-label]',
   positionsBody: '[data-vt-positions-body]',
   historyBody:   '[data-vt-history-body]',
   marketTicker:  '[data-vt-market-ticker]',
@@ -69,6 +71,7 @@ export function mountTerminal({ root, onClose } = {}) {
     confirming: false,
     lastPreview: null,
     assetPrices: {},
+    spotSide: 'buy',
   };
 
   function fmtMoney(n) { return Number.isFinite(n) ? round2(n).toFixed(2) : '—'; }
@@ -117,7 +120,8 @@ export function mountTerminal({ root, onClose } = {}) {
   function renderConvert() {
     if (!els.convertTicker || !els.convertUnits) return;
     const balances = store.state.balances || {};
-    const tickers = Object.keys(balances).filter((ticker) => ticker !== 'STABLE' && ticker !== 'USD').sort();
+    const tickers = [...new Set(['AAPL', state.ticker, ...Object.keys(balances), ...(store.state.unlocks || [])])]
+      .filter((ticker) => ticker && ticker !== 'STABLE' && ticker !== 'USD').sort();
     const previous = els.convertTicker.value;
     els.convertTicker.innerHTML = tickers.map((ticker) => `<option value="${ticker}">${ticker}</option>`).join('');
     if (!tickers.length) {
@@ -126,7 +130,7 @@ export function mountTerminal({ root, onClose } = {}) {
       if (els.convertSubmit) els.convertSubmit.disabled = true;
       setText(els.convertPrice, '—');
       setText(els.convertUsd, '—');
-      setText(els.convertStatus, 'Earn AAPL in Train first.');
+      setText(els.convertStatus, 'No spot assets available.');
       return;
     }
     const ticker = tickers.includes(previous) ? previous : tickers[0];
@@ -134,13 +138,20 @@ export function mountTerminal({ root, onClose } = {}) {
     els.convertTicker.disabled = false;
     els.convertUnits.disabled = false;
     const available = Number(balances[ticker] || 0);
+    const usdAvailable = Number(store.state.player?.stable || 0);
     const units = Number(els.convertUnits.value || 0);
     const price = Number(state.assetPrices[ticker]);
     const usd = Number.isFinite(price) && price > 0 && Number.isFinite(units) ? units * price : NaN;
     setText(els.convertPrice, Number.isFinite(price) ? fmtMoney(price) : '—');
     setText(els.convertUsd, Number.isFinite(usd) ? fmtMoney(usd) : '—');
-    const valid = units > 0 && units <= available + 1e-9 && Number.isFinite(price) && price > 0;
-    setText(els.convertStatus, valid ? `Available ${formatUnits(available)} ${ticker}` : `Available ${formatUnits(available)} ${ticker}`);
+    const buy = state.spotSide === 'buy';
+    const valid = units > 0 && Number.isFinite(price) && price > 0
+      && (buy ? usd <= usdAvailable + 1e-9 : units <= available + 1e-9);
+    setText(els.convertStatus, buy
+      ? `USD available ${fmtMoney(usdAvailable)} · ${ticker} ${formatUnits(available)}`
+      : `${ticker} available ${formatUnits(available)} · USD ${fmtMoney(usdAvailable)}`);
+    setText(els.spotQuoteLabel, buy ? 'Total ' : 'Receive ');
+    if (els.convertSubmit) els.convertSubmit.textContent = `${buy ? 'Buy' : 'Sell'} ${ticker}`;
     if (els.convertSubmit) els.convertSubmit.disabled = !valid;
   }
 
@@ -156,16 +167,17 @@ export function mountTerminal({ root, onClose } = {}) {
     renderConvert();
   }
 
-  async function convertAsset() {
+  async function spotTrade() {
     const ticker = els.convertTicker?.value;
     const units = Number(els.convertUnits?.value);
     if (!ticker || !Number.isFinite(units) || units <= 0) return;
     if (els.convertSubmit) els.convertSubmit.disabled = true;
-    setText(els.convertStatus, 'Selling…');
+    const side = state.spotSide;
+    setText(els.convertStatus, side === 'buy' ? 'Buying…' : 'Selling…');
     try {
-      const r = await store.convertAsset({ ticker, units });
-      setText(els.convertStatus, `Sold ${formatUnits(r.units)} ${ticker} for ${fmtMoney(r.usd)} USD.`);
-      els.convertUnits.value = '0';
+      const r = await store.tradeSpot({ ticker, side, units });
+      setText(els.convertStatus, `${side === 'buy' ? 'Bought' : 'Sold'} ${formatUnits(r.units)} ${ticker} for ${fmtMoney(r.usd)} USD.`);
+      els.convertUnits.value = '0.01';
       refreshAll();
     } catch (e) {
       setText(els.convertStatus, 'Error: ' + (e && e.message ? e.message : e));
@@ -412,11 +424,18 @@ export function mountTerminal({ root, onClose } = {}) {
   if (els.convertTicker) {
     els.convertTicker.addEventListener('change', refreshConvertQuote);
   }
+  panel.querySelectorAll(SELECTORS.spotSide).forEach((button) => {
+    button.addEventListener('click', () => {
+      state.spotSide = button.dataset.vtSpotSide;
+      panel.querySelectorAll(SELECTORS.spotSide).forEach((b) => b.classList.toggle('active', b === button));
+      renderConvert();
+    });
+  });
   if (els.convertUnits) {
     els.convertUnits.addEventListener('input', renderConvert);
   }
   if (els.convertSubmit) {
-    els.convertSubmit.addEventListener('click', convertAsset);
+    els.convertSubmit.addEventListener('click', spotTrade);
   }
   if (els.otConfirmChk) {
     els.otConfirmChk.addEventListener('change', renderPreview);
