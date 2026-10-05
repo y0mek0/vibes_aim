@@ -8,11 +8,11 @@ This is the `mvp-v0.1` release. It is a fully playable single-player loop on top
 
 ## What it is
 
-- **Aim loop**: Gridshot / Flick modes on top of a ported valotrainer engine. Each hit emits a `vibes:hit` event; a tiny client bridge POSTs it to the server; the server mints a simulated unit of the active ticker (default AAPL).
-- **Chart widget**: top-right corner. TradingView Lightweight Charts via importmap (no `npm install`). 1D / 5D ranges, AAPL / NVDA tickers, polled every 1s, stale label after 5s. Tickers shown are the ones the player has actually unlocked.
-- **Trading terminal**: full-height panel. Holdings, open positions, history, order ticket with leverage slider up to 20x, long/short, liquidation preview before confirmation.
-- **Missions panel**: 6 missions on the AAPL chain. When all 6 are claimed, NVDA unlocks and the active ticker switches on next hit. `hold_60s` and `precise_session` are MVP shortcuts (1s, any winning trade) — real versions queued.
-- **Guest mode**: works without login. Progress is in localStorage only. Real progress is in Supabase when the env is configured.
+- **Aim loop**: Gridshot / Flick modes on a ported valotrainer engine. Each hit emits a `vibes:hit` event; a client bridge POSTs it to the server; the server mints simulated units of the active ticker. AAPL is available from the start; NVDA unlocks only after the full mission chain.
+- **Chart widget**: top-right corner. 1D / 5D ranges, AAPL / NVDA tickers, polling every second, and a stale label after 5 seconds. The default offline provider is visibly simulated; an optional configured provider supplies live quotes.
+- **Trading terminal**: full-height panel with holdings, open positions, history, long/short orders, leverage from 1× to 20×, and a liquidation preview. `notional` is position exposure; reserved collateral is `notional / leverage`. New orders are blocked with `409 market_closed` when a live provider reports a closed US session; closing an existing position remains available.
+- **Missions panel**: 6 AAPL-chain missions. `hold_60s` requires a real closed long held for at least 60,000 ms; `precise_session` requires recorded aim accuracy of at least 70%. Claim all six to unlock NVDA.
+- **Progress**: a new player starts with 200 Stable. The client keeps a local guest snapshot; the default server store is in-memory for the running process. Configure Supabase to persist server-side progress across restarts.
 
 ![terminal](docs/screenshots/02-terminal.png)
 
@@ -37,16 +37,14 @@ The client reads the API base from `window.VIBES_API_BASE` or falls back to `htt
 ## Run the tests
 
 ```bash
+# Fast suite: 16 no-install Node/browser suites
 npm test
+
+# Separate real-time mission proof: waits at least 60 seconds
+npm run test:slow
 ```
 
-Sixteen suites, no `npm install` required:
-
-- Engine: `ballistics`, `gunplay`, `crosshair`, `stalker`, `themes`, `css`, `imports`.
-- Server: `server`, `finnhub`, `supabase`, `dom`.
-- Client: `client-bridge`, `chart`, `terminal`, `missions`, `visual`.
-
-`visual` is a headless-Chrome smoke. It requires Python + Playwright + Chromium; if any is missing, the test is **skipped** and `npm test` stays green. See [docs/visual/README.md](docs/visual/README.md).
+`npm test` needs no `npm install`. Its visual smoke uses Python + Playwright + Chromium when available; otherwise that one browser suite reports a skip while the Node suites still run. When available, it asserts the interactive UI plus zero browser console, request, API, and static-host errors.
 
 ## Architecture
 
@@ -72,7 +70,8 @@ client/                          server/                       tests/
 │   ├── upstream.css (valotrn)   │       ├── portfolio.js
 │   └── style.css (vibes)        │       ├── missions.js
 └──                              └── migrations/
-                                     └── 0001_init.sql (Supabase)
+                                     ├── 0001_init.sql (Supabase schema)
+                                     └── 0002_add_precise_best.sql (existing-player upgrade)
 ```
 
 The aim engine is `valotrainer @ ded498f5` (MIT) — modes, weapons, ballistics, crosshair editor, sensitivity sync, the works. We added one line to its `markHit` to emit `vibes:hit` on `window`; everything else is the upstream engine.
@@ -123,7 +122,7 @@ The server is a single Node process. It reads `PORT` (default 3000). For a real 
 
 - **Render free tier**: `node server/src/index.js` as the start command, `PORT` is set by Render, `ORIGIN` should match the static client's URL.
 - **Vercel** can host the `client/` as a static site. The server can run on Vercel as a Serverless Function with the `api/` shim, but the no-dep policy means writing that shim is on you.
-- **Supabase** is the recommended persistence backend. Run `server/migrations/0001_init.sql` in the Supabase SQL editor, set `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`, and the store automatically switches to Supabase. Otherwise the in-memory store keeps everything in a `Map` for the lifetime of the process.
+- **Supabase** is the optional persistence backend. Run `server/migrations/0001_init.sql`, then `server/migrations/0002_add_precise_best.sql`, set `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`, and the store automatically switches to Supabase. Without it, the in-memory store lasts only for the Node process lifetime.
 
 See `server/.env.example` for the full env-var list.
 

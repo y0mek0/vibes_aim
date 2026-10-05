@@ -52,6 +52,20 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.7 — README truth pass (DONE 2026-10-05)
+
+**Verified evidence:** README stale-claim scan found zero removed mission shortcuts/1000-Stable references; checked screenshots and migration paths exist; fresh `npm test` exited 0, including strict visual smoke.
+
+**Scope:** align public README claims with shipped game behavior: real mission requirements, 200 Stable start, server-side progression and margin rules, live-market session gate, slow-test command, and Supabase migration sequence.
+
+**Acceptance criteria:**
+
+- No README claim describes a removed 1-second/any-profit mission shortcut or a 1000 Stable default.
+- Trading, unlock, persistence, market-session, and test descriptions match the current code and tests.
+- README links/assets remain valid and the unchanged code test suite stays green.
+
+**Out of scope:** new gameplay, market-provider credentials, deployment configuration, and UI redesign.
+
 ### Stage 11.6 — visual smoke clean-console investigation (DONE 2026-10-05)
 
 **Verified evidence:** direct `python tests/visual_smoke.py`, strict `node tests/visual.test.mjs`, and full `npm test` all exited 0 with empty console/page/request/API/static-host error arrays.

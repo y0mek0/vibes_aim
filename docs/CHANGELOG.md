@@ -406,3 +406,14 @@
 - Direct `python tests/visual_smoke.py` → all error arrays empty.
 - Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
 - Full `npm test` → exit 0 / `ALL PASS`.
+
+## Stage 11.7 — README truth pass (2026-10-05)
+
+- Rewrote stale game documentation to state the real 60-second hold mission, 70% recorded-accuracy mission, 200 Stable start, AAPL→NVDA progression, exposure-versus-collateral margin semantics, and live-provider session gate.
+- Documented the separate `npm run test:slow` proof, strict visual-smoke checks, the actual in-memory versus Supabase persistence boundary, and ordered Supabase migrations `0001` then `0002`.
+
+### Evidence
+
+- README stale-claim scan → zero obsolete mission/1000-Stable references.
+- Checked all README screenshot and migration paths exist.
+- Fresh `npm test` → exit 0 / `ALL PASS`, including clean strict visual smoke.
