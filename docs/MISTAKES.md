@@ -90,3 +90,7 @@
 ## Stage 11.6 — Browser errors were being tolerated instead of identified (2026-10-05)
 
 - The visual wrapper emitted generic 404 warnings but still passed because it had no URL-level console diagnostics and treated console errors as non-fatal. The first direct trace found missing `favicon.ico`; after that fix, static-host instrumentation exposed `GET /sw.js` from a stale `main.js` service-worker registration. Fix: make console/network/static 4xx evidence strict, add an actual SVG favicon, and remove the registration for the intentionally absent PWA worker. Lesson: never whitelist or downgrade a generic browser 404; record its requested path at the server boundary until the source is known.
+
+## Stage 11.8 — Background terminal result was not test evidence (2026-10-05)
+
+- A background `node tests/visual.test.mjs` process exited with only `bash: no job control in this shell` and `stdin is not a tty`; it produced no test assertion output. It was treated as a launcher/PTY failure, not a passing or failing UI result. A single foreground visual run then completed with `ALL PASS`; use that output as evidence and do not rerun blindly after infrastructure-only background failures.

@@ -52,6 +52,20 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.8 — ticker UI guard and active HUD cue (DONE 2026-10-05)
+
+**Verified evidence:** `node tests/client-bridge.test.mjs`, strict `node tests/visual.test.mjs`, and fresh full `npm test` exited 0. The rendered HUD states `ACTIVE AAPL` with `aria-label="Active farm ticker: AAPL"`; browser smoke found zero pre-IPO chart/terminal controls and no browser/network errors.
+
+**Scope:** document and regress-prove that pre-IPO tickers are not selectable in the chart/terminal UI; make the existing aim HUD's current ticker explicit and accessible.
+
+**Acceptance criteria:**
+
+- Browser smoke proves `OPENAI` and `ANTHROPIC` have no selectable ticker control at boot.
+- HUD visibly and accessibly names the active AAPL farm ticker, and its label follows a ticker switch.
+- Existing unlock behavior (AAPL shown; NVDA hidden until unlocked) and browser-clean checks remain green.
+
+**Out of scope:** adding pre-IPO instruments, changing unlock policy, redesigning chart/terminal layouts, or provider changes.
+
 ### Stage 11.7 — README truth pass (DONE 2026-10-05)
 
 **Verified evidence:** README stale-claim scan found zero removed mission shortcuts/1000-Stable references; checked screenshots and migration paths exist; fresh `npm test` exited 0, including strict visual smoke.

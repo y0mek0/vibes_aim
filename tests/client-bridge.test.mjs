@@ -8,6 +8,7 @@
 import http from 'node:http';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/src/index.js';
+import { activeTickerLabel, getActiveTicker, setActiveTicker } from '../client/js/aim-bridge.js';
 
 let fails = 0;
 const ok  = (m) => console.log(`ok   ${m}`);
@@ -35,6 +36,16 @@ function req({ port, method, path, headers = {}, body }) {
 }
 
 async function main() {
+  // The HUD must name the selected farm ticker, and this state transition
+  // is safe to evaluate in non-browser tests (no localStorage required).
+  assert.equal(getActiveTicker(), 'AAPL');
+  assert.equal(activeTickerLabel(getActiveTicker()), 'Active farm ticker: AAPL');
+  setActiveTicker('NVDA');
+  assert.equal(getActiveTicker(), 'NVDA');
+  assert.equal(activeTickerLabel(getActiveTicker()), 'Active farm ticker: NVDA');
+  setActiveTicker('AAPL');
+  ok('active ticker HUD label follows AAPL → NVDA → AAPL');
+
   const { listen } = createApp();
   const server = listen(0);
   await new Promise((r) => server.once('listening', r));

@@ -200,6 +200,10 @@ def main():
             summary["dom"]["chart_price_at_boot"] = page.eval_on_selector('[data-vc-price]', 'el => el.textContent')
             summary["dom"]["chart_nvda_button_visible"] = page.eval_on_selector('[data-vc-ticker-btn="NVDA"]', 'el => !el.hidden')
             summary["dom"]["chart_aapl_button_visible"] = page.eval_on_selector('[data-vc-ticker-btn="AAPL"]', 'el => !el.hidden')
+            summary["dom"]["pre_ipo_control_count"] = page.eval_on_selector_all(
+                '[data-vc-ticker-btn="OPENAI"], [data-vc-ticker-btn="ANTHROPIC"], [data-vt-ot-ticker] option[value="OPENAI"], [data-vt-ot-ticker] option[value="ANTHROPIC"]',
+                'els => els.length',
+            )
             out4 = os.path.join(SCREENSHOTS_DIR, "04-chart-nvda.png")
             page.screenshot(path=out4)
             summary["screenshots"].append(out4)
@@ -211,6 +215,8 @@ def main():
             summary["dom"]["initial_menu_open"] = True
             summary["dom"]["initial_chart_visible"] = True
             summary["dom"]["initial_bridge_present"] = True
+            summary["dom"]["initial_bridge_text"] = page.eval_on_selector('#vibes-aim-bridge', 'el => el.textContent.trim()')
+            summary["dom"]["initial_bridge_aria_label"] = page.eval_on_selector('#vibes-aim-bridge', 'el => el.getAttribute("aria-label")')
             summary["dom"]["initial_ticker"] = "AAPL"
 
             browser.close()

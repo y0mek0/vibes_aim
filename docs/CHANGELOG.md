@@ -417,3 +417,14 @@
 - README stale-claim scan → zero obsolete mission/1000-Stable references.
 - Checked all README screenshot and migration paths exist.
 - Fresh `npm test` → exit 0 / `ALL PASS`, including clean strict visual smoke.
+
+## Stage 11.8 — Ticker UI guard and active HUD cue (2026-10-05)
+
+- Confirmed pre-IPO symbols are data-only: neither `OPENAI` nor `ANTHROPIC` is rendered as a chart button or terminal option. The browser smoke now fails if either gains a selectable control.
+- Changed the floating aim HUD from ambiguous `FARM AAPL` to explicit `ACTIVE AAPL`, with an accessible `Active farm ticker: <symbol>` label. The bridge test proves the label contract follows AAPL → NVDA → AAPL.
+
+### Evidence
+
+- `node tests/client-bridge.test.mjs` → exit 0.
+- Strict `node tests/visual.test.mjs` → exit 0; confirms HUD copy/aria label, zero pre-IPO controls, and zero browser errors.
+- Fresh full `npm test` → exit 0 / `ALL PASS`.

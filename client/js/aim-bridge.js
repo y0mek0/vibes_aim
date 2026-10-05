@@ -12,17 +12,26 @@ import { getSessionId } from '../src/session.js';
 const ACTIVE_TICKER_KEY = 'vibes_aim.activeTicker.v1';
 const DEFAULT_TICKER = 'AAPL';
 
+function readStoredTicker() {
+  try { return localStorage.getItem(ACTIVE_TICKER_KEY); } catch { return null; }
+}
+
+export function activeTickerLabel(ticker) {
+  return `Active farm ticker: ${ticker}`;
+}
+
 let counter = 0;
 let inFlight = new Set();
 let chipEl = null;
 let tickerEl = null;
-let activeTicker = localStorage.getItem(ACTIVE_TICKER_KEY) || DEFAULT_TICKER;
+let activeTicker = readStoredTicker() || DEFAULT_TICKER;
 
 export function getActiveTicker() { return activeTicker; }
 export function setActiveTicker(t) {
   activeTicker = t;
   try { localStorage.setItem(ACTIVE_TICKER_KEY, t); } catch { /* ignore */ }
   if (tickerEl) tickerEl.textContent = t;
+  if (chipEl) chipEl.wrap.setAttribute('aria-label', activeTickerLabel(t));
 }
 
 function ensureChip() {
@@ -32,6 +41,7 @@ function ensureChip() {
   const wrap = document.createElement('div');
   wrap.id = 'vibes-aim-bridge';
   wrap.setAttribute('data-bridge', '1');
+  wrap.setAttribute('aria-label', activeTickerLabel(activeTicker));
   wrap.style.cssText = [
     'position:fixed', 'right:14px', 'bottom:14px', 'z-index:30',
     'font-family:JetBrains Mono,ui-monospace,monospace',
@@ -42,7 +52,7 @@ function ensureChip() {
   ].join(';');
   const tag = document.createElement('span');
   tag.style.cssText = 'color:#8a91a0;font-size:10px;letter-spacing:0.18em;text-transform:uppercase';
-  tag.textContent = 'farm';
+  tag.textContent = 'active';
   tickerEl = document.createElement('span');
   tickerEl.style.cssText = 'color:#7df9c5;font-size:12px;letter-spacing:0.18em';
   tickerEl.textContent = activeTicker;

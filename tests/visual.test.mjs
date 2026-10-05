@@ -73,6 +73,9 @@ assert.equal(summary.dom.initial_chart_visible, true, 'chart panel should be vis
 ok('chart panel is visible on boot');
 assert.equal(summary.dom.initial_bridge_present, true, 'aim-bridge HUD chip should be present');
 ok('aim-bridge HUD chip is present');
+assert.match(summary.dom.initial_bridge_text, /active\s*AAPL/i, 'HUD should visibly identify the active AAPL ticker');
+assert.equal(summary.dom.initial_bridge_aria_label, 'Active farm ticker: AAPL', 'HUD needs an accessible active-ticker label');
+ok('aim-bridge HUD visibly and accessibly names active AAPL');
 assert.equal(summary.dom.initial_ticker, 'AAPL', 'default ticker should be AAPL');
 ok('default ticker is AAPL');
 assert.equal(summary.dom.terminal_stable, '200.00', 'fresh player has 200 Stable');
@@ -88,6 +91,8 @@ assert.equal(summary.dom.chart_aapl_button_visible, true, 'AAPL ticker button vi
 ok('AAPL ticker button is visible at boot');
 assert.equal(summary.dom.chart_nvda_button_visible, false, 'NVDA ticker button hidden at boot');
 ok('NVDA ticker button is hidden at boot (unlocks empty)');
+assert.equal(summary.dom.pre_ipo_control_count, 0, 'pre-IPO tickers must not have chart or terminal controls');
+ok('pre-IPO tickers have no selectable chart or terminal control');
 if (/^[0-9]+\./.test(summary.dom.chart_price_at_boot)) {
   ok(`chart shows AAPL price at boot: ${summary.dom.chart_price_at_boot}`);
 } else {

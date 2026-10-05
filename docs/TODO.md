@@ -120,6 +120,7 @@
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
 - [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [x] Honest README update — documents real mission timing/accuracy, 200 Stable, unlock and collateral rules, live-market session gate, persistence boundaries, and slow proof command. → DONE 2026-10-05.
+- [x] Ticker UI guard + active HUD cue — pre-IPO symbols have no chart/terminal controls; HUD visibly/accessibly identifies the active ticker. → DONE 2026-10-05.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
@@ -144,6 +145,7 @@
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
 - [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [x] Honest README update — documents real mission timing/accuracy, 200 Stable, unlock and collateral rules, live-market session gate, persistence boundaries, and slow proof command. → DONE 2026-10-05.
+- [x] Ticker UI guard + active HUD cue — pre-IPO symbols have no chart/terminal controls; HUD visibly/accessibly identifies the active ticker. → DONE 2026-10-05.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
