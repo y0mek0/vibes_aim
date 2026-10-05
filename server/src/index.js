@@ -3,7 +3,8 @@
 // call dispatch() in-process.
 
 import http from 'node:http';
-import { URL } from 'node:url';
+import { URL, fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { config } from './config.js';
 import { createMarketProvider } from './market/index.js';
 import { pickStore } from './db/supabase.js';
@@ -55,8 +56,11 @@ export function createApp(deps = {}) {
 // Re-export the HttpError so route handlers can throw it.
 export { HttpError };
 
-// Run when invoked directly.
-const isMain = import.meta.url === `file:///${process.argv[1]?.replace(/\\/g, '/')}`;
+// Run when invoked directly. `process.argv[1]` may be relative (`src/index.js`
+// in the Docker CMD) or absolute, so compare normalized filesystem paths rather
+// than constructing a file URL by hand.
+const isMain = Boolean(process.argv[1])
+  && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const { listen } = createApp();
   listen();
