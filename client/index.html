@@ -26,71 +26,47 @@
 <!-- vibes_aim: trading terminal. A separate full-height panel; open
      via a tab, close via the panel's own button. Hidden by default. -->
 <div id="vibes-terminal" hidden>
-  <div class="vt-head">
-    <span class="vt-kicker">// terminal</span>
-    <span class="vt-balance-line">Stable <span class="num" data-vt-balance>—</span></span>
-    <span class="vt-portfolio-line">Holdings <span class="num" data-vt-portfolio-value>—</span> · Open P/L <span class="num" data-vt-open-pnl>—</span> · Total <span class="num" data-vt-portfolio-total>—</span></span>
+  <header class="vt-head">
+    <button type="button" class="vt-brand" data-vt-home aria-label="Back to dashboard"><span>MARKET</span><b>//AIM</b></button>
+    <div class="vt-title"><span class="vt-kicker">// market</span><strong>Paper terminal</strong></div>
+    <div class="vt-summary"><span>Stable <b class="num" data-vt-balance>—</b></span><span>Portfolio <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div>
     <button type="button" class="vt-close-btn" data-vt-cancel>Close</button>
-  </div>
+  </header>
 
   <div class="vt-body">
-    <section class="vt-section vt-holdings">
-      <h3>Holdings</h3>
-      <table class="vt-table">
-        <thead><tr><th>Ticker</th><th>Qty</th></tr></thead>
-        <tbody data-vt-holdings></tbody>
-      </table>
-    </section>
+    <aside class="vt-watchlist">
+      <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
+      <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">—</strong></button>
+      <button type="button" class="vt-watch" data-vt-watch="NVDA" hidden><span><b>NVDA</b><small>NVIDIA Corp.</small></span><strong data-vt-watch-price="NVDA">—</strong></button>
+      <div class="vt-watch-note">Prices and candles come from the existing market feed.</div>
+    </aside>
 
-    <section class="vt-section vt-order">
-      <h3>Order ticket</h3>
-      <div class="vt-row">
-        <label>Ticker</label>
-        <select data-vt-ot-ticker>
-          <option value="AAPL">AAPL</option>
-          <option value="NVDA">NVDA</option>
-        </select>
-        <label>Side</label>
-        <select data-vt-ot-side>
-          <option value="long">long</option>
-          <option value="short">short</option>
-        </select>
-      </div>
-      <div class="vt-row">
-        <label>Notional</label>
-        <input type="number" min="10" step="10" value="100" data-vt-ot-notional>
-        <label>Leverage</label>
-        <input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage>
-        <span class="num" data-vt-ot-leverage-num>1x</span>
-      </div>
-      <div class="vt-row vt-readout">
-        <span>Entry <span class="num" data-vt-ot-entry>—</span></span>
-        <span>Margin <span class="num" data-vt-ot-margin>—</span></span>
-        <span>Notional <span class="num" data-vt-ot-notional-total>—</span></span>
-        <span class="neg">Liquidation <span class="num" data-vt-ot-liq>—</span></span>
-      </div>
-      <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
-      <div class="vt-confirm">
-        <label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label>
-        <button type="button" class="vt-btn vt-btn-primary" data-vt-ot-submit disabled>Open position</button>
-      </div>
-    </section>
+    <main class="vt-market-center">
+      <section class="vt-chart-shell">
+        <div class="vt-chart-head"><div><span class="vt-kicker">// active market</span><h1><span data-vt-market-ticker>AAPL</span> <em data-vt-market-price>—</em></h1></div><span class="vt-market-state">PAPER MARKET</span></div>
+        <div class="vt-chart-slot" data-vt-chart-slot></div>
+      </section>
+      <section class="vt-section vt-holdings">
+        <div class="vt-section-head"><span>Holdings</span><small>Farmed assets</small></div>
+        <table class="vt-table"><thead><tr><th>Ticker</th><th>Units</th></tr></thead><tbody data-vt-holdings></tbody></table>
+      </section>
+      <section class="vt-section vt-positions">
+        <div class="vt-section-head"><span>Open positions</span><small>Manage risk</small></div>
+        <table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Liq</th><th></th></tr></thead><tbody data-vt-positions-body></tbody></table>
+      </section>
+    </main>
 
-    <section class="vt-section vt-positions">
-      <h3>Open positions</h3>
-      <table class="vt-table">
-        <thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Liq</th><th></th></tr></thead>
-        <tbody data-vt-positions-body></tbody>
-      </table>
-    </section>
-
-    <section class="vt-section vt-history">
-      <h3>Trade history</h3>
-      <table class="vt-table">
-        <thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Status</th></tr></thead>
-        <tbody data-vt-history-body></tbody>
-      </table>
-    </section>
+    <aside class="vt-market-right">
+      <section class="vt-section vt-order">
+        <div class="vt-section-head"><span>Order ticket</span><small>Paper trade</small></div>
+        <div class="vt-row"><label>Ticker</label><select data-vt-ot-ticker><option value="AAPL">AAPL</option><option value="NVDA">NVDA</option></select><label>Side</label><select data-vt-ot-side><option value="long">long</option><option value="short">short</option></select></div>
+        <div class="vt-row"><label>Notional</label><input type="number" min="10" step="10" value="100" data-vt-ot-notional><label>Leverage</label><input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage><span class="num" data-vt-ot-leverage-num>1x</span></div>
+        <div class="vt-row vt-readout"><span>Entry <span class="num" data-vt-ot-entry>—</span></span><span>Margin <span class="num" data-vt-ot-margin>—</span></span><span>Notional <span class="num" data-vt-ot-notional-total>—</span></span><span class="neg">Liquidation <span class="num" data-vt-ot-liq>—</span></span></div>
+        <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
+        <div class="vt-confirm"><label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label><button type="button" class="vt-btn vt-btn-primary" data-vt-ot-submit disabled>Open position</button></div>
+      </section>
+      <section class="vt-section vt-history"><div class="vt-section-head"><span>Trade history</span><small>Last 20</small></div><table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Status</th></tr></thead><tbody data-vt-history-body></tbody></table></section>
+    </aside>
   </div>
 </div>
 
@@ -98,30 +74,19 @@
      has a Missions button that shows it. The unlock card inside
      appears once all 6 missions are claimed. -->
 <div id="vibes-missions" hidden>
-  <div class="vm-head">
-    <span class="vm-kicker">// missions</span>
-    <span class="vm-counter">Claimed <span class="num" data-vm-claimed>0</span> / <span data-vm-total>6</span></span>
+  <header class="vm-head">
+    <button type="button" class="vm-brand" data-vm-home aria-label="Back to dashboard"><span>MARKET</span><b>//AIM</b></button>
+    <div class="vm-title"><span class="vm-kicker">// missions</span><strong>AAPL progression</strong></div>
+    <div class="vm-counter">Claimed <span class="num" data-vm-claimed>0</span> / <span data-vm-total>6</span></div>
     <button type="button" class="vm-close-btn" data-vm-cancel>Close</button>
-  </div>
-  <div class="vm-body">
-    <table class="vm-table">
-      <thead>
-        <tr><th>Mission</th><th>Progress</th><th>Reward</th><th>Status</th><th></th></tr>
-      </thead>
-      <tbody data-vm-body></tbody>
-    </table>
-    <div class="vm-unlock" data-vm-unlock-card hidden>
-      <div class="vm-unlock-kicker">// chain complete</div>
-      <div class="vm-unlock-title">AAPL chain complete</div>
-      <div class="vm-unlock-text">
-        All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.
-      </div>
-      <div class="vm-unlock-actions">
-        <span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span>
-        <button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button>
-      </div>
+  </header>
+  <main class="vm-body">
+    <section class="vm-page-intro"><div><span class="vm-kicker">Road to NVDA</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
+    <div class="vm-layout">
+      <section class="vm-board"><div class="vm-board-head"><div><span class="vm-kicker">// mission board</span><h2>Active objectives</h2></div><span class="vm-board-note">Progress updates from training and trades</span></div><table class="vm-table"><thead><tr><th>Mission</th><th>Progress</th><th>Reward</th><th>Status</th><th></th></tr></thead><tbody data-vm-body></tbody></table></section>
+      <aside class="vm-side"><section class="vm-progress-card"><div class="vm-kicker">AAPL chain</div><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><div class="vm-side-bar"><i data-vm-side-bar></i></div><p>Every mission is tied to the existing aim, trade, and accuracy systems.</p></section><div class="vm-unlock" data-vm-unlock-card hidden><div class="vm-unlock-kicker">// chain complete</div><div class="vm-unlock-title">AAPL chain complete</div><div class="vm-unlock-text">All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.</div><div class="vm-unlock-actions"><span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span><button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button></div></div></aside>
     </div>
-  </div>
+  </main>
 </div>
 
 <div id="startfade"></div>
@@ -287,23 +252,50 @@
 <script type="module" src="js/missions.js"></script>
 <script type="module" src="js/main.js"></script>
 <script type="module">
-  // Open / close the trading terminal. The terminal.js module auto-mounts
-  // on first load; this just toggles the panel's `hidden` attribute.
+  // Open / close the trading terminal. The chart is the same existing chart
+  // node used on the dashboard; moving it avoids a second market data loop.
   const panel = document.getElementById('vibes-terminal');
   const openBtn = document.getElementById('vibes-open-terminal');
   const closeBtn = document.querySelector('[data-vt-cancel]');
-  if (openBtn) openBtn.addEventListener('click', () => { if (panel) panel.hidden = false; });
-  if (closeBtn) closeBtn.addEventListener('click', () => { if (panel) panel.hidden = true; });
+  const chartPanel = document.getElementById('vibes-chart');
+  const chartHome = chartPanel?.parentElement;
+  const chartSlot = document.querySelector('[data-vt-chart-slot]');
+  const setMarketOpen = (open) => {
+    if (!panel) return;
+    if (open) {
+      if (chartPanel && chartSlot && chartPanel.parentElement !== chartSlot) chartSlot.appendChild(chartPanel);
+      panel.hidden = false;
+      document.body.classList.add('market-open');
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    } else {
+      if (chartPanel && chartHome && chartPanel.parentElement !== chartHome) chartHome.appendChild(chartPanel);
+      panel.hidden = true;
+      document.body.classList.remove('market-open');
+    }
+  };
+  openBtn?.addEventListener('click', () => setMarketOpen(true));
+  closeBtn?.addEventListener('click', () => setMarketOpen(false));
+  document.querySelector('[data-vt-home]')?.addEventListener('click', () => setMarketOpen(false));
+  document.querySelectorAll('[data-vt-watch]').forEach((watch) => watch.addEventListener('click', () => {
+    const ticker = watch.dataset.vtWatch;
+    const chartTicker = chartPanel?.querySelector(`[data-vc-ticker-btn="${ticker}"]`);
+    if (!chartTicker || chartTicker.hidden) return;
+    chartTicker.click();
+    document.querySelectorAll('[data-vt-watch]').forEach((item) => item.classList.toggle('active', item === watch));
+  }));
 
-  // Same wiring for the missions panel.
+  // The secondary dashboard Trade button opens the same full workspace.
+  const terminalSecondary = document.getElementById('vibes-open-terminal-secondary');
+  terminalSecondary?.addEventListener('click', () => setMarketOpen(true));
+
+  // Same wiring for the missions workspace.
   const missionsPanel = document.getElementById('vibes-missions');
   const missionsOpenBtn = document.getElementById('vibes-open-missions');
   const missionsCloseBtn = document.querySelector('[data-vm-cancel]');
-  if (missionsOpenBtn) missionsOpenBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = false; });
-  if (missionsCloseBtn) missionsCloseBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = true; });
-
-  const terminalSecondary = document.getElementById('vibes-open-terminal-secondary');
-  if (terminalSecondary) terminalSecondary.addEventListener('click', () => { if (panel) panel.hidden = false; });
+  const setMissionsOpen = (open) => { if (missionsPanel) missionsPanel.hidden = !open; };
+  missionsOpenBtn?.addEventListener('click', () => setMissionsOpen(true));
+  missionsCloseBtn?.addEventListener('click', () => setMissionsOpen(false));
+  document.querySelector('[data-vm-home]')?.addEventListener('click', () => setMissionsOpen(false));
 
   const customize = document.getElementById('customize');
   const customizeOpen = document.getElementById('customize-open');

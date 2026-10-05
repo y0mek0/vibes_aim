@@ -74,6 +74,10 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     const claimed = missions.filter((m) => m.claimed).length;
     setText(els.claimed, claimed);
     setText(els.total, MISSIONS.length);
+    document.querySelectorAll('[data-vm-side-claimed]').forEach((el) => { el.textContent = claimed; });
+    document.querySelectorAll('[data-vm-side-total]').forEach((el) => { el.textContent = MISSIONS.length; });
+    const sideBar = document.querySelector('[data-vm-side-bar]');
+    if (sideBar) sideBar.style.width = `${Math.round((claimed / MISSIONS.length) * 100)}%`;
     const roadCount = document.getElementById('overall-imp');
     const roadBar = document.getElementById('goalbar');
     setText(roadCount, `${claimed} / ${MISSIONS.length}`);

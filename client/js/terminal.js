@@ -20,7 +20,8 @@ const SELECTORS = {
   holdings:      '[data-vt-holdings]',
   positionsBody: '[data-vt-positions-body]',
   historyBody:   '[data-vt-history-body]',
-  // order ticket
+  marketTicker:  '[data-vt-market-ticker]',
+  marketPrice:   '[data-vt-market-price]',
   otTicker:      '[data-vt-ot-ticker]',
   otSide:        '[data-vt-ot-side]',
   otNotional:    '[data-vt-ot-notional]',
@@ -140,10 +141,15 @@ export function mountTerminal({ root, onClose } = {}) {
       if (q && q.price != null) {
         state.entryPrice = q.price;
         setText(els.otEntry, fmtMoney(q.price));
+        setText(els.marketTicker, state.ticker);
+        setText(els.marketPrice, fmtMoney(q.price));
+        document.querySelectorAll(`[data-vt-watch-price="${state.ticker}"]`).forEach((el) => { el.textContent = fmtMoney(q.price); });
         renderPreview();
       } else if (q && q.status === 'pre_ipo') {
         state.entryPrice = 0;
         setText(els.otEntry, '—');
+        setText(els.marketPrice, '—');
+        document.querySelectorAll(`[data-vt-watch-price="${state.ticker}"]`).forEach((el) => { el.textContent = '—'; });
         setText(els.otLiq, '—');
         setText(els.otMargin, '—');
         setText(els.otNotionalTotal, '—');
