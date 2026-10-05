@@ -346,3 +346,24 @@
   it out because Render's free tier deploys from source just as well.
 - No production-grade observability. The server logs to stdout. A
   real deploy would want to pipe those to a log aggregator.
+
+
+## Stage 11 — Public release, GitHub Actions CI, branch protection (2026-10-04)
+
+- **Repository made public**: `gh repo edit y0mek0/vibes_aim --visibility public --accept-visibility-change-consequences`. The `mvp-v0.1` GitHub Release is now visible to anyone.
+- `.github/workflows/test.yml` — CI runs `npm test` on every push to `main` and on every pull request, on a matrix of `ubuntu-latest` and `windows-latest` with Node 20. The workflow cancels in-flight runs on the same ref. After the run, `docs/screenshots/` is uploaded as an artifact (only if present).
+- **Branch protection via ruleset `main-protection`**: `non_fast_forward` (rejects force-push) and `deletion` (rejects branch deletion). Created via the GitHub Rulesets API. The `required_status_checks` rule will be added in a follow-up once the `test` workflow has registered at least one check name; until then, the protection is "no force-push, no delete".
+- **No new commits** for the ruleset — it lives in GitHub's API, not in the repo.
+
+### Evidence
+
+- `gh repo view y0mek0/vibes_aim` returns `visibility: public`, `defaultBranch: main`, `description: Browser aim-trading game: ...`.
+- `gh api repos/y0mek0/vibes_aim/rulesets` returns the `main-protection` ruleset.
+- `gh release list` shows `mvp-v0.1` with its release notes.
+- `npm test` (local) → exit 0, 16/16 suites green.
+
+### Limits of this stage
+
+- The CI workflow will not have run yet until the next push. After the first push, the user can tighten the ruleset to require the `test / node-test` status check by adding a `required_status_checks` rule.
+- No `dependabot.yml` or `codeql.yml` yet. Both are 10-line adds if the user wants Renovate-style dependency PRs or security scanning.
+- The README mentions "no `npm install`" — the CI workflow honours this because `actions/setup-node` does not run `npm ci` unless the user runs it; `npm test` here is a no-deps chain of `node tests/*.test.mjs`.

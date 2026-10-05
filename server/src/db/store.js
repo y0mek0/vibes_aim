@@ -41,7 +41,7 @@ export function createStore(supabaseConfig) {
     async getOrCreatePlayer(playerId) {
       if (mem.players.has(playerId)) return mem.players.get(playerId);
       const now = Date.now();
-      const p = { id: playerId, stable: 1000, createdAt: now, updatedAt: now }; // start with 1000 Stable for the first session
+      const p = { id: playerId, stable: 200, preciseBest: 0, createdAt: now, updatedAt: now }; // MVP defaults: 200 Stable, 0 best-accuracy
       mem.players.set(playerId, p);
       return p;
     },
@@ -50,6 +50,15 @@ export function createStore(supabaseConfig) {
       const p = mem.players.get(playerId) ?? (await this.getOrCreatePlayer(playerId));
       p.stable = Math.max(0, Math.round((p.stable + amount) * 1e6) / 1e6);
       p.updatedAt = Date.now();
+      return p;
+    },
+    async recordAccuracy(playerId, accuracy) {
+      // accuracy is hits / shots in [0, 1]. We only ever raise the best.
+      const p = mem.players.get(playerId) ?? (await this.getOrCreatePlayer(playerId));
+      const a = Number(accuracy);
+      if (!Number.isFinite(a) || a < 0) return p;
+      const prev = Number(p.preciseBest) || 0;
+      if (a > prev) { p.preciseBest = a; p.updatedAt = Date.now(); }
       return p;
     },
 

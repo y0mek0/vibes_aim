@@ -40,6 +40,7 @@ export function aimRoutes(r, { store, config }) {
     unit = round(unit, 8);
 
     await store.getOrCreatePlayer(playerId);
+    if (Number.isFinite(acc)) await store.recordAccuracy(playerId, acc);
     const bal = await store.addTickerUnits(playerId, ticker, unit);
 
     sendJson(res, 200, {

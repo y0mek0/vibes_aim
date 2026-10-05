@@ -86,16 +86,21 @@ async function checkMission(def, state, store) {
     }
     case 'hold_60s': {
       // "hold 60s" = any long trade that stayed open at least 60s without liquidation.
-      const ok = state.trades.some((t) => t.side === 'long' && t.status === 'closed' && t.closedAt - t.createdAt >= 1000); // MVP: 1s, see MISTAKES
+      // Real 60-second hold: any long trade that stayed open at least
+      // 60s without liquidation. See MISTAKES Stage 11 (1.1) for the
+      // previous MVP shortcut. The test opens a position, waits 60s, and
+      // closes — the only way to satisfy this mission.
+      const ok = state.trades.some((t) => t.side === 'long' && t.status === 'closed' && t.closedAt - t.createdAt >= 60_000);
       return { done: ok, progress: ok ? 1 : 0 };
     }
     case 'precise_session': {
-      // We track best accuracy in the state from the client. For now, treat as
-      // a milestone: a single trade with pnl/entry >= 0.005 (positive edge)
-      // counts as a "precise" session for the MVP. Future stages will
-      // wire accuracy through /aim/hit.
-      const ok = state.trades.some((t) => t.pnl > 0);
-      return { done: ok, progress: ok ? 1 : 0 };
+      // Real accuracy tracking: the server records the player's
+      // best hits/shots ratio in player.preciseBest on every /aim/hit.
+      // The mission is satisfied when the player reaches 70% accuracy
+      // (across any session of shots they've taken). Guard against
+      // undefined -> NaN so the JSON response stays numeric.
+      const acc = Number.isFinite(state.preciseBest) ? state.preciseBest : 0;
+      return { done: acc >= 0.7, progress: Math.min(acc, 0.7) };
     }
     default:
       return { done: false, progress: 0 };

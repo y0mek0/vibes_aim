@@ -227,7 +227,7 @@ async function integration() {
   // 1. /portfolio empty for a fresh player
   const p1 = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });
   assert.equal(p1.status, 200);
-  assert.equal(p1.body.player.stable, 1000);
+  assert.equal(p1.body.player.stable, 200);
   ok('GET /portfolio empty state for fresh player');
 
   // 2. /portfolio/preview: long 5x AAPL
@@ -261,14 +261,14 @@ async function integration() {
   //    Player has 1000 stable; notional 500 at 5x -> margin 500. Stable drops to 500.
   const o2 = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
-    body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 500, confirmLiquidation: true },
+    body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 100, confirmLiquidation: true },
   });
   assert.equal(o2.status, 200);
   assert.equal(o2.body.trade.status, 'open');
   const tradeId = o2.body.trade.id;
 
   const p2 = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });
-  assert.equal(p2.body.player.stable, 500);
+  assert.equal(p2.body.player.stable, 100);  // 200 - margin(100)
   assert.equal(p2.body.trades.length, 1);
   assert.equal(p2.body.trades[0].id, tradeId);
   ok('POST /portfolio/order opens a trade and debits margin from Stable');

@@ -84,17 +84,21 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   ok('first_profit counts only positive pnl');
 }
 {
-  // hold_60s: long trade that survived >= 1s (MVP threshold)
-  const t1 = { side: 'long', status: 'closed', createdAt: 1000, closedAt: 2500 };
-  const t2 = { side: 'long', status: 'closed', createdAt: 1000, closedAt: 1999 };
+  // hold_60s: long trade that survived >= 60s (real MVP threshold).
+  // Boundary cases: exactly 60s -> done, 59.999s -> not done.
+  const t1 = { side: 'long', status: 'closed', createdAt: 0, closedAt: 60_000 };
+  const t2 = { side: 'long', status: 'closed', createdAt: 0, closedAt: 59_999 };
   let r = missionProgress(MISSIONS[4], { trades: [t1] });
   assert.equal(r.done, true);
   r = missionProgress(MISSIONS[4], { trades: [t2] });
   assert.equal(r.done, false);
-  // short doesn't count
+  // short doesn't count even after 9999s
   r = missionProgress(MISSIONS[4], { trades: [{ side: 'short', status: 'closed', createdAt: 0, closedAt: 9999 }] });
   assert.equal(r.done, false);
-  ok('hold_60s (MVP 1s) checks long trade survival');
+  // open (not closed) doesn't count
+  r = missionProgress(MISSIONS[4], { trades: [{ side: 'long', status: 'open', createdAt: 0 }] });
+  assert.equal(r.done, false);
+  ok('hold_60s requires long + closed + duration >= 60s');
 }
 {
   // precise_session: accuracy >= 0.7
@@ -211,41 +215,42 @@ async function integration() {
   assert.ok(claimAapl.body.stable > 1000);
   ok('POST /missions/claim earn_half_aapl credits 250 Stable');
 
-  // 4. open + close a profitable trade
+  // 4. open + close a profitable trade. We wait 6s so the stub price
+  // drifts to a different tickKey -> the close is profitable ->
+  // first_profit mission completes. hold_60s is covered by a focused
+  // 60s test below; we do not wait 60s here.
   const o = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
   });
   assert.equal(o.status, 200);
-  await new Promise((r) => setTimeout(r, 6100)); // hold_60s MVP threshold = 1s, but we also need price drift to make the close profitable; wait 6s for a different tickKey.
+  await new Promise((r) => setTimeout(r, 6100)); // wait 6s for price drift -> different tickKey -> close is profitable
   const c = await req({
     method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': playerId },
     body: { tradeId: o.body.trade.id },
   });
   assert.equal(c.status, 200);
-  ok('open + close round-trip completed (used by hold_60s / first_trade / first_profit)');
+  ok('open + close round-trip completed (used by first_trade / first_profit)');
 
-  // 5. claim first_10_hits, first_trade, first_profit, hold_60s
-  for (const kind of ['first_10_hits', 'first_trade', 'first_profit', 'hold_60s']) {
+  // 5. claim first_10_hits, first_trade, first_profit (hold_60s is in a focused test below)
+  for (const kind of ['first_10_hits', 'first_trade', 'first_profit']) {
     const r = await req({
       method: 'POST', path: '/missions/claim', headers: { 'X-Player-Id': playerId },
       body: { kind },
     });
     assert.equal(r.status, 200, `claim ${kind} status ${r.status} body ${JSON.stringify(r.body)}`);
   }
-  ok('4 missions claimed (first_10_hits, first_trade, first_profit, hold_60s)');
+  ok('3 missions claimed (first_10_hits, first_trade, first_profit)');
 
-  // 6. remaining: precise_session. We don't have a real accuracy path
-  //    from the client yet; trigger by claiming first_profit which we
-  //    already did. For precise_session, the server treats any winning
-  //    trade as a precise session. We already have a winning trade; just
-  //    claim it.
+  // 6. precise_session needs player.preciseBest >= 0.7. The 700 hits
+  //    we just sent had accuracy 0.9, so the server recorded
+  //    preciseBest = 0.9 -> mission is done.
   const claim6 = await req({
     method: 'POST', path: '/missions/claim', headers: { 'X-Player-Id': playerId },
     body: { kind: 'precise_session' },
   });
-  assert.equal(claim6.status, 200, `claim precise_session status ${claim6.status}`);
-  ok('6th mission (precise_session) claimed');
+  assert.equal(claim6.status, 200, `claim precise_session status ${claim6.status} body ${JSON.stringify(claim6.body)}`);
+  ok('6th mission (precise_session) claimed (real accuracy, >= 0.7)');
 
   // 7. /portfolio should now include NVDA in unlocks
   const p = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });

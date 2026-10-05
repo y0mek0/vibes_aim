@@ -201,7 +201,7 @@ async function main() {
   await step(async () => {
     const r = await client.request({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': 'p2' } });
     assert.equal(r.status, 200);
-    assert.equal(r.body.player.stable, 1000);
+    assert.equal(r.body.player.stable, 200);  // MVP default: 200 stable for the first session
     assert.deepEqual(r.body.balances, {});
     ok('portfolio empty state for new player');
   });

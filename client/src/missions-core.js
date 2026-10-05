@@ -38,8 +38,10 @@ export function missionProgress(def, state) {
       return { progress: Math.min(n, def.target), done: n >= def.target };
     }
     case 'hold_60s': {
-      // MVP: a long trade that survived at least 1s without liquidation.
-      const ok = hasHeldLong(s.trades, 1000);
+      // Real 60-second hold. Server is the authority; this is a UI hint
+      // for the missions panel that ticks the progress to 1 when a long
+      // trade lasted at least 60s.
+      const ok = hasHeldLong(s.trades, 60_000);
       return { progress: ok ? 1 : 0, done: ok };
     }
     case 'precise_session': {

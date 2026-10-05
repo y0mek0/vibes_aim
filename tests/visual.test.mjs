@@ -75,8 +75,8 @@ assert.equal(summary.dom.initial_bridge_present, true, 'aim-bridge HUD chip shou
 ok('aim-bridge HUD chip is present');
 assert.equal(summary.dom.initial_ticker, 'AAPL', 'default ticker should be AAPL');
 ok('default ticker is AAPL');
-assert.equal(summary.dom.terminal_stable, '1000.00', 'fresh player has 1000 Stable');
-ok('fresh player has 1000.00 Stable in the terminal header');
+assert.equal(summary.dom.terminal_stable, '200.00', 'fresh player has 200 Stable');
+ok('fresh player has 200.00 Stable in the terminal header');
 assert.equal(summary.dom.missions_claimed, '0', 'no missions claimed at boot');
 assert.equal(summary.dom.missions_total, '6', '6 missions exist');
 assert.equal(summary.dom.mission_rows, 6, 'mission table has 6 rows');
