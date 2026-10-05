@@ -23,17 +23,10 @@
 <body>
 <canvas id="game"></canvas>
 
-<!-- vibes_aim: trading terminal. A separate full-height panel; open
-     via a tab, close via the panel's own button. Hidden by default. -->
+<!-- vibes_aim: trading workspace. It lives inside the shared dashboard shell. -->
 <div id="vibes-terminal" hidden>
-  <header class="vt-head">
-    <button type="button" class="vt-brand" data-vt-home aria-label="Back to dashboard"><span>MARKET</span><b>//AIM</b></button>
-    <div class="vt-title"><span class="vt-kicker">// market</span><strong>Paper terminal</strong></div>
-    <div class="vt-summary"><span>Stable <b class="num" data-vt-balance>—</b></span><span>Portfolio <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div>
-    <button type="button" class="vt-close-btn" data-vt-cancel>Close</button>
-  </header>
-
   <div class="vt-body">
+    <div class="workspace-heading"><div><span class="section-kicker">Market</span><h1>Market</h1></div><div class="workspace-metrics"><span>Stable <b class="num" data-vt-balance>—</b></span><span>Portfolio <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div></div>
     <aside class="vt-watchlist">
       <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
       <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">—</strong></button>
@@ -70,18 +63,10 @@
   </div>
 </div>
 
-<!-- vibes_aim: missions panel. Hidden by default; the engine's menu
-     has a Missions button that shows it. The unlock card inside
-     appears once all 6 missions are claimed. -->
+<!-- vibes_aim: missions workspace inside the shared dashboard shell. -->
 <div id="vibes-missions" hidden>
-  <header class="vm-head">
-    <button type="button" class="vm-brand" data-vm-home aria-label="Back to dashboard"><span>MARKET</span><b>//AIM</b></button>
-    <div class="vm-title"><span class="vm-kicker">// missions</span><strong>AAPL progression</strong></div>
-    <div class="vm-counter">Claimed <span class="num" data-vm-claimed>0</span> / <span data-vm-total>6</span></div>
-    <button type="button" class="vm-close-btn" data-vm-cancel>Close</button>
-  </header>
   <main class="vm-body">
-    <section class="vm-page-intro"><div><span class="vm-kicker">Road to NVDA</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
+    <section class="vm-page-intro"><div><span class="vm-kicker">Missions</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-claimed data-vm-side-claimed>0</span> / <span data-vm-total data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
     <div class="vm-layout">
       <section class="vm-board"><div class="vm-board-head"><div><span class="vm-kicker">// mission board</span><h2>Active objectives</h2></div><span class="vm-board-note">Progress updates from training and trades</span></div><table class="vm-table"><thead><tr><th>Mission</th><th>Progress</th><th>Reward</th><th>Status</th><th></th></tr></thead><tbody data-vm-body></tbody></table></section>
       <aside class="vm-side"><section class="vm-progress-card"><div class="vm-kicker">AAPL chain</div><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><div class="vm-side-bar"><i data-vm-side-bar></i></div><p>Every mission is tied to the existing aim, trade, and accuracy systems.</p></section><div class="vm-unlock" data-vm-unlock-card hidden><div class="vm-unlock-kicker">// chain complete</div><div class="vm-unlock-title">AAPL chain complete</div><div class="vm-unlock-text">All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.</div><div class="vm-unlock-actions"><span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span><button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button></div></div></aside>
@@ -127,8 +112,8 @@
       </button>
       <nav class="primary-nav" aria-label="Primary navigation">
         <button type="button" class="nav-link active" data-dashboard-section="train">Train</button>
-        <button type="button" class="nav-link" id="vibes-open-terminal">Market</button>
-        <button type="button" class="nav-link" id="vibes-open-missions">Missions</button>
+        <button type="button" class="nav-link" id="vibes-open-terminal" data-dashboard-section="market">Market</button>
+        <button type="button" class="nav-link" id="vibes-open-missions" data-dashboard-section="missions">Missions</button>
         <button type="button" class="nav-link" data-dashboard-section="stats">Stats</button>
       </nav>
       <div class="nav-account">
@@ -252,30 +237,48 @@
 <script type="module" src="js/missions.js"></script>
 <script type="module" src="js/main.js"></script>
 <script type="module">
-  // Open / close the trading terminal. The chart is the same existing chart
-  // node used on the dashboard; moving it avoids a second market data loop.
+  // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');
-  const openBtn = document.getElementById('vibes-open-terminal');
-  const closeBtn = document.querySelector('[data-vt-cancel]');
+  const missionsPanel = document.getElementById('vibes-missions');
+  const shell = document.querySelector('#menu .app-shell');
+  const dashboard = document.getElementById('dashboard-main');
   const chartPanel = document.getElementById('vibes-chart');
   const chartHome = chartPanel?.parentElement;
   const chartSlot = document.querySelector('[data-vt-chart-slot]');
-  const setMarketOpen = (open) => {
-    if (!panel) return;
+  if (shell) {
+    if (panel && panel.parentElement !== shell) shell.appendChild(panel);
+    if (missionsPanel && missionsPanel.parentElement !== shell) shell.appendChild(missionsPanel);
+  }
+
+  const setMarketChartLocation = (open) => {
     if (open) {
       if (chartPanel && chartSlot && chartPanel.parentElement !== chartSlot) chartSlot.appendChild(chartPanel);
-      panel.hidden = false;
       document.body.classList.add('market-open');
       requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     } else {
       if (chartPanel && chartHome && chartPanel.parentElement !== chartHome) chartHome.appendChild(chartPanel);
-      panel.hidden = true;
       document.body.classList.remove('market-open');
     }
   };
-  openBtn?.addEventListener('click', () => setMarketOpen(true));
-  closeBtn?.addEventListener('click', () => setMarketOpen(false));
-  document.querySelector('[data-vt-home]')?.addEventListener('click', () => setMarketOpen(false));
+
+  const setWorkspace = (target) => {
+    const isMarket = target === 'market';
+    const isMissions = target === 'missions';
+    setMarketChartLocation(isMarket);
+    if (panel) panel.hidden = !isMarket;
+    if (missionsPanel) missionsPanel.hidden = !isMissions;
+    if (dashboard) {
+      dashboard.classList.toggle('workspace-hidden', isMarket || isMissions);
+      dashboard.classList.toggle('stats-view', target === 'stats');
+    }
+    document.querySelectorAll('[data-dashboard-section]').forEach((item) => item.classList.toggle('active', item.dataset.dashboardSection === target));
+    if (target === 'stats') document.querySelector('[data-dashboard-section-target="stats"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (target === 'train') dashboard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  document.querySelector('[data-dashboard-home]')?.addEventListener('click', () => setWorkspace('train'));
+  document.querySelectorAll('[data-dashboard-section]').forEach((link) => link.addEventListener('click', () => setWorkspace(link.dataset.dashboardSection)));
+  document.getElementById('vibes-open-terminal-secondary')?.addEventListener('click', () => setWorkspace('market'));
   document.querySelectorAll('[data-vt-watch]').forEach((watch) => watch.addEventListener('click', () => {
     const ticker = watch.dataset.vtWatch;
     const chartTicker = chartPanel?.querySelector(`[data-vc-ticker-btn="${ticker}"]`);
@@ -283,19 +286,6 @@
     chartTicker.click();
     document.querySelectorAll('[data-vt-watch]').forEach((item) => item.classList.toggle('active', item === watch));
   }));
-
-  // The secondary dashboard Trade button opens the same full workspace.
-  const terminalSecondary = document.getElementById('vibes-open-terminal-secondary');
-  terminalSecondary?.addEventListener('click', () => setMarketOpen(true));
-
-  // Same wiring for the missions workspace.
-  const missionsPanel = document.getElementById('vibes-missions');
-  const missionsOpenBtn = document.getElementById('vibes-open-missions');
-  const missionsCloseBtn = document.querySelector('[data-vm-cancel]');
-  const setMissionsOpen = (open) => { if (missionsPanel) missionsPanel.hidden = !open; };
-  missionsOpenBtn?.addEventListener('click', () => setMissionsOpen(true));
-  missionsCloseBtn?.addEventListener('click', () => setMissionsOpen(false));
-  document.querySelector('[data-vm-home]')?.addEventListener('click', () => setMissionsOpen(false));
 
   const customize = document.getElementById('customize');
   const customizeOpen = document.getElementById('customize-open');
@@ -315,18 +305,7 @@
     document.querySelectorAll('[data-customize-tab]').forEach((item) => item.classList.toggle('active', item === tab));
     document.querySelectorAll('[data-customize-pane]').forEach((pane) => pane.classList.toggle('active', pane.dataset.customizePane === name));
   }));
-  const dashboard = document.getElementById('dashboard-main');
-  const setDashboardSection = (target) => {
-    if (!dashboard) return;
-    dashboard.classList.toggle('stats-view', target === 'stats');
-    document.querySelectorAll('[data-dashboard-section]').forEach((item) => item.classList.toggle('active', item.dataset.dashboardSection === target));
-  };
-  document.querySelector('[data-dashboard-home]')?.addEventListener('click', () => setDashboardSection('train'));
-  document.querySelectorAll('[data-dashboard-section]').forEach((link) => link.addEventListener('click', () => {
-    const target = link.dataset.dashboardSection;
-    setDashboardSection(target);
-    document.querySelector(`[data-dashboard-section-target="${target}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }));
+
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>

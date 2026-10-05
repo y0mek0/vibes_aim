@@ -1363,3 +1363,51 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
   .vm-board { overflow-x: auto; }
   .vm-table { min-width: 680px; }
 }
+
+/* Shared dashboard shell: Market and Missions are ordinary views below the
+   one app-nav, never second full-screen applications. */
+#menu .app-shell > #vibes-terminal,
+#menu .app-shell > #vibes-missions {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+}
+#menu .app-shell > #vibes-terminal[hidden],
+#menu .app-shell > #vibes-missions[hidden] { display: none; }
+#menu .dashboard.workspace-hidden { display: none; }
+#menu .app-shell > #vibes-terminal .vt-body {
+  width: 100%;
+  margin: 0;
+  padding: 38px 0 34px;
+}
+#menu .workspace-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--dash-line);
+}
+#menu .workspace-heading h1 { margin: 0; color: var(--fg); font-size: clamp(30px, 4vw, 48px); line-height: .95; letter-spacing: -.05em; }
+#menu .workspace-heading .section-kicker { margin-bottom: 8px; }
+#menu .workspace-metrics { display: flex; gap: 22px; color: var(--dash-muted); font: 10px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+#menu .workspace-metrics .num { margin-left: 5px; color: var(--fg); }
+#menu .app-shell > #vibes-missions .vm-body { width: 100%; margin: 0; padding: 38px 0 34px; }
+#menu .app-shell > #vibes-missions .vm-page-intro { padding-bottom: 22px; }
+#menu .app-shell > #vibes-terminal .vt-chart-slot #vibes-chart { position: static; inset: auto; width: 100%; }
+#menu .app-shell > #vibes-terminal .vt-chart-slot #vibes-chart .vc-body { height: 348px; }
+#menu .app-shell > #vibes-missions .vm-page-intro h1 { font-size: clamp(30px, 4vw, 48px); }
+
+@media (max-width: 760px) {
+  #menu .workspace-heading { align-items: flex-start; flex-direction: column; }
+  #menu .workspace-metrics { flex-wrap: wrap; gap: 8px 16px; }
+  #menu .app-shell > #vibes-terminal .vt-body,
+  #menu .app-shell > #vibes-missions .vm-body { padding-top: 24px; }
+}

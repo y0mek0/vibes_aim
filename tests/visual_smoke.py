@@ -161,10 +161,7 @@ def main():
             page.screenshot(path=out2)
             summary["screenshots"].append(out2)
             summary["dom"]["terminal_stable"] = page.eval_on_selector('[data-vt-balance]', 'el => el.textContent')
-            page.click('[data-vt-cancel]', timeout=5000)
-            page.wait_for_timeout(400)
-
-            # Open the missions
+            # Switch directly through the shared primary navigation.
             page.click("#vibes-open-missions", timeout=10000)
             # Do not rely on a wall-clock sleep: the panel renders from
             # store refresh asynchronously. Wait for all six rows so the
@@ -200,10 +197,10 @@ def main():
             summary["dom"]["missions_total"] = page.eval_on_selector('[data-vm-total]', 'el => el.textContent')
             summary["dom"]["mission_rows"] = page.eval_on_selector_all('[data-vm-kind]', 'els => els.length')
             summary["dom"]["unlock_card_hidden"] = page.eval_on_selector('[data-vm-unlock-card]', 'el => el.hidden')
-            page.click('[data-vm-cancel]', timeout=5000)
+            page.click("#vibes-open-terminal", timeout=5000)
             page.wait_for_timeout(400)
 
-            # Capture the chart state. NVDA button is in the markup but
+            # Capture the chart state from the Market view. NVDA button is in the markup but
             # is hidden at boot (unlocks is empty for a fresh player) per
             # the refreshUnlockedTickers rule. We do not click it here;
             # clicking it would require unlocking NVDA first.
