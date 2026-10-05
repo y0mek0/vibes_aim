@@ -115,11 +115,14 @@
 
 - [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
 - [ ] CI: optional Playwright job for the visual smoke.
-- [ ] `precise_session` real accuracy tracking (server proxy now).
-- [ ] `hold_60s` real 60-second session timer (1s MVP now).
+- [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
+- [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
+- [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
+- [ ] Visual smoke clean-console investigation — identify and remove the two current 404 resource warnings; acceptance: zero unexpected browser console/network errors.
+- [ ] Honest README update — remove obsolete 1s/any-profit mission shortcuts and document 200 Stable, unlock gate, margin semantics, and market-session behavior.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.
-- [ ] Push to GitHub. Currently the repo is local-only (no `git remote`).
+- [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 
 
 ## Stage 10 — Polish, release tag (DONE 2026-10-04)
@@ -136,11 +139,14 @@
 
 - [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
 - [ ] CI: optional Playwright job for the visual smoke.
-- [ ] `precise_session` real accuracy tracking (server proxy now).
-- [ ] `hold_60s` real 60-second session timer (1s MVP now).
+- [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
+- [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
+- [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
+- [ ] Visual smoke clean-console investigation — identify and remove the two current 404 resource warnings; acceptance: zero unexpected browser console/network errors.
+- [ ] Honest README update — remove obsolete 1s/any-profit mission shortcuts and document 200 Stable, unlock gate, margin semantics, and market-session behavior.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.
-- [ ] Push to GitHub. Currently the repo is local-only (no `git remote`).
+- [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 
 
 ## Anti-cheat (already covered in Stage 3)

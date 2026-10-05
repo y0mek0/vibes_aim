@@ -137,6 +137,31 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   ok('getStatus reports unconfigured when token empty, live when set');
 }
 
+// 8. getTradingStatus maps Finnhub US session state
+{
+  const calls = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify({ isOpen: false, session: 'post', holiday: 'Independence Day' }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    });
+  };
+  try {
+    const p = createFinnhubProvider({ token: 'fake-token' });
+    const status = await p.getTradingStatus('AAPL');
+    assert.equal(status.provider, 'finnhub');
+    assert.equal(status.isOpen, false);
+    assert.equal(status.session, 'post');
+    assert.equal(status.holiday, 'Independence Day');
+    assert.ok(calls[0].includes('/api/v1/stock/market-status'), `url=${calls[0]}`);
+    assert.ok(calls[0].includes('exchange=US'), `url=${calls[0]}`);
+    ok('getTradingStatus maps the Finnhub US market session');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}
+
 if (fails) {
   console.error(`${fails} FAILURES`);
   process.exit(1);

@@ -82,6 +82,18 @@ export function createFinnhubProvider({ token }) {
     async getStatus() {
       return { provider: 'finnhub', status: token ? 'live' : 'unconfigured', lastTickTs: Date.now() };
     },
+    async getTradingStatus() {
+      // Finnhub owns the exchange-calendar logic (weekends, holidays and
+      // special sessions). A malformed/unavailable response is fail-closed:
+      // no new paper order is opened without an explicit isOpen: true.
+      const data = await fhGet('/stock/market-status', token, { exchange: 'US' });
+      return {
+        provider: 'finnhub',
+        isOpen: data?.isOpen === true,
+        session: data?.session || (data?.isOpen === true ? 'regular' : 'closed'),
+        holiday: data?.holiday || null,
+      };
+    },
     async getSymbols() {
       // The fixed game set; we don't query Finnhub for the symbol list.
       return ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'AMZN', 'SPY', 'SPCX', 'OPENAI', 'ANTHROPIC']

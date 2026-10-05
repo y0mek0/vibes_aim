@@ -384,3 +384,14 @@
 - `npm run test:slow` → exit 0; real wall-clock hold recorded as `60020ms`.
 - `node tests/visual.test.mjs` run three times consecutively → exit 0 each time.
 - Final `npm test` → exit 0; all configured suites reported `ALL PASS`, including visual smoke with 6 mission rows.
+
+## Stage 11.5 — Live-market order gate (2026-10-05)
+
+- Added the provider-level `getTradingStatus()` contract. The offline stub reports a simulated open session, while Finnhub normalizes its US market-session response (`isOpen`, `session`, optional `holiday`).
+- `/portfolio/order` now checks that status only after preserving the existing Pre‑IPO `no_price` behavior and before any Stable debit or trade creation. A closed session returns `409 market_closed`; preview and close stay available.
+- Added a real-socket integration test proving a closed provider leaves Stable at 200 and creates no trade, then permits close after a position was opened during an open session. Added a mocked Finnhub session-endpoint test.
+
+### Evidence
+
+- `node tests/finnhub.test.mjs`, `node tests/server.test.mjs`, and `node tests/missions.test.mjs` → exit 0.
+- Full `npm test` → exit 0 / `ALL PASS`; visual smoke rendered six mission rows and current AAPL chart data.

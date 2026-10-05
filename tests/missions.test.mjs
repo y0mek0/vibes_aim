@@ -165,6 +165,7 @@ async function integration() {
     },
     async getCandles(symbol, range) { return { symbol, range, candles: [] }; },
     async getStatus() { return { provider: 'test', status: 'test', lastTickTs: Date.now() }; },
+    async getTradingStatus() { return { provider: 'test', isOpen: true, session: 'simulated' }; },
     async getSymbols() { return []; },
   };
   const { listen } = createApp({ market });

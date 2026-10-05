@@ -96,6 +96,11 @@ export function createStubProvider() {
     async getStatus() {
       return { provider: 'stub', status: 'stub', lastTickTs: Date.now() };
     },
+    // The offline game provider has no exchange session. It stays tradeable
+    // so local play and deterministic tests never depend on wall-clock time.
+    async getTradingStatus() {
+      return { provider: 'stub', isOpen: true, session: 'simulated' };
+    },
     async getSymbols() {
       return Object.entries(BASES).map(([symbol, base]) => ({
         symbol,

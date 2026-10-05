@@ -4,6 +4,7 @@
 //   async getQuote(symbol)              -> { symbol, price, ts, currency }
 //   async getCandles(symbol, range)     -> { symbol, range, candles: [{ t, o, h, l, c }] }
 //   async getStatus()                   -> { provider, status: 'live'|'delayed'|'closed'|'stale', lastTickTs }
+//   async getTradingStatus(symbol)      -> { provider, isOpen, session, ... }
 //   async getSymbols()                  -> [{ symbol, name, market }]
 //
 // Ranges supported by the in-game chart:

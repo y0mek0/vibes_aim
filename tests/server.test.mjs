@@ -416,6 +416,51 @@ async function main() {
     ok('POST /aim/hit with pre-IPO ticker (OPENAI) -> 200');
   });
 
+  // ---- live market-session gate (Stage 11.5) --------------------------
+  // A closed live provider must block new orders before any Stable debit or
+  // trade creation, while a position opened during an open session must
+  // still be closable after the session switches to closed.
+  await step(async () => {
+    let isOpen = false;
+    const gateMarket = {
+      async getQuote(symbol) { return { symbol, price: 100, ts: Date.now(), currency: 'USD' }; },
+      async getTradingStatus() { return { provider: 'test-live', isOpen, session: isOpen ? 'regular' : 'closed' }; },
+    };
+    const { listen } = createApp({ market: gateMarket });
+    const gateServer = listen(0);
+    await new Promise((resolve) => gateServer.once('listening', resolve));
+    const gateClient = makeClient(gateServer.address().port);
+    const headers = { 'X-Player-Id': 'market-gate-player' };
+    try {
+      const blocked = await gateClient.request({
+        method: 'POST', path: '/portfolio/order', headers,
+        body: { ticker: 'AAPL', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
+      });
+      assert.equal(blocked.status, 409);
+      assert.equal(blocked.body.error, 'market_closed');
+      const untouched = await gateClient.request({ method: 'GET', path: '/portfolio', headers });
+      assert.equal(untouched.body.player.stable, 200);
+      assert.equal(untouched.body.trades.length, 0);
+
+      isOpen = true;
+      const opened = await gateClient.request({
+        method: 'POST', path: '/portfolio/order', headers,
+        body: { ticker: 'AAPL', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
+      });
+      assert.equal(opened.status, 200);
+      isOpen = false;
+      const closed = await gateClient.request({
+        method: 'POST', path: '/portfolio/close', headers,
+        body: { tradeId: opened.body.trade.id },
+      });
+      assert.equal(closed.status, 200);
+      assert.equal(closed.body.trade.status, 'closed');
+      ok('market_closed blocks new orders without debit; close remains available');
+    } finally {
+      await new Promise((resolve) => gateServer.close(resolve));
+    }
+  });
+
   server.close();
   if (fails) {
     console.error(`${fails} FAILURES`);

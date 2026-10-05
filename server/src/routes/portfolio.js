@@ -22,6 +22,17 @@ async function assertTickerUnlocked(store, playerId, ticker) {
   }
 }
 
+async function assertMarketOpen(market, ticker) {
+  if (typeof market.getTradingStatus !== 'function') {
+    throw new HttpError(503, 'market_status_unavailable', 'Market session status is unavailable; cannot open a new position.');
+  }
+  const status = await market.getTradingStatus(ticker);
+  if (status?.isOpen !== true) {
+    const session = status?.session || 'closed';
+    throw new HttpError(409, 'market_closed', `Market is ${session}; new positions cannot be opened.`);
+  }
+}
+
 export function portfolioRoutes(r, { market, store }) {
   // GET /portfolio?playerId=... — current state snapshot
   r.get('/portfolio', async (req, res, _params, query) => {
@@ -74,6 +85,9 @@ export function portfolioRoutes(r, { market, store }) {
     const q = await market.getQuote(ticker);
     if (q.price == null) throw new HttpError(400, 'no_price', `${ticker} is awaiting market`);
     const entry = q.price;
+    // Keep no_price as the pre-IPO response; only a priced market ticker
+    // reaches the session gate. This happens before debit/trade creation.
+    await assertMarketOpen(market, ticker);
     const liq = computeLiquidationPrice(side, entry, lev);
     if (confirmLiquidation !== true) {
       // UI must call /preview first, then POST with confirmLiquidation: true.

@@ -52,6 +52,21 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.5 — live-market order gate (DONE 2026-10-05)
+
+**Verified evidence:** `node tests/finnhub.test.mjs`, `node tests/server.test.mjs`, `node tests/missions.test.mjs`, and the full `npm test` all exited 0.
+
+**Scope:** prevent new paper positions from opening when a live US-equity market provider reports a closed session. The offline `stub` stays explicitly tradeable for local play and deterministic tests. Preview and closing an existing position remain available.
+
+**Acceptance criteria:**
+
+- Market providers expose a normalized trading-session result (`isOpen`, provider/session context).
+- `/portfolio/order` returns a clear `409 market_closed` before it debits Stable or creates a trade when the provider says the market is closed.
+- An open session permits orders; stub keeps allowing orders; `/portfolio/close` remains callable regardless of open/closed status.
+- Focused provider/server tests plus the full `npm test` chain pass.
+
+**Out of scope:** chart UI message, holiday-calendar UX, WebSocket quotes, Pre-IPO UI hiding, and README wording (separate stages).
+
 ### Stage 11.3–11.4 — market unlock enforcement and margin consistency (DONE 2026-10-05)
 
 **Verified evidence:** `node tests/server.test.mjs`, `node tests/terminal.test.mjs`, and `npm test` all exited 0. `npm run test:slow` held a real position for 60020 ms and exited 0. Visual smoke passed three consecutive isolated runs after its server-concurrency repair.
