@@ -610,19 +610,34 @@ canvas#game {
 }
 #vibes-open-terminal:hover { border-color: var(--accent); color: var(--accent); }
 
-/* — vibes_aim missions panel — */
+/* — missions modal (centered, backdrop, card) — */
 #vibes-missions {
   position: fixed;
   inset: 0;
   z-index: 26;
-  background: var(--bg);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 9, 12, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   font-family: var(--font-ui);
   color: var(--fg);
   overflow: auto;
+  padding: 24px;
 }
 #vibes-missions[hidden] { display: none; }
+.vm-card {
+  width: min(720px, 92vw);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-3);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
 
 .vm-head {
   display: flex;
