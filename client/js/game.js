@@ -70,7 +70,17 @@ export function boot() {
     renderer.setPixelRatio(pixelRatio()); renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight; baseFov = fovFor(adsZoom); camera.fov = baseFov; camera.updateProjectionMatrix();
   }
-  addEventListener('resize', applySize);
+  // Debounce resize through rAF: the OS fires resize events back-to-back during
+  // border drag and DPI snaps. Reapplying pixel ratio / projection on every
+  // event causes a one-frame redraw glitch that reads as flicker. Coalesce
+  // them to one apply per frame.
+  let resizePending = false;
+  addEventListener('resize', () => {
+    if (resizePending) return;
+    resizePending = true;
+    requestAnimationFrame(() => { resizePending = false; applySize(); });
+  });
+  applySize();
 
   // ---------- player / weapon state ----------
   let state = MENU, mode = 'gridshot';
