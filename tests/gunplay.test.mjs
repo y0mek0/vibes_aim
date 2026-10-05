@@ -79,7 +79,7 @@ eq('gate passes on-time shot', shotReady(1000, 800, 9.75), true);
 }
 
 // --- spawn distance bands ---
-eq('close band knifeable', SPAWN_BANDS.close[1] <= 9, true);
+eq('close band viable', SPAWN_BANDS.close[1] <= 9, true);
 eq('spawnDist deterministic', spawnDist('long', 0.5), 27.5);
 eq('spawnDist in band', spawnDist('close', 0.999) < 9 && spawnDist('close', 0) >= 4, true);
 eq('spawnDist fallback', spawnDist('nope', 0), 10);
@@ -100,7 +100,6 @@ eq('easeOutBack clamps', easeOutBack(5), easeOutBack(1));
 eq('sidearm slot', slotForClass('Sidearm'), 2);
 eq('rifle slot', slotForClass('Rifle'), 1);
 eq('sniper slot', slotForClass('Sniper'), 1);
-eq('melee class falls back to primary', slotForClass('Melee'), 1);
 eq('cycle fwd', cycleSlot(2, 1), 1);
 eq('cycle back', cycleSlot(1, -1), 2);
 eq('cycle mid', cycleSlot(1, 1), 2);
