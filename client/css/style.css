@@ -966,13 +966,33 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
   #menu .customize-modal { max-height: calc(100dvh - 20px); }
   #menu .customize-content { max-height: calc(100dvh - 180px); padding: 20px 17px; }
 }
+#menu .mode-grid { grid-template-columns: minmax(0, .78fr) minmax(0, 1.42fr); grid-template-rows: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; gap: 8px; }
+#menu .mode-grid > .mode { grid-column: auto; grid-row: auto; min-width: 0; min-height: 0; }
+#menu .mode-grid > .mode-gridshot { grid-column: 2; grid-row: 1 / span 3; min-height: 0; }
+#menu .mode-grid > .mode-flick { grid-column: 1; grid-row: 1; }
+#menu .mode-grid > .mode-tracking { grid-column: 1; grid-row: 2; }
+#menu .mode-grid > .mode-bots { grid-column: 1; grid-row: 3; }
+#menu .mode-grid > .mode:first-child { grid-column: auto; min-height: 0; }
+#menu .mode-grid > .mode-gridshot { border-width: 1px; }
+#menu #vibes-open-terminal,
+#menu #vibes-open-missions { position: relative; inset: auto; left: auto; right: auto; top: auto; bottom: auto; }
+@media (max-width: 680px) {
+  #menu .mode-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+  #menu .mode-grid > .mode-gridshot,
+  #menu .mode-grid > .mode-flick,
+  #menu .mode-grid > .mode-tracking,
+  #menu .mode-grid > .mode-bots { grid-column: auto; grid-row: auto; }
+}
 @media (prefers-reduced-motion: reduce) {
   #menu .mode, #menu .nav-link, #menu .nav-customize { transition: none; }
 }
-
-
-/* Point refinements: keep the dashboard structure, tighten the rhythm, and
-   use the original comic-like yellow / black / white language. */
+#menu .mode-grid > .mode.mode-gridshot:first-child { grid-column: 2; grid-row: 1 / span 3; min-height: 0; }
+#menu .mode-grid > .mode.mode-flick { grid-column: 1; grid-row: 1; }
+#menu .mode-grid > .mode.mode-tracking { grid-column: 1; grid-row: 2; }
+#menu .mode-grid > .mode.mode-bots { grid-column: 1; grid-row: 3; }
+#menu #vibes-open-terminal,
+#menu #vibes-open-missions { position: relative; inset: auto; }
+/* Point refinements: keep the dashboard structure, tighten the rhythm, and use the original comic-like yellow / black / white language. */
 #menu.overlay.open {
   background: #101010;
 }
@@ -1037,3 +1057,12 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
 #menu .stats-strip-item b { font-size: 11px; }
 #menu .vc-change.neg { color: #fff !important; }
 #menu .vc-status { color: #bdbdbd; }
+
+
+/* Final dashboard grid guard: wins over legacy first-child rules. */
+#menu .mode-grid > .mode.mode-gridshot:first-child { grid-column: 2; grid-row: 1 / span 3; min-height: 0; }
+#menu .mode-grid > .mode.mode-flick { grid-column: 1; grid-row: 1; }
+#menu .mode-grid > .mode.mode-tracking { grid-column: 1; grid-row: 2; }
+#menu .mode-grid > .mode.mode-bots { grid-column: 1; grid-row: 3; }
+#menu #vibes-open-terminal,
+#menu #vibes-open-missions { position: relative; inset: auto; }
