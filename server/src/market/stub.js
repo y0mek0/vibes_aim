@@ -63,10 +63,12 @@ function candlesFor(symbol, range) {
   let prev = priceAt(symbol, t);
   for (let i = 0; i < count; i++) {
     const o = prev;
-    const drift = (Math.sin((t / step) * (symbol.charCodeAt(1) + 1)) + Math.cos((t / step) * 0.3)) * 0.004;
+    // Keep the offline chart readable: a slow drift instead of a full-amplitude
+    // oscillation on every candle, which renders as visual noise in the dashboard.
+    const drift = Math.sin(i * 0.08 + symbol.charCodeAt(1)) * 0.0008 + Math.cos(i * 0.03) * 0.0003;
     const c = Math.max(0, o * (1 + drift));
-    const h = Math.max(o, c) * (1 + Math.abs(Math.sin(t / step)) * 0.002);
-    const l = Math.min(o, c) * (1 - Math.abs(Math.cos(t / step)) * 0.002);
+    const h = Math.max(o, c) * (1 + (0.0005 + Math.abs(Math.sin(i * 0.11)) * 0.0005));
+    const l = Math.min(o, c) * (1 - (0.0005 + Math.abs(Math.cos(i * 0.09)) * 0.0005));
     out.push({ t, o: round(o, 4), h: round(h, 4), l: round(l, 4), c: round(c, 4) });
     prev = c;
     t += step;
