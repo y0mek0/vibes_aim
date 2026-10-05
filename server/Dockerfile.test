@@ -1,0 +1,16 @@
+# Test-only Dockerfile: runs the full fast test suite inside the same
+# Node 20 image used by CI and the production server. Used in CI and
+# also handy for local "does my machine still pass?" checks.
+#
+# Usage:
+#   docker build -f server/Dockerfile.test -t vibes_aim-tests .
+#   docker run --rm vibes_aim-tests
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# The whole repo is required because tests load client/* fixtures.
+COPY . .
+
+CMD ["npm", "test"]

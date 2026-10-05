@@ -407,6 +407,19 @@
 - Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
 - Full `npm test` → exit 0 / `ALL PASS`.
 
+## Stage 11.9 — Server Docker image (2026-10-05)
+
+- Added `server/Dockerfile` and `server/Dockerfile.test`, both based on `node:20-alpine` to match `.nvmrc`. The server has zero npm dependencies, so the production image copies only `server/src` and runs `node src/index.js` as the unprivileged `node` user with a `/health` container health check. The test image runs `npm test` in the same base.
+- Added `.dockerignore` files that exclude `node_modules`, `.git`, generated screenshots, Python cache, and `.env*` files.
+- Extended `deploy/README.md` with a Docker section covering the build and run commands for both images.
+
+### Evidence
+
+- `node --check server/src/index.js` → exit 0.
+- Local `PORT=4174 node server/src/index.js` returned `200 {"ok":true,"ts":...}` for `GET /health`.
+- Full `npm test` → exit 0 / `ALL PASS`.
+- Docker daemon is not installed on the development host, so a local `docker build` was not run; CI or any host with Docker can verify with the documented commands.
+
 ## Stage 11.7 — README truth pass (2026-10-05)
 
 - Rewrote stale game documentation to state the real 60-second hold mission, 70% recorded-accuracy mission, 200 Stable start, AAPL→NVDA progression, exposure-versus-collateral margin semantics, and live-provider session gate.

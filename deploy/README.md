@@ -51,6 +51,26 @@ Example `client/vercel.json`:
 - Set `PORT` (the platform usually injects it for you)
 - Set `ORIGIN` to the static client's URL
 
+### Docker (any host with a Docker daemon)
+
+Two minimal Dockerfiles are shipped. Both use `node:20-alpine` (matches `.nvmrc`) and contain no `npm install` step because the project has zero runtime npm dependencies.
+
+- `server/Dockerfile` — production server image. Exposes port `3000`, runs as the unprivileged `node` user, and uses `/health` as a container health check.
+- `server/Dockerfile.test` — same base image, runs the full fast `npm test` chain. Useful in CI and for local "does this machine still pass?" checks.
+
+```bash
+# Production server
+docker build -t vibes_aim-server ./server
+docker run --rm -p 3000:3000 \
+    -e ORIGIN=http://127.0.0.1:4173 \
+    -e MARKET_PROVIDER=stub \
+    vibes_aim-server
+
+# Test image (CI / local check)
+docker build -f server/Dockerfile.test -t vibes_aim-tests .
+docker run --rm vibes_aim-tests
+```
+
 ### Supabase persistence
 
 To persist progress across server restarts:

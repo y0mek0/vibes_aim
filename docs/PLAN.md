@@ -52,7 +52,21 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
-### Stage 11.8 — ticker UI guard and active HUD cue (DONE 2026-10-05)
+### Stage 11.9 — server Docker image (DONE 2026-10-05)
+
+**Verified evidence:** `node --check server/src/index.js` exited 0; local `PORT=4174 node server/src/index.js` answered `GET /health` with `200 {"ok":true,"ts":...}`. Full `npm test` exited 0. The Docker image itself is not built locally because Docker is not installed on this machine; CI users can verify with `docker build -t vibes_aim-server ./server` and `docker run --rm -p 3000:3000 vibes_aim-server`.
+
+**Scope:** add a minimal production Docker image for the pure-Node server, plus a test image, and document both in the deploy guide. The server has no npm dependencies, so the image only copies source and runs `node src/index.js`.
+
+**Acceptance criteria:**
+
+- `server/Dockerfile` builds a single-stage `node:20-alpine` image with non-root `node` user, `/health` health check, port `3000` exposed, and no `npm install` step.
+- `server/Dockerfile.test` builds the same base and runs `npm test`.
+- `.dockerignore` excludes `node_modules`, `.git`, screenshots, Python cache, and `.env*`.
+- `deploy/README.md` documents both images and the exact `docker run` commands.
+- `node --check server/src/index.js` and `npm test` remain green.
+
+**Out of scope:** real Finnhub token, multi-stage builds, distroless variants, Compose stack, registry publishing.
 
 **Verified evidence:** `node tests/client-bridge.test.mjs`, strict `node tests/visual.test.mjs`, and fresh full `npm test` exited 0. The rendered HUD states `ACTIVE AAPL` with `aria-label="Active farm ticker: AAPL"`; browser smoke found zero pre-IPO chart/terminal controls and no browser/network errors.
 
