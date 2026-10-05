@@ -12,6 +12,7 @@
 import { HttpError } from '../util/json.js';
 
 const FINNHUB_BASE = 'https://finnhub.io/api/v1';
+const FINNHUB_WS = 'wss://ws.finnhub.io';
 
 const NAMES = {
   AAPL: 'Apple Inc.',
@@ -49,9 +50,85 @@ async function fhGet(path, token, params = {}) {
   return res.json();
 }
 
-export function createFinnhubProvider({ token }) {
+function addSocketListener(socket, event, listener) {
+  if (typeof socket?.addEventListener === 'function') {
+    socket.addEventListener(event, listener);
+    return;
+  }
+  if (typeof socket?.on === 'function') {
+    socket.on(event, listener);
+    return;
+  }
+  throw new Error('Finnhub WebSocket does not expose addEventListener/on');
+}
+
+// Finnhub WebSocket trade payloads use: { type: 'trade', data: [{ p, s, t, v }] }.
+// A malformed or unrelated event is ignored rather than ending a live stream.
+export function parseFinnhubTradeMessage(raw, symbol) {
+  let payload;
+  try {
+    const candidate = typeof raw === 'string'
+      ? raw
+      : (typeof raw?.data === 'string' ? raw.data : raw);
+    payload = typeof candidate === 'string' ? JSON.parse(candidate) : candidate;
+  } catch (_) {
+    return [];
+  }
+  if (payload?.type !== 'trade' || !Array.isArray(payload.data)) return [];
+  return payload.data
+    .filter((trade) => trade?.s === symbol && Number.isFinite(Number(trade.p)))
+    .map((trade) => ({
+      symbol,
+      price: Number(trade.p),
+      // Finnhub trade timestamps are epoch milliseconds. Keep a safe
+      // local fallback for a malformed upstream timestamp.
+      ts: Number.isFinite(Number(trade.t)) ? Number(trade.t) : Date.now(),
+      currency: 'USD',
+    }));
+}
+
+function makeFinnhubSubscriber({ token, WebSocketImpl }) {
+  return function subscribe(symbol, listener) {
+    if (!(symbol in NAMES)) throw new HttpError(400, 'unknown_symbol', symbol);
+    // There is no upstream feed for the game's Pre-IPO labels. Deliver a
+    // deterministic no-price state so SSE preserves existing semantics.
+    if (NAMES[symbol].includes('Pre-IPO')) {
+      let closed = false;
+      queueMicrotask(() => {
+        if (!closed) listener({ symbol, price: null, ts: Date.now(), currency: 'USD', status: 'pre_ipo' });
+      });
+      return { unsubscribe: () => { closed = true; } };
+    }
+    requireToken(token);
+    if (typeof WebSocketImpl !== 'function') return null;
+
+    let closed = false;
+    const url = `${FINNHUB_WS}?token=${encodeURIComponent(token)}`;
+    const socket = new WebSocketImpl(url);
+    const stop = () => {
+      if (closed) return;
+      closed = true;
+      try { socket.close(); } catch (_) { /* noop */ }
+    };
+    addSocketListener(socket, 'open', () => {
+      if (!closed) socket.send(JSON.stringify({ type: 'subscribe', symbol }));
+    });
+    addSocketListener(socket, 'message', (event) => {
+      if (closed) return;
+      for (const tick of parseFinnhubTradeMessage(event, symbol)) listener(tick);
+    });
+    // A close/error leaves the client-side stale indicator to do its job.
+    // The SSE layer keeps its connection alive and does not spin retries.
+    addSocketListener(socket, 'close', () => { closed = true; });
+    addSocketListener(socket, 'error', () => {});
+    return { unsubscribe: stop };
+  };
+}
+
+export function createFinnhubProvider({ token, WebSocketImpl = globalThis.WebSocket } = {}) {
   return {
     name: 'finnhub',
+    subscribe: makeFinnhubSubscriber({ token, WebSocketImpl }),
     async getQuote(symbol) {
       if (!(symbol in NAMES)) throw new HttpError(400, 'unknown_symbol', symbol);
       if (NAMES[symbol].includes('Pre-IPO')) {

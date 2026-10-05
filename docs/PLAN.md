@@ -52,6 +52,22 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.12 — Finnhub upstream WebSocket adapter (DONE — mock-verified, 2026-10-05)
+
+**Verified evidence:** official Finnhub documentation confirms `wss://ws.finnhub.io?token=…`. `node tests/finnhub.test.mjs` passes 12 assertions, including URL encoding, subscribe-frame emission, trade filtering, malformed payload handling, unsubscribe cleanup, no-WebSocket REST fallback, and no-token rejection. `node tests/stream.test.mjs` and `node tests/stream-wire.test.mjs` pass. Live upstream validation is explicitly unverified because `FINNHUB_TOKEN` is absent after the local reboot.
+
+**Scope:** implement the optional native `subscribe(symbol, listener)` provider contract in the Finnhub adapter, then let the existing server SSE stream choose it in preference to REST polling. The implementation must run without a third-party WebSocket dependency and retain all no-key/offline behaviour.
+
+**Acceptance criteria:**
+
+- With a configured token and runtime native `WebSocket`, the provider opens `wss://ws.finnhub.io?token=…`, emits Finnhub's `{ type: 'subscribe', symbol }` frame after `open`, filters only the selected symbol's trade events, and closes on unsubscribe.
+- Malformed/unrelated upstream frames do not end the feed; pre-IPO symbols retain game-local `price: null, status: 'pre_ipo'` semantics.
+- If no native WebSocket exists (not all supported Node 20 runtimes expose it), `subscribe()` returns `null`; SSE retains the existing REST polling fallback.
+- When a native subscription exists, SSE does not also poll REST and duplicate chart ticks.
+- Tokens never enter client code, logs, tests, commits, or documentation.
+
+**Remaining external acceptance:** start server with `MARKET_PROVIDER=finnhub` and a locally configured `FINNHUB_TOKEN`, then observe an authenticated live trade frame. This must be done without exposing the token.
+
 ### Stage 11.11 — cross-platform visual-smoke launcher (DONE 2026-10-05)
 
 **Verified evidence:** `python -m py_compile tests/visual_smoke.py` exited 0. With `VIBES_VISUAL_CHROME=""`, direct `python tests/visual_smoke.py` exited 0 with empty console/page/request/API/static-host error arrays. Fresh full `npm test` exited 0 / `ALL PASS`.

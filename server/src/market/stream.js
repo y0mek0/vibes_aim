@@ -66,38 +66,45 @@ export function streamSymbol(market, symbol, res) {
   }, MAX_FRAME_INTERVAL_MS);
 
   let unsubscribe = () => {};
+  let hasNativeSubscription = false;
   if (typeof market.subscribe === 'function') {
     try {
       const sub = market.subscribe(symbol, onTick);
       if (sub && typeof sub.unsubscribe === 'function') {
+        hasNativeSubscription = true;
         unsubscribe = () => sub.unsubscribe();
       }
-    } catch (e) {
-      // Fall through to polling fallback below.
+    } catch (_) {
+      // Fall through to polling fallback below. This is expected for an
+      // unconfigured live provider (no token) or a runtime without WebSocket.
     }
   }
 
-  // Polling fallback: send the first snapshot immediately, then every
-  // POLL_INTERVAL_MS. We keep both branches alive when subscribe is
-  // present so a missing native event still produces ticks.
-  let lastSentTs = 0;
-  const poll = async () => {
-    if (stopped) return;
-    try {
-      const q = await market.getQuote(symbol);
-      if (q && q.ts !== lastSentTs) {
-        lastSentTs = q.ts;
-        onTick(q);
-      }
-    } catch (_) { /* keep stream alive */ }
-  };
-  poll();
-  const pollTimer = setInterval(poll, POLL_INTERVAL_MS);
+  // A provider-native stream owns tick delivery. Otherwise send a snapshot
+  // immediately and poll once per second. Avoiding dual delivery is important:
+  // a live upstream trade event and a REST snapshot can have distinct
+  // timestamps for the same price, which would duplicate chart updates.
+  let pollTimer = null;
+  if (!hasNativeSubscription) {
+    let lastSentTs = 0;
+    const poll = async () => {
+      if (stopped) return;
+      try {
+        const q = await market.getQuote(symbol);
+        if (q && q.ts !== lastSentTs) {
+          lastSentTs = q.ts;
+          onTick(q);
+        }
+      } catch (_) { /* keep stream alive */ }
+    };
+    poll();
+    pollTimer = setInterval(poll, POLL_INTERVAL_MS);
+  }
 
   function stop() {
     if (stopped) return;
     stopped = true;
-    clearInterval(pollTimer);
+    if (pollTimer) clearInterval(pollTimer);
     clearInterval(heartbeat);
     try { unsubscribe(); } catch (_) { /* noop */ }
     try { res.end(); } catch (_) { /* already closed */ }

@@ -407,6 +407,20 @@
 - Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
 - Full `npm test` → exit 0 / `ALL PASS`.
 
+## Stage 11.12 — Finnhub upstream WebSocket adapter (2026-10-05)
+
+- Added optional native `subscribe(symbol, listener)` to `server/src/market/finnhub.js`. With a configured token and runtime native WebSocket, it connects only to Finnhub's documented `wss://ws.finnhub.io?token=…` endpoint, sends a subscribe frame after socket open, filters same-symbol trade frames, and closes the socket on unsubscribe.
+- The adapter remains safe in supported runtimes without a global WebSocket: `subscribe()` returns `null`, so the server's pre-existing SSE implementation continues using REST polling. Missing token still rejects with `503 market_not_configured` before any socket is opened.
+- Corrected the SSE stream so a provider-native subscription is exclusive: it no longer also performs REST polling and produces duplicate chart ticks. Polling remains unchanged for stub/no-WebSocket providers.
+- Extended deterministic mock tests for URL encoding, subscribe payload, event filtering, parser safety, unsubscribe cleanup, missing-WebSocket fallback, and missing-token rejection. No key or upstream authenticated call was used.
+
+### Evidence
+
+- `node tests/finnhub.test.mjs` → exit 0 / `ALL PASS` (12 assertions).
+- `node tests/stream.test.mjs` → exit 0; asserts native subscription produces zero REST polls.
+- `node tests/stream-wire.test.mjs` → exit 0 / `ALL PASS`.
+- Live Finnhub authentication is deliberately not claimed: `FINNHUB_TOKEN` was absent after reboot.
+
 ## Stage 11.11 — Cross-platform visual-smoke launcher (2026-10-05)
 
 - `tests/visual_smoke.py` now reads optional `VIBES_VISUAL_CHROME`. It first attempts the existing Windows Chrome path and, when unavailable, falls back to the Chromium browser installed by `python -m playwright install chromium`. This makes the strict smoke portable to Linux CI without changing its assertions.

@@ -2,6 +2,10 @@
 
 > Append-only. Honest record of what was tried, what actually happened, and what to do next time. Failures belong here, not in CHANGELOG.
 
+## Stage 11.12 — Finnhub payload parser initially unwrapped valid trade data (2026-10-05)
+
+- First parser version treated any object with a `data` property as a WebSocket `MessageEvent`. Finnhub's decoded trade payload itself also has `data` — an array of trades — so the unit test for direct decoded payload returned an empty list. The event wrapper must only be unwrapped when `event.data` is a string; otherwise parse the object as the payload. Focused test failed before this correction and passed after it. Lesson: distinguish transport envelopes by the value type, not only a shared property name.
+
 ## Stage 11.11 — Workflow push rejected by credential scope (2026-10-05)
 
 - Tried to add an optional Playwright visual-smoke job under `.github/workflows/test.yml`. GitHub rejected the push: the active OAuth credential can push ordinary code but lacks the `workflow` scope required to create or update workflow files. The rejected commit was not force-pushed or worked around; the workflow change is held locally pending a proper credential. The independent cross-platform visual launcher and `.gitignore` changes remain safe to ship. Lesson: treat workflow changes as a separate privileged release unit and verify credential scope before staging them with ordinary code.

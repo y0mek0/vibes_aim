@@ -8,7 +8,7 @@
 // Run: node tests/finnhub.test.mjs (from vibes_aim/)
 
 import assert from 'node:assert/strict';
-import { createFinnhubProvider } from '../server/src/market/finnhub.js';
+import { createFinnhubProvider, parseFinnhubTradeMessage } from '../server/src/market/finnhub.js';
 
 let fails = 0;
 const ok  = (m) => console.log(`ok   ${m}`);
@@ -160,6 +160,58 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   } finally {
     globalThis.fetch = realFetch;
   }
+}
+
+// 9. native WebSocket subscribe: handshake, symbol filtering and cleanup
+{
+  const sockets = [];
+  class FakeWebSocket {
+    constructor(url) { this.url = url; this.listeners = new Map(); this.sent = []; this.closed = false; sockets.push(this); }
+    addEventListener(event, listener) { this.listeners.set(event, listener); }
+    emit(event, payload = {}) { this.listeners.get(event)?.(payload); }
+    send(payload) { this.sent.push(payload); }
+    close() { this.closed = true; }
+  }
+  const p = createFinnhubProvider({ token: 'fake token', WebSocketImpl: FakeWebSocket });
+  const ticks = [];
+  const sub = p.subscribe('AAPL', (tick) => ticks.push(tick));
+  assert.equal(sockets.length, 1);
+  assert.equal(sockets[0].url, 'wss://ws.finnhub.io?token=fake%20token');
+  sockets[0].emit('open');
+  assert.deepEqual(JSON.parse(sockets[0].sent[0]), { type: 'subscribe', symbol: 'AAPL' });
+  sockets[0].emit('message', { data: JSON.stringify({ type: 'trade', data: [
+    { s: 'AAPL', p: 201.5, t: 1700000000123 },
+    { s: 'NVDA', p: 900, t: 1700000000999 },
+  ] }) });
+  assert.deepEqual(ticks, [{ symbol: 'AAPL', price: 201.5, ts: 1700000000123, currency: 'USD' }]);
+  sub.unsubscribe();
+  assert.equal(sockets[0].closed, true);
+  sockets[0].emit('message', { data: JSON.stringify({ type: 'trade', data: [{ s: 'AAPL', p: 202, t: 1 }] }) });
+  assert.equal(ticks.length, 1, 'unsubscribed socket must not emit ticks');
+  ok('subscribe opens Finnhub WebSocket, filters trades and closes cleanly');
+}
+
+// 10. parser ignores malformed/unrelated payloads and keeps valid symbols
+{
+  assert.deepEqual(parseFinnhubTradeMessage('{bad', 'AAPL'), []);
+  assert.deepEqual(parseFinnhubTradeMessage({ data: JSON.stringify({ type: 'ping' }) }, 'AAPL'), []);
+  const ticks = parseFinnhubTradeMessage({ type: 'trade', data: [{ s: 'AAPL', p: '201.1', t: '42' }, { s: 'AAPL', p: 'oops', t: 43 }] }, 'AAPL');
+  assert.deepEqual(ticks, [{ symbol: 'AAPL', price: 201.1, ts: 42, currency: 'USD' }]);
+  ok('trade parser safely ignores malformed and unrelated upstream events');
+}
+
+// 11. environments without a native WebSocket use the existing REST fallback
+{
+  const p = createFinnhubProvider({ token: 'fake-token', WebSocketImpl: null });
+  assert.equal(p.subscribe('AAPL', () => {}), null);
+  ok('subscribe returns null without WebSocket so SSE uses REST polling');
+}
+
+// 12. no token is still rejected before an upstream socket can open
+{
+  const p = createFinnhubProvider({ token: '', WebSocketImpl: class {} });
+  assert.throws(() => p.subscribe('AAPL', () => {}), (e) => e?.status === 503 && e?.code === 'market_not_configured');
+  ok('no-token subscribe -> 503 market_not_configured');
 }
 
 if (fails) {

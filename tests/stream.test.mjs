@@ -83,8 +83,10 @@ test('streamSymbol rejects unknown symbols with 400 JSON', () => {
 
 test('streamSymbol uses provider subscribe when present', async () => {
   const events = [];
+  let polls = 0;
   const provider = {
     name: 'sub',
+    async getQuote() { polls++; throw new Error('must not poll while native subscribe is active'); },
     subscribe(symbol, listener) {
       queueMicrotask(() => listener({ symbol, price: 42.0, ts: 1700000000000 }));
       return { unsubscribe() { events.push('unsub'); } };
@@ -95,6 +97,7 @@ test('streamSymbol uses provider subscribe when present', async () => {
   await new Promise((r) => setImmediate(r));
   await new Promise((r) => setImmediate(r));
   assert.match(res.body, /"price":42/);
+  assert.equal(polls, 0, 'native provider must not also start REST polling');
   handle && handle.stop();
   assert.deepEqual(events, ['unsub']);
 });

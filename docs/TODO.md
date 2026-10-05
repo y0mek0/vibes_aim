@@ -113,7 +113,7 @@
 
 ## Stage 11 backlog (post-v0.1)
 
-- [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
+- [x] CI: `.github/workflows/test.yml` runs `npm test` on every push. → workflow committed previously; GitHub execution is governed by repository settings.
 - [ ] CI: optional Playwright job for the visual smoke — **blocked** until the credential used to update `.github/workflows/test.yml` has GitHub `workflow` scope; node CI still runs the fast suite.
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
@@ -121,8 +121,8 @@
 - [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [x] Honest README update — documents real mission timing/accuracy, 200 Stable, unlock and collateral rules, live-market session gate, persistence boundaries, and slow proof command. → DONE 2026-10-05.
 - [x] Ticker UI guard + active HUD cue — pre-IPO symbols have no chart/terminal controls; HUD visibly/accessibly identifies the active ticker. → DONE 2026-10-05.
-- [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
-- [ ] Docker image for the server.
+- [ ] Finnhub native upstream WebSocket is implemented and mock-verified; remaining acceptance is one authenticated live frame with a locally configured `FINNHUB_TOKEN` (do not commit or disclose the token).
+- [x] Docker image for the server. → DONE 2026-10-05; Node 20 Alpine, non-root, `/health` check.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 - [x] Server Docker image — minimal `node:20-alpine` Dockerfile with `/health` health check and a `Dockerfile.test` for `npm test`; documented in `deploy/README.md`. → DONE 2026-10-05.
 - [x] Server-Sent Events for live market ticks — `GET /market/stream/:symbol` plus client `openQuoteStream`, with polling fallback. → DONE 2026-10-05.
@@ -140,7 +140,7 @@
 
 ## Stage 11 backlog (post-v0.1)
 
-- [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
+- [x] CI: `.github/workflows/test.yml` runs `npm test` on every push. → workflow committed previously; GitHub execution is governed by repository settings.
 - [ ] CI: optional Playwright job for the visual smoke — **blocked** until the credential used to update `.github/workflows/test.yml` has GitHub `workflow` scope; node CI still runs the fast suite.
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
@@ -148,8 +148,8 @@
 - [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [x] Honest README update — documents real mission timing/accuracy, 200 Stable, unlock and collateral rules, live-market session gate, persistence boundaries, and slow proof command. → DONE 2026-10-05.
 - [x] Ticker UI guard + active HUD cue — pre-IPO symbols have no chart/terminal controls; HUD visibly/accessibly identifies the active ticker. → DONE 2026-10-05.
-- [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
-- [ ] Docker image for the server.
+- [ ] Finnhub native upstream WebSocket is implemented and mock-verified; remaining acceptance is one authenticated live frame with a locally configured `FINNHUB_TOKEN` (do not commit or disclose the token).
+- [x] Docker image for the server. → DONE 2026-10-05; Node 20 Alpine, non-root, `/health` check.
 - [x] Push to GitHub `origin/main`. → DONE 2026-10-05.
 - [x] Server Docker image — minimal `node:20-alpine` Dockerfile with `/health` health check and a `Dockerfile.test` for `npm test`; documented in `deploy/README.md`. → DONE 2026-10-05.
 - [x] Server-Sent Events for live market ticks — `GET /market/stream/:symbol` plus client `openQuoteStream`, with polling fallback. → DONE 2026-10-05.
