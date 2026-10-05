@@ -180,16 +180,19 @@
           <h1>Build precision.<br><em>Earn the market.</em></h1>
           <p>Every clean hit adds to your active ticker. Train, build a position and see the result in your portfolio.</p>
         </div>
-        <div class="road-card">
-          <div class="road-card-head"><div><span>ROAD TO NVDA</span><small>Unlock requirement</small></div><b id="overall-imp">0 / 6</b></div>
-          <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
-          <div class="road-foot"><span>Complete all six AAPL missions to unlock NVDA.</span><span id="impbreakdown">0 / 6 complete</span></div>
-        </div>
+        <details class="road-card">
+          <summary class="road-summary">
+            <div class="road-card-head"><div><span>ROAD TO NVDA</span><small>Unlock requirement</small></div><b id="overall-imp">0 / 6</b></div>
+            <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
+            <div class="road-foot"><span>Complete all six AAPL missions to unlock NVDA.</span><span class="road-toggle">View missions</span></div>
+          </summary>
+          <div class="road-missions" data-road-missions aria-label="AAPL missions"></div>
+        </details>
       </section>
 
       <section class="dashboard-grid" data-dashboard-section-target="train">
         <div class="training-column">
-          <div class="panel-heading"><div><span class="section-kicker">Train</span><h2>Choose a session</h2></div></div>
+          <div class="panel-heading"><div><h2>Choose a session</h2></div></div>
           <section class="training-panel"><div id="modelist" class="mode-grid"></div></section>
         </div>
 

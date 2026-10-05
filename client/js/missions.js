@@ -76,10 +76,20 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     setText(els.total, MISSIONS.length);
     const roadCount = document.getElementById('overall-imp');
     const roadBar = document.getElementById('goalbar');
-    const roadBreakdown = document.getElementById('impbreakdown');
     setText(roadCount, `${claimed} / ${MISSIONS.length}`);
-    setText(roadBreakdown, `${claimed} / ${MISSIONS.length} complete`);
     if (roadBar) roadBar.style.width = `${Math.round((claimed / MISSIONS.length) * 100)}%`;
+    const roadMissions = document.querySelector('[data-road-missions]');
+    if (roadMissions) {
+      roadMissions.innerHTML = MISSIONS.map((def) => {
+        const live = missions.find((m) => m.kind === def.kind) || { progress: 0, done: false, claimed: false };
+        const status = live.claimed ? 'claimed' : (live.done ? 'ready' : 'in progress');
+        return `<div class="road-mission" data-road-kind="${def.kind}">
+          <span class="road-mission-label">${def.label}</span>
+          <span class="road-mission-progress">${formatProgress(def, live.progress || 0)}</span>
+          <span class="road-mission-status ${status.replace(' ', '-')}">${status}</span>
+        </div>`;
+      }).join('');
+    }
 
     // unlock card: visible if every mission is claimed
     if (allMissionsClaimed(missions)) {

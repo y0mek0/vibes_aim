@@ -1100,6 +1100,20 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
 #menu .road-foot { align-items: baseline; }
 #menu .road-foot span:first-child { flex: 1 1 auto; min-width: 0; }
 #menu .road-foot span:last-child { flex: 0 0 auto; white-space: nowrap; }
+#menu .road-card { cursor: default; }
+#menu .road-summary { display: block; cursor: pointer; list-style: none; outline: none; }
+#menu .road-summary::-webkit-details-marker { display: none; }
+#menu .road-summary::marker { content: ''; }
+#menu .road-summary:focus-visible { outline: 1px solid #f6d447; outline-offset: 5px; }
+#menu .road-toggle { color: #f6d447; }
+#menu .road-card[open] .road-toggle { color: #fff; }
+#menu .road-missions { display: grid; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--dash-line); }
+#menu .road-mission { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 10px; min-width: 0; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.08); font: 9px var(--font-mono); }
+#menu .road-mission:last-child { border-bottom: 0; }
+#menu .road-mission-label { min-width: 0; color: var(--dash-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#menu .road-mission-progress { color: #fff; white-space: nowrap; }
+#menu .road-mission-status { color: var(--dash-muted); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+#menu .road-mission-status.ready, #menu .road-mission-status.claimed { color: #f6d447; }
 
 /* The engine stylesheet disables selection globally; the dashboard must remain selectable. */
 *, *::before, *::after { -webkit-user-select: text; user-select: text; }
@@ -1127,6 +1141,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .dashboard-intro h1 { font-size: clamp(28px, 2.8vw, 40px); line-height: .94; }
 #menu .dashboard-intro p { margin-top: 12px; }
 #menu .road-card { width: auto; min-width: 0; padding: 7px 0 7px 18px; }
+#menu .training-column .panel-heading { min-height: 48px; }
 #menu .training-panel { height: 336px; box-sizing: border-box; }
 #menu .mode-grid { grid-template-rows: repeat(3, minmax(0, 102px)); }
 #menu .mode-play { min-width: 68px; padding: 8px 18px; margin: 0 16px 14px 0; }
@@ -1138,6 +1153,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .market-panel { height: 193px; box-sizing: border-box; }
 #menu #vibes-chart .vc-body { height: 87px; }
 #menu .app-shell { padding-bottom: 15px; }
+#menu .mode::after { background: linear-gradient(115deg, transparent 40%, rgba(246,212,71,.34) 40.5%, rgba(246,212,71,.68) 44%, transparent 44.5%); }
 
 @media (max-width: 1400px) and (min-width: 941px) {
   #menu .mode-grid { grid-template-rows: repeat(3, minmax(0, 102px)); }
