@@ -675,7 +675,7 @@ export function boot() {
       const best = hs.length ? Math.max(...hs.map(h => h.score)) : null;
       const el = document.createElement('div'); el.className = 'mode mode-' + id;
       el.tabIndex = 0; el.setAttribute('role', 'button');
-      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${best !== null ? `best ${best} · ${hs.length} sessions` : 'no sessions yet — click to start'}</div>${mi === 1 ? '<button type="button" class="mode-play">Play</button>' : ''}</div>`;
+      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${best !== null ? `best ${best}` : 'click to start'}</div>${mi === 1 ? '<button type="button" class="mode-play">Play</button>' : ''}</div>`;
       el.addEventListener('click', () => startGame(id));
       const play = el.querySelector('.mode-play');
       if (play) play.addEventListener('click', e => { e.stopPropagation(); startGame(id); });
@@ -694,7 +694,7 @@ export function boot() {
         const bestAcc = hs.length ? Math.max(...hs.map(h => h.acc || 0)) + '%' : '—';
         const card = document.createElement('article');
         card.className = 'mode-record-card';
-        card.innerHTML = `<div class="mode-record-head"><span>${d.name}</span><b>${hs.length ? hs.length : 0} runs</b></div><div class="mode-record-values"><div><strong>${bestScore}</strong><small>BEST SCORE</small></div><div><strong>${bestAcc}</strong><small>BEST ACCURACY</small></div></div>`;
+        card.innerHTML = `<div class="mode-record-head"><span>${d.name}</span></div><div class="mode-record-values"><div><strong>${bestScore}</strong><small>BEST SCORE</small></div><div><strong>${bestAcc}</strong><small>BEST ACCURACY</small></div></div>`;
         records.appendChild(card);
       }
     }

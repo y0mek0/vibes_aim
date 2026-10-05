@@ -1113,3 +1113,9 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
   #menu .mode-record-grid,
   #menu .session-window-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Restore the compact MARKET//AIM wordmark treatment. */
+#menu .brand-mark { gap: 6px; font-family: var(--font-mono); font-size: 16px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+#menu .brand-main { color: var(--fg); }
+#menu .brand-accent { color: var(--dash-accent); letter-spacing: .07em; }

@@ -225,9 +225,10 @@ def main():
             summary["dom"]["initial_boot_hidden"] = True  # banner was hidden at start
             summary["dom"]["initial_menu_open"] = True
             summary["dom"]["initial_chart_visible"] = True
-            summary["dom"]["initial_bridge_present"] = True
-            summary["dom"]["initial_bridge_text"] = page.eval_on_selector('#vibes-aim-bridge', 'el => el.textContent.trim()')
-            summary["dom"]["initial_bridge_aria_label"] = page.eval_on_selector('#vibes-aim-bridge', 'el => el.getAttribute("aria-label")')
+            bridge = page.query_selector('#vibes-aim-bridge')
+            summary["dom"]["initial_bridge_present"] = bridge is not None
+            summary["dom"]["initial_bridge_text"] = bridge.text_content().strip() if bridge else ""
+            summary["dom"]["initial_bridge_aria_label"] = bridge.get_attribute("aria-label") if bridge else None
             summary["dom"]["initial_ticker"] = "AAPL"
 
             browser.close()

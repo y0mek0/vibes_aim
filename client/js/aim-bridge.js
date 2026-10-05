@@ -74,20 +74,13 @@ function ensureChip() {
 let lastUnit = 0;
 let total = 0;
 function flashChip(unit) {
-  ensureChip();
-  if (!chipEl) return;
   lastUnit = unit;
   total += unit;
-  chipEl.val.textContent = unit.toFixed(4);
-  chipEl.tot.textContent = `| total ${total.toFixed(4)}`;
   if (typeof document !== 'undefined') {
     document.querySelectorAll('[data-dashboard-session-units], [data-recent-earned]').forEach((el) => { el.textContent = `+${total.toFixed(4)} ${activeTicker}`; });
     document.querySelectorAll('[data-dashboard-today]').forEach((el) => { el.textContent = `+${total.toFixed(4)}`; });
     document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = activeTicker; });
   }
-  chipEl.wrap.style.opacity = '1';
-  clearTimeout(flashChip._t);
-  flashChip._t = setTimeout(() => { chipEl.wrap.style.opacity = '0.55'; }, 180);
 }
 
 function onHit(ev) {
@@ -117,7 +110,6 @@ function onHit(ev) {
 // we attach are simply lost (the session just started, no hits yet).
 export function startAimBridge() {
   if (typeof window === 'undefined') return;
-  ensureChip();
   window.addEventListener('vibes:hit', onHit);
   // sessionId is in sessionStorage; reading it once warms any browser that
   // delays first access. Not strictly required.
