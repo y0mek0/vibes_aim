@@ -407,6 +407,18 @@
 - Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
 - Full `npm test` → exit 0 / `ALL PASS`.
 
+## Stage 11.11 — Cross-platform visual-smoke launcher (2026-10-05)
+
+- `tests/visual_smoke.py` now reads optional `VIBES_VISUAL_CHROME`. It first attempts the existing Windows Chrome path and, when unavailable, falls back to the Chromium browser installed by `python -m playwright install chromium`. This makes the strict smoke portable to Linux CI without changing its assertions.
+- Added Python bytecode patterns (`__pycache__/`, `*.pyc`, `*.pyo`) to `.gitignore` so the direct smoke does not leave accidental local artifacts in the working tree.
+- An intended GitHub Actions visual-smoke job was **not** included in this release: GitHub rejected the push because the active OAuth credential lacks the required `workflow` scope. The existing Node matrix CI remains unchanged; the workflow change is pending a scoped credential.
+
+### Evidence
+
+- `python -m py_compile tests/visual_smoke.py` → exit 0.
+- `VIBES_VISUAL_CHROME="" python tests/visual_smoke.py` → exit 0; all console/page/request/API/static-host error arrays empty.
+- Fresh `npm test` → exit 0 / `ALL PASS`.
+
 ## Stage 11.10 — Server-Sent Events for live market ticks (2026-10-05)
 
 - Added `GET /market/stream/:symbol` to the server. Frames are `event: tick` with JSON data; the response is `text/event-stream` and includes a 15-second heartbeat so reverse proxies do not kill the connection. Unknown symbols return a 400 JSON `unknown_symbol`; pre-IPO symbols still stream with `price: null, status: 'pre_ipo'`.

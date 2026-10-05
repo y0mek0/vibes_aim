@@ -2,6 +2,10 @@
 
 > Append-only. Honest record of what was tried, what actually happened, and what to do next time. Failures belong here, not in CHANGELOG.
 
+## Stage 11.11 — Workflow push rejected by credential scope (2026-10-05)
+
+- Tried to add an optional Playwright visual-smoke job under `.github/workflows/test.yml`. GitHub rejected the push: the active OAuth credential can push ordinary code but lacks the `workflow` scope required to create or update workflow files. The rejected commit was not force-pushed or worked around; the workflow change is held locally pending a proper credential. The independent cross-platform visual launcher and `.gitignore` changes remain safe to ship. Lesson: treat workflow changes as a separate privileged release unit and verify credential scope before staging them with ordinary code.
+
 ## Stage 0 — Repo skeleton (2026-10-04)
 
 - First attempt to install the `market-aim-dev-log` skill description in 129 chars was rejected by the skill loader. Corrected to a 60-char summary in the description, detail moved into the body, then accepted.

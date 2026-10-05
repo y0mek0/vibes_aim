@@ -114,7 +114,7 @@
 ## Stage 11 backlog (post-v0.1)
 
 - [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
-- [ ] CI: optional Playwright job for the visual smoke.
+- [ ] CI: optional Playwright job for the visual smoke — **blocked** until the credential used to update `.github/workflows/test.yml` has GitHub `workflow` scope; node CI still runs the fast suite.
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
@@ -141,7 +141,7 @@
 ## Stage 11 backlog (post-v0.1)
 
 - [ ] CI: `.github/workflows/test.yml` runs `npm test` on every push.
-- [ ] CI: optional Playwright job for the visual smoke.
+- [ ] CI: optional Playwright job for the visual smoke — **blocked** until the credential used to update `.github/workflows/test.yml` has GitHub `workflow` scope; node CI still runs the fast suite.
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.

@@ -34,3 +34,7 @@ Thumbs.db
 dist/
 build/
 out/
+# Local Python artefacts
+__pycache__/
+*.pyc
+*.pyo

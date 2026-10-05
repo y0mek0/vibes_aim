@@ -101,11 +101,22 @@ def main():
         }
 
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                executable_path=r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-                headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
-            )
+            # Allow CI runners (e.g. Linux Playwright) to point at any
+            # installed Chrome/Chromium via VIBES_VISUAL_CHROME. The
+            # default stays the Windows developer install path so
+            # existing local workflows keep working.
+            chrome_path = os.environ.get("VIBES_VISUAL_CHROME") or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+            launch_kwargs = {
+                "headless": True,
+                "args": ["--no-sandbox", "--disable-dev-shm-usage"],
+            }
+            try:
+                browser = p.chromium.launch(executable_path=chrome_path, **launch_kwargs)
+            except Exception as launch_err:
+                # Fall back to whatever Playwright considers the default
+                # channel (chromium installed via `playwright install`).
+                summary["browser_launch_error"] = str(launch_err)
+                browser = p.chromium.launch(**launch_kwargs)
             ctx = browser.new_context(viewport={"width": 1440, "height": 900})
             ctx.add_init_script(f'window.VIBES_API_BASE = "http://127.0.0.1:{server_port}";')
             page = ctx.new_page()

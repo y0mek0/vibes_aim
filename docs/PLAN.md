@@ -52,6 +52,21 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.11 — cross-platform visual-smoke launcher (DONE 2026-10-05)
+
+**Verified evidence:** `python -m py_compile tests/visual_smoke.py` exited 0. With `VIBES_VISUAL_CHROME=""`, direct `python tests/visual_smoke.py` exited 0 with empty console/page/request/API/static-host error arrays. Fresh full `npm test` exited 0 / `ALL PASS`.
+
+**Scope:** make the existing browser smoke portable from the Windows developer Chrome path to a Playwright-provided Chromium binary on CI or Linux, without weakening strict browser checks. Prevent local Python bytecode artifacts from appearing as untracked files.
+
+**Acceptance criteria:**
+
+- `VIBES_VISUAL_CHROME` optionally selects a browser executable.
+- When the Windows Chrome path is unavailable, the smoke falls back to `p.chromium.launch()` so `playwright install chromium` works on Linux CI.
+- Existing Windows local Chrome behavior remains the default path; zero browser/network/static-host errors stay enforced.
+- Python `__pycache__`, `.pyc`, and `.pyo` files are ignored.
+
+**Out of scope:** adding a GitHub Actions visual-smoke job (the current GitHub credential lacks the required `workflow` scope), native Finnhub WebSocket integration, and browser asset changes.
+
 ### Stage 11.10 — server-sent events for live market ticks (DONE 2026-10-05)
 
 **Verified evidence:** `node tests/stream.test.mjs` (6 pure assertions) and `node tests/stream-wire.test.mjs` (real HTTP, 11 wire assertions) exit 0. Full `npm test` exits 0 / `ALL PASS` including strict visual smoke (no console / network / static-host 4xx-5xx).
