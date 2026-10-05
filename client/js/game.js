@@ -80,7 +80,6 @@ export function boot() {
     resizePending = true;
     requestAnimationFrame(() => { resizePending = false; applySize(); });
   });
-  applySize();
 
   // ---------- player / weapon state ----------
   let state = MENU, mode = 'gridshot';
