@@ -1,7 +1,7 @@
 import { boot } from './game.js';
 boot();
 
-// ---- app shell: PWA install flow, desktop-only gate, offline service worker ----
+// ---- app shell: optional install prompt and desktop-only gate ----
 let deferredPrompt = null;
 const installBtn = () => document.getElementById('pwa-install');
 addEventListener('beforeinstallprompt', e => {
@@ -16,9 +16,8 @@ installBtn()?.addEventListener('click', async () => {
   installBtn().hidden = true;
 });
 addEventListener('appinstalled', () => { installBtn().hidden = true; });
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-}
+// PWA/offline support is not part of this MVP: do not register a missing
+// worker and create a browser-visible 404 on every local launch.
 // desktop-only: touch-only devices get the gate instead of a broken trainer
 if (matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) {
   document.getElementById('deskblock')?.classList.add('on');

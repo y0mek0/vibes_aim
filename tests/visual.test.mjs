@@ -94,20 +94,33 @@ if (/^[0-9]+\./.test(summary.dom.chart_price_at_boot)) {
   bad(`chart AAPL price at boot not numeric: ${summary.dom.chart_price_at_boot}`);
 }
 
-// 3. no real page errors (uncaught exceptions). Console errors are
-//    reported but do not fail the test because Chrome strips the URL
-//    from the generic "Failed to load resource" line and we cannot
-//    reliably filter without a URL.
+// 3. Zero unexpected browser errors. The Python harness preserves URL-level
+// diagnostics for any failure, so a generic 404 cannot silently pass.
 if (Array.isArray(summary.real_errors) && summary.real_errors.length === 0) {
   ok('no real page errors during the smoke');
 } else {
   bad(`page errors during smoke: ${JSON.stringify(summary.real_errors).slice(0, 400)}`);
 }
-if (Array.isArray(summary.real_console) && summary.real_console.length > 0) {
-  console.log(`warn   real console errors during smoke: ${summary.real_console.length}`);
-  for (const e of summary.real_console.slice(0, 5)) console.log('       ' + e.slice(0, 120));
+if (Array.isArray(summary.real_console) && summary.real_console.length === 0) {
+  ok('no unexpected console errors during the smoke');
 } else {
-  ok('no real console errors during the smoke');
+  const details = JSON.stringify(summary.console_error_details || []).slice(0, 800);
+  bad(`console errors during smoke: ${details}`);
+}
+if (Array.isArray(summary.request_failures) && summary.request_failures.length === 0) {
+  ok('no failed browser requests during the smoke');
+} else {
+  bad(`failed browser requests: ${JSON.stringify(summary.request_failures).slice(0, 800)}`);
+}
+if (Array.isArray(summary.error_responses) && summary.error_responses.length === 0) {
+  ok('no 4xx/5xx app responses during the smoke');
+} else {
+  bad(`4xx/5xx app responses: ${JSON.stringify(summary.error_responses).slice(0, 800)}`);
+}
+if (Array.isArray(summary.static_errors) && summary.static_errors.length === 0) {
+  ok('no 4xx/5xx static-host responses during the smoke');
+} else {
+  bad(`4xx/5xx static-host responses: ${JSON.stringify(summary.static_errors).slice(0, 800)}`);
 }
 
 if (fails) { console.error(`${fails} FAILURES`); process.exit(1); }

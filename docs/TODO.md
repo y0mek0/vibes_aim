@@ -118,7 +118,7 @@
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
-- [ ] Visual smoke clean-console investigation — identify and remove the two current 404 resource warnings; acceptance: zero unexpected browser console/network errors.
+- [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [ ] Honest README update — remove obsolete 1s/any-profit mission shortcuts and document 200 Stable, unlock gate, margin semantics, and market-session behavior.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.
@@ -142,7 +142,7 @@
 - [x] `precise_session` real accuracy tracking — server records and persists `preciseBest`. → DONE 2026-10-05.
 - [x] `hold_60s` real 60-second session timer — separately verified by `npm run test:slow`. → DONE 2026-10-05.
 - [x] Server market-session gate — a closed live provider blocks new orders with `409 market_closed`; stub remains simulated-open. → DONE 2026-10-05.
-- [ ] Visual smoke clean-console investigation — identify and remove the two current 404 resource warnings; acceptance: zero unexpected browser console/network errors.
+- [x] Visual smoke clean-console investigation — removed missing favicon and obsolete `sw.js` registration; strict smoke requires zero unexpected browser/network errors. → DONE 2026-10-05.
 - [ ] Honest README update — remove obsolete 1s/any-profit mission shortcuts and document 200 Stable, unlock gate, margin semantics, and market-session behavior.
 - [ ] Real Finnhub token + WebSocket upgrade for sub-second chart updates.
 - [ ] Docker image for the server.

@@ -86,3 +86,7 @@
 
 - The first new closed-session integration assertion failed exactly as intended: order creation returned `200` even when the injected live provider reported closed. Fix: added an explicit provider session contract and checked it before the order debit. The same test now proves `409 market_closed` leaves 200 Stable untouched and that close remains available for an existing position.
 - The visual smoke still reports two 404 console warnings even though its app assertions pass. They are not treated as clean-console evidence. The prior service-worker/manifest search did not find their source; this needs a focused request-level investigation before claiming final visual perfection.
+
+## Stage 11.6 — Browser errors were being tolerated instead of identified (2026-10-05)
+
+- The visual wrapper emitted generic 404 warnings but still passed because it had no URL-level console diagnostics and treated console errors as non-fatal. The first direct trace found missing `favicon.ico`; after that fix, static-host instrumentation exposed `GET /sw.js` from a stale `main.js` service-worker registration. Fix: make console/network/static 4xx evidence strict, add an actual SVG favicon, and remove the registration for the intentionally absent PWA worker. Lesson: never whitelist or downgrade a generic browser 404; record its requested path at the server boundary until the source is known.

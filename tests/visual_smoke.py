@@ -42,6 +42,7 @@ def main():
 
     client_port = find_port()
     client_origin = f"http://127.0.0.1:{client_port}"
+    static_errors = []
     # Never use a fixed API port here. A prior test/helper can leave a
     # process alive briefly; fixed 3098 could make the browser talk to a
     # stale backend while this process fails to bind. A fresh OS-assigned
@@ -64,6 +65,9 @@ def main():
             super().__init__(*a, directory=CLIENT_DIR, **kw)
         def log_message(self, *a, **k):
             pass
+        def send_error(self, code, message=None, explain=None):
+            static_errors.append({"path": self.path, "status": code})
+            return super().send_error(code, message, explain)
         def do_GET(self):
             if self.path in ("/", ""):
                 self.path = "/index.html"
@@ -89,9 +93,11 @@ def main():
             "screenshots": [],
             "dom": {},
             "console_errors": [],
+            "console_error_details": [],
             "page_errors": [],
             "request_failures": [],
             "error_responses": [],
+            "static_errors": static_errors,
         }
 
         with sync_playwright() as p:
@@ -103,8 +109,20 @@ def main():
             ctx = browser.new_context(viewport={"width": 1440, "height": 900})
             ctx.add_init_script(f'window.VIBES_API_BASE = "http://127.0.0.1:{server_port}";')
             page = ctx.new_page()
+            def record_console_error(message):
+                if message.type != "error":
+                    return
+                location = message.location or {}
+                summary["console_errors"].append(message.text)
+                summary["console_error_details"].append({
+                    "text": message.text,
+                    "url": location.get("url"),
+                    "line": location.get("lineNumber"),
+                    "column": location.get("columnNumber"),
+                })
+
             page.on("pageerror", lambda e: summary["page_errors"].append(str(e)))
-            page.on("console", lambda m: summary["console_errors"].append(m.text) if m.type == "error" else None)
+            page.on("console", record_console_error)
             page.on("requestfailed", lambda r: summary["request_failures"].append({
                 "url": r.url, "failure": r.failure,
             }))

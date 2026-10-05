@@ -395,3 +395,14 @@
 
 - `node tests/finnhub.test.mjs`, `node tests/server.test.mjs`, and `node tests/missions.test.mjs` → exit 0.
 - Full `npm test` → exit 0 / `ALL PASS`; visual smoke rendered six mission rows and current AAPL chart data.
+
+## Stage 11.6 — Clean visual-smoke console (2026-10-05)
+
+- Replaced a silent console-warning policy with strict visual assertions for console errors, page errors, failed requests, API 4xx/5xx responses, and static-host 4xx/5xx responses. The Python smoke preserves URL-level diagnostics for failures.
+- Root-caused both 404s: Chrome requested missing `favicon.ico`, and the imported `main.js` registered a non-existent `sw.js` although offline PWA support is out of scope. Added `client/favicon.svg` and explicit icon link; removed the obsolete service-worker registration rather than adding a fake worker.
+
+### Evidence
+
+- Direct `python tests/visual_smoke.py` → all error arrays empty.
+- Strict `node tests/visual.test.mjs` → exit 0 with all DOM and clean-network assertions.
+- Full `npm test` → exit 0 / `ALL PASS`.

@@ -52,6 +52,20 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.6 — visual smoke clean-console investigation (DONE 2026-10-05)
+
+**Verified evidence:** direct `python tests/visual_smoke.py`, strict `node tests/visual.test.mjs`, and full `npm test` all exited 0 with empty console/page/request/API/static-host error arrays.
+
+**Scope:** locate and remove the exact source of the two Chrome 404 console warnings in the real visual smoke. Do not suppress generic errors or whitelist an unknown URL.
+
+**Acceptance criteria:**
+
+- The smoke evidence identifies the failed script/resource URL and originating page location.
+- The root cause is corrected at its source, or an external browser artifact is proven with an isolated reproduction.
+- Direct `python tests/visual_smoke.py` and `npm test` both report zero unexpected console errors, page errors, request failures, and 4xx/5xx app responses.
+
+**Out of scope:** UI redesign and unrelated market functionality.
+
 ### Stage 11.5 — live-market order gate (DONE 2026-10-05)
 
 **Verified evidence:** `node tests/finnhub.test.mjs`, `node tests/server.test.mjs`, `node tests/missions.test.mjs`, and the full `npm test` all exited 0.
