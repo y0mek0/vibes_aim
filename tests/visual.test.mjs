@@ -77,8 +77,8 @@ assert.equal(summary.dom.initial_bridge_text, '', 'removed HUD chip should not r
 assert.equal(summary.dom.initial_bridge_aria_label, null, 'removed HUD chip should not render an aria label');
 assert.equal(summary.dom.initial_ticker, 'AAPL', 'default ticker should be AAPL');
 ok('default ticker is AAPL');
-assert.equal(summary.dom.terminal_stable, '200.00', 'fresh player has 200 Stable');
-ok('fresh player has 200.00 Stable in the shared Market workspace');
+assert.equal(summary.dom.terminal_usd, '200.00', 'fresh player has 200 USD in Account Assets');
+ok('fresh player has 200.00 USD in the shared Market workspace');
 assert.equal(summary.dom.missions_claimed, '0', 'no missions claimed at boot');
 assert.equal(summary.dom.missions_total, '6', '6 missions exist');
 assert.equal(summary.dom.mission_rows, 6, 'mission table has 6 rows');

@@ -233,7 +233,30 @@ async function integration() {
   assert.equal(p1.body.player.stable, 200);
   ok('GET /portfolio empty state for fresh player');
 
-  // 2. /portfolio/preview: long 5x AAPL
+  // 2. ordinary spot conversion: earned AAPL units -> USD, without touching leveraged trades.
+  const convertPlayer = 'term-convert-player';
+  const convertSession = 'term-convert-session';
+  const hit = await req({
+    method: 'POST', path: '/aim/hit',
+    headers: { 'X-Player-Id': convertPlayer, 'X-Session-Id': convertSession },
+    body: { hitId: 'convert-hit-1', ticker: 'AAPL', accuracy: 1, streak: 1, ts: 1 },
+  });
+  assert.equal(hit.status, 200);
+  const convertBefore = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': convertPlayer } });
+  const earnedUnits = convertBefore.body.balances.AAPL;
+  assert.ok(earnedUnits > 0);
+  const converted = await req({
+    method: 'POST', path: '/portfolio/convert', headers: { 'X-Player-Id': convertPlayer },
+    body: { ticker: 'AAPL', units: earnedUnits },
+  });
+  assert.equal(converted.status, 200);
+  assert.equal(converted.body.ok, true);
+  assert.equal(converted.body.balance, 0);
+  const convertAfter = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': convertPlayer } });
+  assert.ok(convertAfter.body.player.stable > convertBefore.body.player.stable);
+  ok('POST /portfolio/convert sells earned AAPL units into USD without opening a position');
+
+  // 3. /portfolio/preview: long 5x AAPL
   const prev = await req({
     method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 500 },
@@ -251,7 +274,7 @@ async function integration() {
   assert.equal(clientPreview.margin, prev.body.margin);
   ok('POST /portfolio/preview math matches client computeOrder');
 
-  // 3. /portfolio/order requires confirmLiquidation
+  // 4. /portfolio/order requires confirmLiquidation
   const o1 = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 500 },
@@ -260,7 +283,7 @@ async function integration() {
   assert.equal(o1.body.error, 'confirm_required');
   ok('POST /portfolio/order without confirm -> 400');
 
-  // 4. /portfolio/order with confirmLiquidation: true opens a trade.
+  // 5. /portfolio/order with confirmLiquidation: true opens a trade.
   //    Player has 200 stable; notional 100 at 5x -> margin 20. Stable drops to 180.
   const o2 = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
@@ -276,7 +299,7 @@ async function integration() {
   assert.equal(p2.body.trades[0].id, tradeId);
   ok('POST /portfolio/order opens a trade and debits margin from Stable');
 
-  // 5. /portfolio/close: same entry/exit -> pnl = 0, margin returned
+  // 6. /portfolio/close: same entry/exit -> pnl = 0, margin returned
   const c1 = await req({
     method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': playerId },
     body: { tradeId },
@@ -291,7 +314,7 @@ async function integration() {
   assert.equal(clientClose.returned, clientClose.margin); // pnl = 0
   ok('POST /portfolio/close: pnl 0, margin returned to Stable');
 
-  // 6. /portfolio/close: short at 5x, exit above liq -> liquidated
+  // 7. /portfolio/close: short at 5x, exit above liq -> liquidated
   const o3 = await req({
     method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'short', leverage: 5, notional: 200, confirmLiquidation: true },
@@ -318,7 +341,7 @@ async function integration() {
   assert.equal(c2.body.trade.status, expected);
   ok(`POST /portfolio/close (short): status ${expected} (deterministic for stub price)`);
 
-  // 7. Insufficient margin returns 400
+  // 8. Insufficient margin returns 400
   // The player starts with 200 Stable; the earlier long and short positions
   // debit and refund `notional / leverage`. Exact P/L may vary by stub tick,
   // so use the current server balance rather than hard-coding a remainder.
@@ -334,7 +357,7 @@ async function integration() {
   assert.equal(o4.body.error, 'insufficient_margin');
   ok('POST /portfolio/order with too much notional -> 400 insufficient_margin');
 
-  // 8. /portfolio/close on already-closed trade -> 400 not_open
+  // 9. /portfolio/close on already-closed trade -> 400 not_open
   const c3 = await req({
     method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': playerId },
     body: { tradeId: shortTrade.id },

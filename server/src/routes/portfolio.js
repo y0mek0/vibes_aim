@@ -110,6 +110,33 @@ export function portfolioRoutes(r, { market, store }) {
     sendJson(res, 200, { ok: true, trade });
   });
 
+  // POST /portfolio/convert — sell earned ticker units into the USD balance.
+  // Body: { ticker, units }. This is the ordinary spot-style trade path;
+  // leveraged positions continue to use /portfolio/order unchanged.
+  r.post('/portfolio/convert', async (req, res, _params, _query, body) => {
+    const playerId = req.headers['x-player-id'];
+    if (!playerId) throw new HttpError(400, 'missing_player_id');
+    const ticker = String(body?.ticker || '').toUpperCase();
+    const units = Number(body?.units);
+    if (!ticker || ticker === 'USD' || ticker === 'STABLE') throw new HttpError(400, 'bad_ticker');
+    if (!Number.isFinite(units) || units <= 0) throw new HttpError(400, 'bad_units');
+    await assertTickerUnlocked(store, playerId, ticker);
+    const q = await market.getQuote(ticker);
+    if (q.price == null) throw new HttpError(400, 'no_price', `${ticker} is awaiting market`);
+    await assertMarketOpen(market, ticker);
+    const current = await store.getBalance(playerId, ticker);
+    const available = Number(current?.qty) || 0;
+    if (units > available + 1e-9) throw new HttpError(400, 'insufficient_asset', `have ${available.toFixed(8)} ${ticker}`);
+    const usd = round(units * q.price, 6);
+    await store.addTickerUnits(playerId, ticker, -units);
+    const player = await store.addStable(playerId, usd);
+    sendJson(res, 200, {
+      ok: true, ticker, units: round(units, 8), price: q.price,
+      usd: usd, player: { id: player.id, stable: player.stable },
+      balance: (await store.getBalance(playerId, ticker)).qty,
+    });
+  });
+
   // POST /portfolio/close — close an open trade at current market price.
   r.post('/portfolio/close', async (req, res, _params, _query, body) => {
     const playerId = req.headers['x-player-id'];

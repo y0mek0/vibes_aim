@@ -82,6 +82,11 @@ function createStore() {
     await refresh();
     return r;
   }
+  async function convertAsset({ ticker, units }) {
+    const r = await api.post('/portfolio/convert', { ticker, units });
+    await refresh();
+    return r;
+  }
   async function claimMission(kind) {
     const r = await api.post('/missions/claim', { kind });
     await refresh();
@@ -122,6 +127,7 @@ function createStore() {
     previewOrder,
     openOrder,
     closeOrder,
+    convertAsset,
     claimMission,
     fetchQuote,
     fetchCandles,

@@ -77,6 +77,8 @@ function flashChip(unit) {
   lastUnit = unit;
   total += unit;
   if (typeof document !== 'undefined') {
+    document.querySelectorAll('[data-game-earned]').forEach((el) => { el.textContent = total.toFixed(4); });
+    document.querySelectorAll('[data-game-earned-ticker]').forEach((el) => { el.textContent = activeTicker; });
     document.querySelectorAll('[data-dashboard-session-units], [data-recent-earned]').forEach((el) => { el.textContent = `+${total.toFixed(4)} ${activeTicker}`; });
     document.querySelectorAll('[data-dashboard-today]').forEach((el) => { el.textContent = `+${total.toFixed(4)}`; });
     document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = activeTicker; });

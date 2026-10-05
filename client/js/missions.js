@@ -70,7 +70,7 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
         : '';
       tr.innerHTML = `
         <td class="vm-mission-cell">
-          <div class="vm-mission-top"><div class="vm-label">${def.label}</div><div class="vm-reward num">+${def.reward}</div></div>
+          <div class="vm-mission-top"><div class="vm-label">${def.label}</div><div class="vm-reward num">+${def.reward} USD</div></div>
           <div class="vm-mission-meta"><span class="vm-group">${missionGroup(def.kind)}</span><span class="vm-progress-value num">${formatProgress(def, live.progress || 0)}</span><span class="vm-status ${statusClass}">${statusLabel}</span>${claimControl}</div>
           <div class="vm-progress" aria-label="${formatProgress(def, live.progress || 0)} progress"><span class="vm-bar" style="width:${barWidth}"></span></div>
         </td>

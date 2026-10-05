@@ -75,9 +75,9 @@ export function buildWorld(scene, camera, themeId) {
   {
     const t = canvasTex(256, 256, (g, s) => {
       g.clearRect(0, 0, s, s);
-      g.strokeStyle = 'rgba(255,70,85,0.9)'; g.lineWidth = 10;
+      g.strokeStyle = TH.accent; g.lineWidth = 10;
       g.beginPath(); g.arc(s / 2, s / 2, 100, 0, Math.PI * 2); g.stroke();
-      g.fillStyle = 'rgba(255,70,85,0.9)';
+      g.fillStyle = TH.accent;
       g.beginPath(); g.moveTo(s / 2, 70); g.lineTo(s / 2 + 42, 140); g.lineTo(s / 2 - 42, 140); g.closePath(); g.fill();
     });
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
@@ -240,23 +240,17 @@ export function buildWorld(scene, camera, themeId) {
     var drawJumbo = (d) => {
       const g = jc.getContext('2d');
       g.fillStyle = '#0b1118'; g.fillRect(0, 0, 512, 256);
-      g.fillStyle = '#ff4655'; g.fillRect(0, 0, 512, 10); g.fillRect(0, 246, 512, 10);
+      g.fillStyle = TH.accent; g.fillRect(0, 0, 512, 10); g.fillRect(0, 246, 512, 10);
       g.textAlign = 'center';
       g.fillStyle = '#8b978f'; g.font = '700 26px Barlow, sans-serif';
       g.fillText('RANGE+  //  ' + (d.mode || 'STANDBY'), 256, 52);
       g.fillStyle = '#ece8e1'; g.font = '400 96px Anton, sans-serif';
       g.fillText(String(d.score ?? 0), 256, 160);
-      g.fillStyle = '#3df0c2'; g.font = '700 30px Barlow, sans-serif';
+      g.fillStyle = TH.glow; g.font = '700 30px Barlow, sans-serif';
       g.fillText(`K ${d.kills ?? 0}   ACC ${d.acc ?? '—'}   ${d.time ?? ''}`, 256, 212);
       jt.needsUpdate = true;
     };
     drawJumbo({});
-  }
-  let flashV = 0, killFlash = null;
-  {
-    killFlash = new THREE.Mesh(new THREE.PlaneGeometry(22, 11.5),
-      new THREE.MeshBasicMaterial({ color: 0xff4655, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-    killFlash.position.set(0, TH.indoor ? 9.5 : 11, -69.3); add(killFlash);
   }
   if (has('sign')) {
     const t = canvasTex(512, 128, (g, w, h) => {
@@ -421,30 +415,11 @@ export function buildWorld(scene, camera, themeId) {
     const s = new THREE.Mesh(new THREE.PlaneGeometry(30, 0.12), new THREE.MeshBasicMaterial({ color: TH.accent }));
     s.rotation.x = -Math.PI / 2; s.position.set(0, 0.02, -d); add(s);
   });
-  function textSprite(txt) {
-    const c = document.createElement('canvas'); c.width = 256; c.height = 64;
-    const g = c.getContext('2d'); g.font = '700 40px Barlow, sans-serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = 'rgba(10,14,18,0.55)'; g.fillRect(0, 8, 256, 48);
-    g.fillStyle = '#ff4655'; g.fillText(txt, 128, 34);
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
-    m.scale.set(2.4, 0.6, 1); return m;
-  }
-  [15, 20, 25, 30, 35].forEach(d => {
-    const sp = textSprite(`${d} M`); sp.position.set(-9.5, 0.9, -d); add(sp);
-  });
-
   return {
     group, occluders,
     updateJumbo: has('jumbo') ? drawJumbo : () => {},
-    pulseKill() { flashV = 0.55; },
-    tick(dt) {
-      if (flashV > 0.005) {
-        flashV *= Math.pow(0.02, dt);
-        killFlash.material.opacity = flashV;
-      } else killFlash.material.opacity = 0;
-    },
+    pulseKill() {},
+    tick() {},
   };
 }
 

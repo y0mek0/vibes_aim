@@ -18,11 +18,20 @@ const SELECTORS = {
   portfolioTotal:'[data-vt-portfolio-total]',
   openPnl:       '[data-vt-open-pnl]',
   holdings:      '[data-vt-holdings]',
+  assetsTotal:   '[data-vt-assets-total]',
+  convertTicker: '[data-vt-convert-ticker]',
+  convertUnits:  '[data-vt-convert-units]',
+  convertPrice:  '[data-vt-convert-price]',
+  convertUsd:    '[data-vt-convert-usd]',
+  convertStatus: '[data-vt-convert-status]',
+  convertSubmit: '[data-vt-convert-submit]',
   positionsBody: '[data-vt-positions-body]',
   historyBody:   '[data-vt-history-body]',
   marketTicker:  '[data-vt-market-ticker]',
   marketPrice:   '[data-vt-market-price]',
   otTicker:      '[data-vt-ot-ticker]',
+  otSymbol:      '[data-vt-ot-symbol]',
+  otPrice:       '[data-vt-ot-price]',
   otSide:        '[data-vt-ot-side]',
   otNotional:    '[data-vt-ot-notional]',
   otLeverage:    '[data-vt-ot-leverage]',
@@ -59,24 +68,108 @@ export function mountTerminal({ root, onClose } = {}) {
     entryPrice: 0,
     confirming: false,
     lastPreview: null,
+    assetPrices: {},
   };
 
   function fmtMoney(n) { return Number.isFinite(n) ? round2(n).toFixed(2) : '—'; }
 
-  function renderHoldings(balances) {
+  function formatUnits(value) {
+    const n = Number(value || 0);
+    if (!Number.isFinite(n)) return '—';
+    if (n === 0) return '0.00';
+    if (Math.abs(n) >= 100) return n.toFixed(2);
+    if (Math.abs(n) >= 1) return n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+    return n.toFixed(6).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  function renderHoldings(balances, prices = state.assetPrices, player = store.state.player) {
     if (!els.holdings) return;
-    els.holdings.innerHTML = '';
-    const tickers = Object.keys(balances || {}).sort();
-    if (tickers.length === 0) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="2" class="vt-empty">No holdings yet — land aim hits to farm assets.</td>';
-      els.holdings.appendChild(tr);
+    const assets = [
+      { ticker: 'USD', units: Number(player?.stable || 0), price: 1 },
+      ...Object.keys(balances || {}).filter((ticker) => ticker !== 'STABLE' && ticker !== 'USD').sort().map((ticker) => ({
+        ticker,
+        units: Number(balances[ticker] || 0),
+        price: Number.isFinite(Number(prices?.[ticker])) ? Number(prices[ticker]) : null,
+      })),
+    ];
+    const totalKnown = assets.every((asset) => asset.price != null);
+    const total = assets.reduce((sum, asset) => sum + (asset.price == null ? 0 : asset.units * asset.price), 0);
+    setText(els.assetsTotal, totalKnown ? fmtMoney(total) : '—');
+    els.holdings.innerHTML = assets.map((asset) => {
+      const value = asset.price == null ? '—' : '$' + fmtMoney(asset.units * asset.price);
+      return `<div class="vt-asset" data-vt-asset="${asset.ticker}"><div class="vt-asset-top"><strong>${asset.ticker}</strong><span class="num">${formatUnits(asset.units)}</span></div><span class="vt-asset-value">${value}</span></div>`;
+    }).join('');
+  }
+
+  async function ensureAssetPrices() {
+    const missing = Object.keys(store.state.balances || {}).filter((ticker) => ticker !== state.ticker && !Number.isFinite(Number(state.assetPrices[ticker])));
+    await Promise.all(missing.map(async (ticker) => {
+      try {
+        const q = await store.fetchQuote(ticker);
+        if (q && q.price != null) state.assetPrices[ticker] = q.price;
+      } catch (_) { /* price stays unavailable */ }
+    }));
+    renderHoldings(store.state.balances, state.assetPrices, store.state.player);
+    renderPortfolio();
+    renderConvert();
+  }
+
+  function renderConvert() {
+    if (!els.convertTicker || !els.convertUnits) return;
+    const balances = store.state.balances || {};
+    const tickers = Object.keys(balances).filter((ticker) => ticker !== 'STABLE' && ticker !== 'USD').sort();
+    const previous = els.convertTicker.value;
+    els.convertTicker.innerHTML = tickers.map((ticker) => `<option value="${ticker}">${ticker}</option>`).join('');
+    if (!tickers.length) {
+      els.convertTicker.disabled = true;
+      els.convertUnits.disabled = true;
+      if (els.convertSubmit) els.convertSubmit.disabled = true;
+      setText(els.convertPrice, '—');
+      setText(els.convertUsd, '—');
+      setText(els.convertStatus, 'Earn AAPL in Train first.');
       return;
     }
-    for (const t of tickers) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="num">${t}</td><td class="num">${Number(balances[t] || 0).toFixed(8)}</td>`;
-      els.holdings.appendChild(tr);
+    const ticker = tickers.includes(previous) ? previous : tickers[0];
+    els.convertTicker.value = ticker;
+    els.convertTicker.disabled = false;
+    els.convertUnits.disabled = false;
+    const available = Number(balances[ticker] || 0);
+    const units = Number(els.convertUnits.value || 0);
+    const price = Number(state.assetPrices[ticker]);
+    const usd = Number.isFinite(price) && price > 0 && Number.isFinite(units) ? units * price : NaN;
+    setText(els.convertPrice, Number.isFinite(price) ? fmtMoney(price) : '—');
+    setText(els.convertUsd, Number.isFinite(usd) ? fmtMoney(usd) : '—');
+    const valid = units > 0 && units <= available + 1e-9 && Number.isFinite(price) && price > 0;
+    setText(els.convertStatus, valid ? `Available ${formatUnits(available)} ${ticker}` : `Available ${formatUnits(available)} ${ticker}`);
+    if (els.convertSubmit) els.convertSubmit.disabled = !valid;
+  }
+
+  async function refreshConvertQuote() {
+    if (!els.convertTicker || !els.convertTicker.value) return;
+    const ticker = els.convertTicker.value;
+    if (!Number.isFinite(Number(state.assetPrices[ticker]))) {
+      try {
+        const q = await store.fetchQuote(ticker);
+        if (q && q.price != null) state.assetPrices[ticker] = q.price;
+      } catch (_) { /* price remains unavailable */ }
+    }
+    renderConvert();
+  }
+
+  async function convertAsset() {
+    const ticker = els.convertTicker?.value;
+    const units = Number(els.convertUnits?.value);
+    if (!ticker || !Number.isFinite(units) || units <= 0) return;
+    if (els.convertSubmit) els.convertSubmit.disabled = true;
+    setText(els.convertStatus, 'Selling…');
+    try {
+      const r = await store.convertAsset({ ticker, units });
+      setText(els.convertStatus, `Sold ${formatUnits(r.units)} ${ticker} for ${fmtMoney(r.usd)} USD.`);
+      els.convertUnits.value = '0';
+      refreshAll();
+    } catch (e) {
+      setText(els.convertStatus, 'Error: ' + (e && e.message ? e.message : e));
+      renderConvert();
     }
   }
 
@@ -140,13 +233,21 @@ export function mountTerminal({ root, onClose } = {}) {
       const q = await store.fetchQuote(state.ticker);
       if (q && q.price != null) {
         state.entryPrice = q.price;
+        state.assetPrices[state.ticker] = q.price;
+        setText(els.otSymbol, state.ticker);
+        setText(els.otPrice, fmtMoney(q.price));
         setText(els.otEntry, fmtMoney(q.price));
         setText(els.marketTicker, state.ticker);
         setText(els.marketPrice, fmtMoney(q.price));
         document.querySelectorAll(`[data-vt-watch-price="${state.ticker}"]`).forEach((el) => { el.textContent = fmtMoney(q.price); });
+        renderHoldings(store.state.balances, state.assetPrices, store.state.player);
+        renderPortfolio();
         renderPreview();
+        renderConvert();
       } else if (q && q.status === 'pre_ipo') {
         state.entryPrice = 0;
+        setText(els.otSymbol, state.ticker);
+        setText(els.otPrice, '—');
         setText(els.otEntry, '—');
         setText(els.marketPrice, '—');
         document.querySelectorAll(`[data-vt-watch-price="${state.ticker}"]`).forEach((el) => { el.textContent = '—'; });
@@ -182,14 +283,14 @@ export function mountTerminal({ root, onClose } = {}) {
     setText(els.otNotionalTotal, fmtMoney(preview.notional));
     if (els.otStatus) {
       if (!preview.marginOk) {
-        els.otStatus.textContent = `Insufficient Stable: need ${fmtMoney(preview.margin)}, have ${fmtMoney(player.stable)}`;
+        els.otStatus.textContent = `Insufficient USD: need ${fmtMoney(preview.margin)}, have ${fmtMoney(player.stable)}`;
         els.otStatus.classList.add('neg');
       } else {
         els.otStatus.textContent = `OK — entry ${fmtMoney(preview.entry)}, liquidates at ${fmtMoney(preview.liquidationPrice)}`;
         els.otStatus.classList.remove('neg');
       }
     }
-    if (els.otSubmit) els.otSubmit.disabled = !preview.marginOk || state.entryPrice === 0;
+    if (els.otSubmit) els.otSubmit.disabled = !preview.marginOk || state.entryPrice === 0 || (els.otConfirmChk && !els.otConfirmChk.checked);
   }
 
   function renderDashboard(player, v) {
@@ -206,7 +307,7 @@ export function mountTerminal({ root, onClose } = {}) {
     // Build a quick price map from the last seen entry prices of open positions,
     // plus the most recent /quote cache. For a real-time value we'd subscribe
     // to the chart panel; here we approximate.
-    const priceMap = {};
+    const priceMap = { ...state.assetPrices };
     for (const t of store.state.trades || []) {
       if (t.status === 'open' && state.entryPrice && t.ticker === state.ticker) {
         priceMap[t.ticker] = state.entryPrice;
@@ -224,9 +325,11 @@ export function mountTerminal({ root, onClose } = {}) {
 
   function refreshAll() {
     renderPortfolio();
-    renderHoldings(store.state.balances);
+    renderHoldings(store.state.balances, state.assetPrices, store.state.player);
     renderPositions(store.state.trades);
     renderHistory(store.state.trades);
+    renderConvert();
+    ensureAssetPrices();
   }
 
   async function submitOrder() {
@@ -270,6 +373,8 @@ export function mountTerminal({ root, onClose } = {}) {
   if (els.otTicker) {
     els.otTicker.addEventListener('change', () => {
       state.ticker = els.otTicker.value;
+      setText(els.otSymbol, state.ticker);
+      setText(els.otPrice, '—');
       refreshQuote();
       renderPreview();
     });
@@ -277,9 +382,19 @@ export function mountTerminal({ root, onClose } = {}) {
   if (els.otSide) {
     els.otSide.addEventListener('change', () => {
       state.side = els.otSide.value;
+      panel.querySelectorAll('[data-vt-side-choice]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.vtSideChoice === state.side);
+      });
       renderPreview();
     });
   }
+  panel.querySelectorAll('[data-vt-side-choice]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!els.otSide) return;
+      els.otSide.value = button.dataset.vtSideChoice;
+      els.otSide.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
   if (els.otLeverage) {
     els.otLeverage.addEventListener('input', () => {
       state.leverage = clampLeverage(els.otLeverage.value);
@@ -293,6 +408,18 @@ export function mountTerminal({ root, onClose } = {}) {
       state.notional = n;
       renderPreview();
     });
+  }
+  if (els.convertTicker) {
+    els.convertTicker.addEventListener('change', refreshConvertQuote);
+  }
+  if (els.convertUnits) {
+    els.convertUnits.addEventListener('input', renderConvert);
+  }
+  if (els.convertSubmit) {
+    els.convertSubmit.addEventListener('click', convertAsset);
+  }
+  if (els.otConfirmChk) {
+    els.otConfirmChk.addEventListener('change', renderPreview);
   }
   if (els.otConfirm) {
     els.otConfirm.addEventListener('click', () => { renderPreview(); });

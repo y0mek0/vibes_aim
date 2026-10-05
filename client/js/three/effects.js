@@ -2,7 +2,6 @@
 // Pools: 24 sparks, 10 tracers, 18 decals, 6 damage numbers.
 
 import * as THREE from 'three';
-import { buildKatana } from './katana.js';
 
 export function createEffects(scene, camera, orbFlash, orbMat) {
   const V1 = new THREE.Vector3(), TV = new THREE.Vector3();
@@ -55,13 +54,10 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
 
   // --- viewmodels: one silhouette per class, only the equipped is visible ---
   // (Sheriff -> Vandal is unmistakable now). Anchor `gun` keeps kick/bob.
-  const CLASS_TINT = { Sidearm: 0x2e3944, SMG: 0x2e4438, Shotgun: 0x6b4a2e, Rifle: 0x2e3944, Sniper: 0x3a2e44, Heavy: 0x44402e, Melee: 0x8a949c };
+  const CLASS_TINT = { Sidearm: 0x2e3944, SMG: 0x2e4438, Shotgun: 0x6b4a2e, Rifle: 0x2e3944, Sniper: 0x3a2e44, Heavy: 0x44402e };
   const gun = new THREE.Group();
   const _dotMat = new THREE.MeshBasicMaterial({ color: 0xff4655 });
   const models = {};
-  let katanaApi = null;
-  const katana = {}; // stable facade (rig builds lazily on first melee switch)
-  ['sheath', 'draw', 'swing', 'inspect', 'trailPop', 'tick', 'flash'].forEach(m => { katana[m] = (...a) => { if (katanaApi) katanaApi[m](...a); }; });
 
   function modelFor(cls) {
     if (models[cls]) return models[cls];
@@ -87,8 +83,6 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
     } else if (cls === 'Heavy') {
       a(0.12, 0.14, 0.60, 0.22, -0.20, -0.55); a(0.10, 0.18, 0.16, 0.22, -0.32, -0.50, tint);
       a(0.06, 0.06, 0.35, 0.22, -0.18, -0.95, mid); a(0.03, 0.08, 0.25, 0.22, -0.09, -0.55, mid); dot(0.22, -0.12, -0.60);
-    } else if (cls === 'Melee') {
-      katanaApi = buildKatana(g);
     } else { // Rifle (default)
       a(0.09, 0.11, 0.55, 0.22, -0.20, -0.55); a(0.05, 0.05, 0.42, 0.22, -0.18, -1.0, tint);
       a(0.07, 0.16, 0.12, 0.22, -0.28, -0.45, mid); a(0.03, 0.06, 0.10, 0.22, -0.12, -0.62, mid);
@@ -98,7 +92,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
   }
   camera.add(gun);
   const setGunClass = cls => { for (const k of Object.keys(models)) models[k].visible = false; modelFor(cls).visible = true; };
-  setGunClass('Rifle'); modelFor('Melee'); setGunClass('Rifle'); // prebuild katana (no first-switch hitch)
+  setGunClass('Rifle');
   const setSniperScope = on => { gun.visible = !on; }; // hide viewmodel when scoped like real ADS
 
   const muzzle = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xffd28a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
@@ -142,16 +136,12 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
       d.t += sdt; if (d.t > 4) d.m.material.opacity = Math.max(0, 0.7 * (1 - (d.t - 4)));
     }
     if (muzzleT < 0.05) { muzzleT += sdt; muzzle.material.opacity = muzzleT < 0.05 ? 0.9 : 0; }
-    katana.tick(sdt);
     for (let i = flashes.length - 1; i >= 0; i--) {
       const f = flashes[i]; f.t += sdt; f.mesh.material = orbFlash;
       if (f.t > 0.06) { f.mesh.material = orbMat; flashes.splice(i, 1); }
     }
   }
-  // first-frame warmup (flicker root cause): three.js compiles each shader program
-  // on first VISIBLE render — pooled effects, the katana rig and the orb-flash
-  // material would otherwise all compile mid-game (sparks, tracers, trails…),
-  // hitching the first session. Compile everything behind the menu instead.
+  // first-frame warmup: compile pooled effects behind the menu.
   function warmup(renderer, cam) {
     renderer.compile(scene, cam);
     const moved = [];
@@ -165,7 +155,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
     for (const [m, v, y] of moved) { m.visible = v; m.position.y = y; }
     scene.remove(s1); scene.remove(s2);
   }
-  return { spark, tracer, decal, flash, dmgNum, update, gun, popMuzzle, setGunClass, setSniperScope, katana, warmup,
+  return { spark, tracer, decal, flash, dmgNum, update, gun, popMuzzle, setGunClass, setSniperScope, warmup,
     kick: () => { gun.position.z = 0.06; },
     recover: (dt, elapsed, speedFrac, recoil, lagYaw, lagPitch) => {
       gun.position.z += (0 - gun.position.z) * Math.min(1, dt * 14);

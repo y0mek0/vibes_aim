@@ -96,25 +96,14 @@ eq('intro overshoots', spawnIntro(120) > 1, true);
 near('intro settles', spawnIntro(500), 1, 1e-9);
 eq('easeOutBack clamps', easeOutBack(5), easeOutBack(1));
 
-// --- loadout slots ---
+// --- loadout slots: primary and secondary only ---
 eq('sidearm slot', slotForClass('Sidearm'), 2);
 eq('rifle slot', slotForClass('Rifle'), 1);
 eq('sniper slot', slotForClass('Sniper'), 1);
-eq('melee slot', slotForClass('Melee'), 3);
-eq('cycle fwd', cycleSlot(3, 1), 1);
-eq('cycle back', cycleSlot(1, -1), 3);
+eq('melee class falls back to primary', slotForClass('Melee'), 1);
+eq('cycle fwd', cycleSlot(2, 1), 1);
+eq('cycle back', cycleSlot(1, -1), 2);
 eq('cycle mid', cycleSlot(1, 1), 2);
-
-// --- Oni Katana timings (frame-researched) ---
-{
-  const k = gunById('knife');
-  eq('katana name', k.name, 'ONI KATANA');
-  eq('katana equip', k.equip, 0.6);
-  near('katana lmb cycle', 1 / k.rpm, 0.49, 0.005);
-  near('katana rmb cycle', 1 / k.rmbRpm, 1.205, 0.005);
-  eq('katana dmg delay', k.dmgDelay, 0.19);
-  eq('katana backstab', k.meleeBackstab, 2);
-}
 
 if (fails) { console.error(`${fails} FAILURES`); process.exit(1); }
 console.log('ALL PASS');

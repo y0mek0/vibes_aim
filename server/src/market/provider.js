@@ -17,15 +17,18 @@
 //     available regardless of provider implementation.
 //
 // Ranges supported by the in-game chart:
-//   '1D' = 1-minute candles, 24h
-//   '5D' = 5-minute candles, 5 days
-//   '1M' = 1-hour candles, 30 days
-//   '3M' = daily candles, 90 days
+//   '15m' = 1-minute candles, 15 minutes
+//   '1H'  = 1-minute candles, 1 hour
+//   '4H'  = 5-minute candles, 4 hours
+//   '1D'  = 1-minute candles, 24h
+//   '5D'  = 5-minute candles, 5 days
+//   '1M'  = 1-hour candles, 30 days
+//   '3M'  = daily candles, 90 days
 //
 // Adapters are isolated. The router never imports a provider directly;
 // it uses the factory in market/index.js.
 
-export const RANGES = ['1D', '5D', '1M', '3M'];
+export const RANGES = ['15m', '1H', '4H', '1D', '5D', '1M', '3M'];
 
 /** Throws HttpError(503) if the provider is not configured. */
 export function assertProviderReady(provider, name) {

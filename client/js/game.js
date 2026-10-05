@@ -78,13 +78,10 @@ export function boot() {
   const pos = new THREE.Vector3(0, 1.6, 2), vel = new THREE.Vector3();
   const keys = {};
   let gun = gunById('vandal');
-  // loadout slots: 1 primary, 2 secondary, 3 melee (katana, fixed)
-  const slots = { 1: 'vandal', 2: 'classic', 3: 'knife' };
+  // loadout slots: 1 primary, 2 secondary
+  const slots = { 1: 'vandal', 2: 'classic' };
   let curSlot = 1, lastSlot = 2;
-  // katana action state (timing owns the animation)
-  let inspecting = false, inspectT = 0, swingT = 1, swingHeavy = false, swingDir = 1, comboIdx = 2;
   let lastYaw = 0, lastPitch = 0, lagX = 0, lagY = 0;
-  let pendingStrikes = [];
   let ammo = gun.mag, reloading = false, reloadT = 0, reloadAmmo0 = 0, equipT = 0;
   let adsHeld = false, scoped = false, scopeIdx = 0; // adsHeld: RMB hold (ads kinds); scoped: toggle (scope kinds)
   let spoolT = 0, lastSpoolEnd = 0;
@@ -96,7 +93,6 @@ export function boot() {
   let trackBot = null, stalker = null, pendingSpawn = 0;
   let pendingGrid = 0, gridT = 0; // opening cascade: orbs pop in one by one
   let trackSecs = [], secClock = 0, secOn = 0; // per-second on-target buckets -> consistency
-  let bufferedSwing = null; // katana input buffer (responsive, timing-honest)
   const raycaster = new THREE.Raycaster();
   const _dir = new THREE.Vector3(), _o = new THREE.Vector3(), _n = new THREE.Vector3(), _hit = new THREE.Vector3();
   const _want = new THREE.Vector3(), _Y = new THREE.Vector3(0, 1, 0), _E = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -115,12 +111,10 @@ export function boot() {
     const pick = id => (gunById(id) ? id : null);
     slots[1] = pick(settings.slot1 || settings.gun) || 'vandal';
     slots[2] = pick(settings.slot2) || 'classic';
-    slots[3] = 'knife';
-    if (slotForClass((gunById(slots[1]) || {}).cls) === 2) slots[1] = 'vandal'; // keep slots sane
     curSlot = 1; lastSlot = 2;
   }
   function renderSlots() {
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 2; i++) {
       const el = $('slot' + i); if (!el) continue;
       const g = gunById(slots[i]);
       el.classList.toggle('active', i === curSlot);
@@ -131,7 +125,6 @@ export function boot() {
     const g = gunById(slots[curSlot]) || gunById('vandal');
     gun = g;
     ammo = g.mag; reloading = false; burstLeft = 0; burstCool = 0; adsHeld = false; scoped = false; scopeIdx = 0;
-    pendingStrikes = []; bufferedSwing = null; cancelInspect();
     vy = 0; airH = 0; grounded = true;
     equipT = g.equip; adsZoom = 1; lastShot = 0; // fresh recovery (VALORANT switch-cancel tech)
     $('reloadbar').style.display = 'none';
@@ -147,18 +140,13 @@ export function boot() {
   }
   function buyGun(id, silent) { // buy menu / loadout: sidearms -> slot 2, rest -> slot 1
     const g = gunById(id); if (!g) return;
-    if (g.cls === 'Melee') { switchSlot(3, silent); return; } // katana is fixed, just draw it
     const slot = slotForClass(g.cls);
     slots[slot] = id;
     settings.slot1 = slots[1]; settings.slot2 = slots[2]; saveSettings();
     if (slot !== curSlot) switchSlot(slot, silent);
     else applySlot(silent);
   }
-  function cancelInspect() {
-    if (!inspecting) return;
-    inspecting = false;
-    if (FX.katana) FX.katana.sheath();
-  }
+  function cancelInspect() {}
 
   // ---------- input ----------
   const locked = () => document.pointerLockElement === canvas;
@@ -192,9 +180,8 @@ export function boot() {
     if (e.code === 'Escape' && $('buy').classList.contains('open')) { toggleBuy(false); return; }
     if (e.code === 'Space') { e.preventDefault(); if (state === PLAYING && grounded && !e.repeat) { vy = JUMP_V0; grounded = false; } }
     if (e.code === 'Escape' && state === PLAYING && !locked()) doPause();
-    if ((e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3') && (state === PLAYING || state === COUNT)) switchSlot(parseInt(e.code.slice(5)));
+    if ((e.code === 'Digit1' || e.code === 'Digit2') && (state === PLAYING || state === COUNT)) switchSlot(parseInt(e.code.slice(5)));
     if (e.code === 'KeyQ' && (state === PLAYING || state === COUNT) && !e.repeat) switchSlot(lastSlot);
-    if (e.code === 'KeyY' && state === PLAYING && !e.repeat) startInspect();
   });
   addEventListener('keyup', e => { keys[e.code] = false; });
   addEventListener('mousedown', e => {
@@ -234,16 +221,13 @@ export function boot() {
     else if (k === 'shotgun' || k === 'slug') {
       if (ammo > 0) firePull(now, false, true); // instant multi-pellet pop; rate cap inside firePull
     }
-    else if (k === 'heavy') meleeSwing(now, true);
   }
-  // burst machine: queue a full burst if cooldown is ready
   function startBurst() {
     if (!gun.alt || gun.alt.kind !== 'adsburst' || burstLeft > 0 || burstCool > 0 || ammo <= 0) return;
     burstLeft = gun.alt.count; burstT = 0;
   }
 
   function pressTrigger(now) {
-    if (gun.mode === 'melee') { meleeSwing(now, false); return; }
     if (reloading || equipT > 0) return;
     if (scoped && gun.alt?.kind === 'scope') { firePull(now, false); return; }
     if (adsHeld && gun.alt?.kind === 'adsburst') { startBurst(); return; }
@@ -375,75 +359,6 @@ export function boot() {
     else if (!hitAny) stats.raw.streak = 0;
   }
 
-  function meleeSwing(now, heavy) {
-    cancelInspect(); // swinging cancels inspect, like the live game
-    if (reloading || equipT > 0) return;
-    const gap = (heavy ? 1 / gun.rmbRpm : 1 / gun.rpm) * 1000; // 0.49 s / 1.205 s cycles
-    if (now - lastShot < gap) {
-      // input buffer: clicks in the last 120 ms of recovery queue one swing (responsive, timing-honest)
-      if (now - lastShot > gap - 120) bufferedSwing = { at: lastShot + gap, heavy };
-      return;
-    }
-    lastShot = now;
-    swingT = 0; swingHeavy = heavy;
-    if (heavy) swingDir = 0; // overhead chop
-    else { comboIdx = (comboIdx + 1) % 3; swingDir = comboIdx === 2 ? 2 : comboIdx === 0 ? 1 : -1; } // 3-move combo
-    recoil += 0.0009; // swing punch (hit adds more on connect)
-    audio.katanaSwing(heavy);
-    FX.katana.trailPop(heavy, swingDir);
-    pendingStrikes.push({ at: now + gun.dmgDelay * 1000, heavy }); // damage lands 0.19 s in
-    stats.raw.shots++;
-  }
-  function landStrike(s) {
-    const range = s.heavy ? gun.rmbRange : gun.lmbRange;
-    _dir.set(0, 0, -1).applyQuaternion(camera.quaternion);
-    raycaster.set(camera.position, _dir); raycaster.far = range;
-    const hits = raycaster.intersectObjects(T.meshes(), false);
-    const oh = raycaster.intersectObjects(W.occluders, false);
-    const oHit = oh.length ? oh[0] : null;
-    const tHit = hits.length ? hits[0] : null;
-    if (!tHit || (oHit && oHit.distance < tHit.distance)) {
-      if (oHit) FX.spark(oHit.point, 0xffd28a); // clang off the scenery
-      stats.raw.streak = 0; return;
-    }
-    const h = hits[0], ud = h.object.userData, t = ud && ud.t;
-    if (!t || !t.alive) return;
-    // backstab ×2 when the target faces away (bots face you, so earn it elsewhere)
-    let back = false;
-    if (t.type === 'bot') {
-      const ry = t.group.rotation.y;
-      back = (Math.sin(ry) * _dir.x + Math.cos(ry) * _dir.z) > 0.3;
-    }
-    const dmg = (s.heavy ? gun.alt.dmg : 50) * (back ? gun.meleeBackstab : 1);
-    stats.raw.hits++; stats.raw.damage += Math.min(dmg, t.hp);
-    audio.katanaHit();
-    hitStop = Math.max(hitStop, 0.022); recoil += 0.0012; // connect punch
-    FX.katana.flash(); // white-hot blade on connect
-    FX.spark(h.point, 0xffd28a); markHit(false);
-    FX.dmgNum(h.point, dmg, back);
-    if (back) showBanner('BACKSTAB');
-    t.hp -= dmg;
-    if (t.type === 'bot') T.setHpBar(t);
-    if (t.hp <= 0 && t.alive) killTarget(t, performance.now(), false, camera.position.distanceTo(h.point), dmg);
-  }
-  function startInspect() { // Y: the Oni way to admire the blade (sheath -> spin -> sheath)
-    if (gun.mode !== 'melee' || inspecting || equipT > 0 || state !== PLAYING) return;
-    inspecting = true; inspectT = 0; audio.inspectSpin();
-  }
-  function poseKatana(dt) { // per-frame katana director: inspect > swing > equip > sheath
-    if (gun.cls !== 'Melee') return;
-    if (inspecting) {
-      inspectT += dt;
-      const k = Math.min(inspectT / 1.4, 1);
-      FX.katana.inspect(k);
-      if (k >= 1) { inspecting = false; FX.katana.sheath(elapsed, 0); }
-    } else if (swingT < (swingHeavy ? 1 / gun.rmbRpm : 1 / gun.rpm)) {
-      swingT += dt;
-      FX.katana.swing(swingT, swingHeavy ? 1 / gun.rmbRpm : 1 / gun.rpm, swingDir, swingHeavy, gun.dmgDelay);
-    } else if (equipT > 0 && gun.equip > 0) FX.katana.draw(clamp(1 - equipT / gun.equip, 0, 1));
-    else FX.katana.sheath(elapsed, Math.min(vel.length() / 5.4, 1));
-  }
-
   function onMiss() { if (mode === 'gridshot') stats.raw.score = Math.max(0, stats.raw.score - 20); stats.raw.streak = 0; }
   function killTarget(t, now, wasHead, dist, dmg) {
     const r = stats.raw;
@@ -509,12 +424,10 @@ export function boot() {
     pos.set(0, 1.6, 2); vel.set(0, 0, 0);
     ammo = gun.mag; reloading = false; pendingSpawn = 0; trackBot = null; stalker = null;
     pendingGrid = 0; gridT = 0;
-    trackSecs = []; secClock = 0; secOn = 0; bufferedSwing = null;
+    trackSecs = []; secClock = 0; secOn = 0;
     adsHeld = false; scoped = false; scopeIdx = 0; adsZoom = 1;
     FX.setSniperScope(false); $('scope').classList.remove('on'); document.body.classList.toggle('scoped', scoped);
     spoolT = 0; burstLeft = 0; burstCool = 0;
-    inspecting = false; swingT = 1; pendingStrikes = []; bufferedSwing = null;
-    if (FX.katana) FX.katana.sheath();
     vy = 0; airH = 0; grounded = true; camH = CAM_STAND;
     timeLeft = MODE_DEFS[m].time ?? 120; elapsed = 0;
     $('st-mode').textContent = MODE_DEFS[m].name;
@@ -556,8 +469,6 @@ export function boot() {
   }
   function endGame() {
     state = RESULTS; mouseDown = false; stats.stopLoop();
-    inspecting = false; pendingStrikes = []; bufferedSwing = null;
-    if (FX.katana) FX.katana.sheath();
     scoped = false; FX.setSniperScope(false); $('scope').classList.remove('on'); document.body.classList.toggle('scoped', scoped);
     if (locked()) document.exitPointerLock();
     document.body.classList.remove('playing', 'paused');
@@ -589,8 +500,6 @@ export function boot() {
   }
   function quitToMenu() {
     state = MENU; mouseDown = false; stats.stopLoop();
-    inspecting = false; pendingStrikes = []; bufferedSwing = null;
-    if (FX.katana) FX.katana.sheath();
     scoped = false; FX.setSniperScope(false); $('scope').classList.remove('on'); document.body.classList.toggle('scoped', scoped);
     if (locked()) document.exitPointerLock();
     T.clear(); toggleBuy(false);
@@ -634,9 +543,9 @@ export function boot() {
         `<svg class="gsil" viewBox="0 0 120 40"><use href="#sil-${g.cls.toLowerCase()}"/></svg>` +
         `<div class="buy-meta"><b>${g.name}</b><span class="price">${g.price} cr</span>${g.id === gun.id ? '<span class="eq">EQUIPPED</span>' : ''}</div>` +
         `<div class="buy-bars"><label>PWR ${maxHead}</label>${bar(maxHead / 255 * 100)}` +
-        `<label>RPM ${g.mode === 'melee' ? '—' : g.rpm}</label>${bar(g.mode === 'melee' ? 0 : g.rpm / 16 * 100)}` +
+        `<label>RPM ${g.rpm}</label>${bar(g.rpm / 16 * 100)}` +
         `<label>MAG ${g.mag === Infinity ? '∞' : g.mag}</label>${bar(g.mag === Infinity ? 100 : g.mag / 100 * 100)}</div>` +
-        `<div class="buy-tag">${g.mode === 'auto' ? 'AUTO' : g.mode === 'semi' ? 'SEMI' : 'MELEE'} · ${g.pen} PEN${g.silenced ? ' · SUPPRESSED' : ''}</div>`;
+        `<div class="buy-tag">${g.mode === 'auto' ? 'AUTO' : 'SEMI'} · ${g.pen} PEN${g.silenced ? ' · SUPPRESSED' : ''}</div>`;
       el.addEventListener('click', () => {
         buyGun(g.id); toggleBuy(false); // instant switch to its slot, run continues
       });
@@ -737,7 +646,7 @@ export function boot() {
     $('gun-card').innerHTML =
       `<h3>${g.name} <span class="price">${g.price} credits</span></h3><p>${g.desc}</p>
        <div class="kv"><span>Damage H/B/L by range</span><b>${bandStr(g)}</b></div>
-       <div class="kv"><span>Fire rate</span><b>${g.mode === 'melee' ? g.rpm + ' swings/s' : g.mode === 'auto' ? g.rpm + '/s' + (g.adsRpm ? ` (${g.adsRpm}/s ADS)` : '') + (g.spool ? `, spools ${g.spool.from}→${g.spool.to}` : '') : g.rpm + '/s semi'}</b></div>
+       <div class="kv"><span>Fire rate</span><b>${g.mode === 'auto' ? g.rpm + '/s' + (g.adsRpm ? ` (${g.adsRpm}/s ADS)` : '') + (g.spool ? `, spools ${g.spool.from}→${g.spool.to}` : '') : g.rpm + '/s semi'}</b></div>
        <div class="kv"><span>Mag / reload / equip</span><b>${g.mag === Infinity ? '∞' : g.mag} · ${g.reload}s · ${g.equip}s</b></div>
        <div class="kv"><span>1st-shot spread</span><b>${g.spread.hip}°${g.spread.ads !== undefined ? ` (${g.spread.ads}° ADS)` : ''} ${conf(g.spread.src)}</b></div>
        <div class="kv"><span>Zoom / pen / silenced</span><b>${g.alt?.zoom ? g.alt.zoom + 'x' : g.alt?.kind === 'scope' ? g.alt.zooms.join('/') + 'x' : '—'} · ${g.pen} · ${g.silenced ? 'yes' : 'no'}</b></div>
@@ -1022,11 +931,6 @@ export function boot() {
       bloom = bloomDecay(bloom, gun.recovery, dt);
 
       T.idle(now, mode === 'gridshot' ? settings.orbMove : 'drift');
-      while (pendingStrikes.length && pendingStrikes[0].at <= now) landStrike(pendingStrikes.shift());
-      if (bufferedSwing && now >= bufferedSwing.at && !reloading && equipT <= 0) {
-        const h = bufferedSwing.heavy; bufferedSwing = null; meleeSwing(now, h);
-      }
-      poseKatana(dt);
       tickCrosshair();
       if (mode === 'tracking' && trackBot && stalker) {
         const st = stalker.update(dt); // VALORANT-like strafe brain (accel/friction/deadzone)

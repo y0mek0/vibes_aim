@@ -181,9 +181,9 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     });
     const color = '#f6d447';
     series = chart.addCandlestickSeries({
-      upColor: color, downColor: '#ffffff',
-      borderUpColor: color, borderDownColor: '#ffffff',
-      wickUpColor: color, wickDownColor: '#ffffff',
+      upColor: color, downColor: '#8a91a0',
+      borderUpColor: color, borderDownColor: '#8a91a0',
+      wickUpColor: color, wickDownColor: '#8a91a0',
     });
   }
 

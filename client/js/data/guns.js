@@ -111,12 +111,7 @@ export const GUNS = [
   spread:{hip:0.40, max:1.2, ads:0.22, src:'est'}, recoil:{pitch:0.28, yaw:0.10, src:'est'},
   alt:{kind:'ads', zoom:1.15}, snd:{freq:1000, dur:0.06}, desc:'100 rounds of area denial. Spools to 15.6.' },
 
-{ id:'knife', name:'ONI KATANA', cls:'Melee', price:0, mag:Infinity, reserve:Infinity, reload:0, equip:0.6, run:6.75,
-  mode:'melee', rpm:2.04, rmbRpm:0.83, dmgDelay:0.19, lmbRange:2.2, rmbRange:2.0,
-  pellets:1, bands:[[2.2,75,50,50]], meleeBackstab:2, pen:'—', silenced:true,
-  spread:{hip:0, max:0, src:'data'}, recoil:{pitch:0, yaw:0, src:'data'}, alt:{kind:'heavy', dmg:75},
-  snd:{freq:2500, dur:0.04}, desc:'Onimaru Kunitsuna. LMB slash 50 (0.49s combo) / RMB overhead 75 (1.2s). ×2 from behind. Stays sheathed — Y to inspect.' },
 ];
 
 export const gunById = id => GUNS.find(g => g.id === id);
-export const GUN_CLASSES = ['Sidearm','SMG','Shotgun','Rifle','Sniper','Heavy','Melee'];
+export const GUN_CLASSES = ['Sidearm','SMG','Shotgun','Rifle','Sniper','Heavy'];

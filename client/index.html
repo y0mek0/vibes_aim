@@ -26,7 +26,7 @@
 <!-- vibes_aim: trading workspace. It lives inside the shared dashboard shell. -->
 <div id="vibes-terminal" hidden>
   <div class="vt-body">
-    <div class="workspace-heading"><div><span class="section-kicker">Market</span><h1>Market</h1></div><div class="workspace-metrics"><span>Stable <b class="num" data-vt-balance>—</b></span><span>Portfolio <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div></div>
+    <div class="workspace-heading"><div><span class="section-kicker">Market</span><h1>Market</h1></div><div class="workspace-metrics"><span>Portfolio value <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div></div>
     <aside class="vt-watchlist">
       <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
       <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">—</strong></button>
@@ -39,9 +39,15 @@
         <div class="vt-chart-head"><div><span class="vt-kicker">// active market</span><h1><span data-vt-market-ticker>AAPL</span> <em data-vt-market-price>—</em></h1></div><span class="vt-market-state">PAPER MARKET</span></div>
         <div class="vt-chart-slot" data-vt-chart-slot></div>
       </section>
-      <section class="vt-section vt-holdings">
-        <div class="vt-section-head"><span>Holdings</span><small>Farmed assets</small></div>
-        <table class="vt-table"><thead><tr><th>Ticker</th><th>Units</th></tr></thead><tbody data-vt-holdings></tbody></table>
+      <section class="vt-section vt-assets">
+        <div class="vt-section-head"><span>Account assets</span><small>Total <b class="num" data-vt-assets-total>—</b></small></div>
+        <div class="vt-assets-list" data-vt-holdings></div>
+      </section>
+      <section class="vt-section vt-convert">
+        <div class="vt-section-head"><span>Trade assets</span><small>Sell earned tokens → USD</small></div>
+        <div class="vt-convert-grid"><label class="vt-control"><span class="vt-field-label">Asset</span><select data-vt-convert-ticker></select></label><label class="vt-control"><span class="vt-field-label">Units</span><input type="number" min="0" step="0.000001" value="0" data-vt-convert-units></label></div>
+        <div class="vt-convert-quote"><span>Rate <b class="num" data-vt-convert-price>—</b></span><strong>Receive <b class="num" data-vt-convert-usd>—</b> USD</strong></div>
+        <div class="vt-convert-actions"><span class="vt-status" data-vt-convert-status>Earn AAPL in Train first.</span><button type="button" class="vt-btn vt-btn-primary" data-vt-convert-submit disabled>Sell for USD</button></div>
       </section>
       <section class="vt-section vt-positions">
         <div class="vt-section-head"><span>Open positions</span><small>Manage risk</small></div>
@@ -52,9 +58,10 @@
     <aside class="vt-market-right">
       <section class="vt-section vt-order">
         <div class="vt-section-head"><span>Order ticket</span><small>Paper trade</small></div>
-        <div class="vt-row"><label>Ticker</label><select data-vt-ot-ticker><option value="AAPL">AAPL</option><option value="NVDA">NVDA</option></select><label>Side</label><select data-vt-ot-side><option value="long">long</option><option value="short">short</option></select></div>
-        <div class="vt-row"><label>Notional</label><input type="number" min="10" step="10" value="100" data-vt-ot-notional><label>Leverage</label><input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage><span class="num" data-vt-ot-leverage-num>1x</span></div>
-        <div class="vt-row vt-readout"><span>Entry <span class="num" data-vt-ot-entry>—</span></span><span>Margin <span class="num" data-vt-ot-margin>—</span></span><span>Notional <span class="num" data-vt-ot-notional-total>—</span></span><span class="neg">Liquidation <span class="num" data-vt-ot-liq>—</span></span></div>
+        <div class="vt-order-market"><div><span class="vt-field-label">Ticker</span><select data-vt-ot-ticker><option value="AAPL">AAPL</option><option value="NVDA">NVDA</option></select></div><div class="vt-order-quote"><strong data-vt-ot-symbol>AAPL</strong><span data-vt-ot-price>—</span></div></div>
+        <div class="vt-order-field"><span class="vt-field-label">Side</span><div class="vt-side-toggle" role="group" aria-label="Position side"><button type="button" data-vt-side-choice="long" class="active">Long</button><button type="button" data-vt-side-choice="short">Short</button></div><select data-vt-ot-side class="vt-side-native" aria-hidden="true" tabindex="-1"><option value="long">long</option><option value="short">short</option></select></div>
+        <div class="vt-order-field-grid"><label class="vt-control"><span class="vt-field-label">Position size</span><input type="number" min="10" step="10" value="100" data-vt-ot-notional></label><label class="vt-control"><span class="vt-field-label">Leverage <b class="num" data-vt-ot-leverage-num>1x</b></span><input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage></label></div>
+        <div class="vt-readout"><div><span>Entry</span><strong class="num" data-vt-ot-entry>—</strong></div><div><span>Margin</span><strong class="num" data-vt-ot-margin>—</strong></div><div><span>Notional</span><strong class="num" data-vt-ot-notional-total>—</strong></div><div class="neg"><span>Liquidation</span><strong class="num" data-vt-ot-liq>—</strong></div></div>
         <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
         <div class="vt-confirm"><label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label><button type="button" class="vt-btn vt-btn-primary" data-vt-ot-submit disabled>Open position</button></div>
       </section>
@@ -68,7 +75,7 @@
   <main class="vm-body">
     <section class="vm-page-intro"><div><span class="vm-kicker">Missions</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-claimed data-vm-side-claimed>0</span> / <span data-vm-total data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
     <div class="vm-layout">
-      <section class="vm-board"><div class="vm-board-head"><div><span class="vm-kicker">// mission log</span><div class="vm-board-title">Active objectives</div></div><span class="vm-board-note">Progress updates from training and trades</span></div><nav class="vm-filters" aria-label="Mission filters"><button type="button" class="vm-filter active" data-vm-filter="all">All</button><button type="button" class="vm-filter" data-vm-filter="aim">Aim</button><button type="button" class="vm-filter" data-vm-filter="trading">Trading</button><button type="button" class="vm-filter" data-vm-filter="completed">Completed</button></nav><table class="vm-table"><tbody data-vm-body></tbody></table></section>
+      <section class="vm-board"><div class="vm-board-head"><div><div class="vm-board-title">Active objectives</div></div><span class="vm-board-note">Progress updates from training and trades</span></div><nav class="vm-filters" aria-label="Mission filters"><button type="button" class="vm-filter active" data-vm-filter="all">All</button><button type="button" class="vm-filter" data-vm-filter="aim">Aim</button><button type="button" class="vm-filter" data-vm-filter="trading">Trading</button><button type="button" class="vm-filter" data-vm-filter="completed">Completed</button></nav><table class="vm-table"><tbody data-vm-body></tbody></table></section>
       <aside class="vm-side"><section class="vm-progress-card"><div class="vm-kicker">AAPL chain</div><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><div class="vm-side-bar"><i data-vm-side-bar></i></div><p>Every mission is tied to the existing aim, trade, and accuracy systems.</p></section><div class="vm-unlock" data-vm-unlock-card hidden><div class="vm-unlock-kicker">// chain complete</div><div class="vm-unlock-title">AAPL chain complete</div><div class="vm-unlock-text">All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.</div><div class="vm-unlock-actions"><span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span><button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button></div></div></aside>
     </div>
   </main>
@@ -80,7 +87,7 @@
 <div id="dmg-layer"></div>
 
 <div id="topbar"><div class="tb">
-  <div class="tb-left"><div class="tb-score" id="st-score">0</div><div class="tb-sub">K <span id="st-kills">0</span> · STREAK <span id="st-streak">0</span></div></div>
+  <div class="tb-left"><div class="tb-score" id="st-earned" data-game-earned>0.0000</div><div class="tb-sub"><span data-game-earned-ticker>AAPL</span> EARNED · K <span id="st-kills">0</span> · STREAK <span id="st-streak">0</span></div><span id="st-score" hidden>0</span></div>
   <div class="tb-mid"><div id="st-mode">GRIDSHOT</div><div id="st-timer">60.0</div></div>
   <div class="tb-right"><div class="tb-cells">
     <div><label>HS%</label><span id="st-hs">—</span></div>
@@ -92,15 +99,14 @@
 <div id="killfeed"></div>
 
 <div id="crosshair"></div>
-<div id="rangedist">—</div>
 <div id="hitmarker"></div>
 <div id="banner">HEADSHOT</div>
 <div id="lockhint"></div>
 
-<div id="slots"><div class="slot" id="slot1"><b>1</b><span>—</span></div><div class="slot" id="slot2"><b>2</b><span>—</span></div><div class="slot" id="slot3"><b>3</b><span>—</span></div></div>
+<div id="slots"><div class="slot" id="slot1"><b>1</b><span>—</span></div><div class="slot" id="slot2"><b>2</b><span>—</span></div></div>
 <div class="hud-bl"><span class="hp-num">100</span><span class="hp-shield" id="st-hp">—</span><div class="small" id="st-stance">RUN</div></div>
 <div class="hud-br"><div id="st-gunname">—</div><div id="st-ammo">—</div><div id="magpips"></div><div id="reloadbar"><i></i></div><div id="st-fps"></div></div>
-<div class="hintline">1/2/3 LOADOUT · Q QUICK · B BUY · R RELOAD · ESC PAUSE</div>
+<div class="hintline">1/2 LOADOUT · Q QUICK · B BUY · R RELOAD · ESC PAUSE</div>
 
 <div id="countdown"><div id="cdtext">READY</div></div>
 
@@ -120,7 +126,7 @@
         <span id="buildtag" hidden></span>
         <button type="button" class="nav-customize" id="customize-open">Customize</button>
         <span class="nav-level">LVL <b id="profile-level">01</b></span>
-        <span class="nav-stable">Stable <b data-dashboard-stable>200.00</b></span>
+        <span class="nav-usd">USD <b data-dashboard-stable>200.00</b></span>
       </div>
     </header>
 
@@ -149,14 +155,14 @@
         <aside class="market-column" data-dashboard-section-target="market">
           <section class="portfolio-panel">
             <div class="panel-heading compact"><div><span class="section-kicker">Portfolio</span><h2>Your position</h2></div><span class="live-state"><i></i> PAPER</span></div>
-            <div class="portfolio-total"><span data-dashboard-portfolio-total>200.00</span><small>Stable total</small></div>
+            <div class="portfolio-total"><span data-dashboard-portfolio-total>200.00</span><small>USD total</small></div>
             <div class="portfolio-line"></div>
           </section>
 
           <section class="market-panel">
             <div class="market-panel-head"><div><span class="section-kicker">Active market</span><h2><span data-vc-ticker-label>AAPL</span> <span class="market-price" data-vc-price-label>—</span></h2></div><button type="button" class="panel-action" id="vibes-open-terminal-secondary">Trade</button></div>
             <div id="vibes-chart" hidden>
-              <div class="vc-head"><span class="vc-kicker">Market feed</span><span class="vc-ticker" data-vc-ticker>AAPL</span><span class="vc-price" data-vc-price>—</span><span class="vc-change" data-vc-change>—</span><span class="vc-status" data-vc-status></span><div class="vc-tickers" role="tablist" aria-label="ticker"><button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button><button type="button" data-vc-ticker-btn="NVDA">NVDA</button></div><div class="vc-ranges" role="tablist" aria-label="range"><button type="button" data-vc-range-btn="1D" class="active">1D</button><button type="button" data-vc-range-btn="5D">5D</button></div></div>
+              <div class="vc-head"><span class="vc-kicker">Market feed</span><span class="vc-ticker" data-vc-ticker>AAPL</span><span class="vc-price" data-vc-price>—</span><span class="vc-change" data-vc-change>—</span><span class="vc-status" data-vc-status></span><div class="vc-tickers" role="tablist" aria-label="ticker"><button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button><button type="button" data-vc-ticker-btn="NVDA">NVDA</button></div><div class="vc-ranges" role="tablist" aria-label="range"><button type="button" data-vc-range-btn="15m">15m</button><button type="button" data-vc-range-btn="1H">1h</button><button type="button" data-vc-range-btn="4H">4h</button><button type="button" data-vc-range-btn="1D" class="active">1D</button><button type="button" data-vc-range-btn="5D">5D</button></div></div>
               <div class="vc-body" data-vc-body></div>
             </div>
           </section>
@@ -264,6 +270,9 @@
   const setWorkspace = (target) => {
     const isMarket = target === 'market';
     const isMissions = target === 'missions';
+    const menu = document.getElementById('menu');
+    menu?.classList.toggle('market-view', isMarket);
+    menu?.classList.toggle('missions-view', isMissions);
     setMarketChartLocation(isMarket);
     if (panel) panel.hidden = !isMarket;
     if (missionsPanel) missionsPanel.hidden = !isMissions;

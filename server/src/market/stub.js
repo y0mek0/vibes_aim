@@ -52,6 +52,9 @@ function candlesFor(symbol, range) {
   const now = Date.now();
   let step, count;
   switch (range) {
+    case '15m': step = 60_000; count = 15; break;          // 1m x 15
+    case '1H': step = 60_000; count = 60; break;            // 1m x 60
+    case '4H': step = 5 * 60_000; count = 48; break;        // 5m x 48
     case '1D': step = 60_000; count = 24 * 60; break;       // 1m x 1440
     case '5D': step = 5 * 60_000; count = 5 * 24 * 12; break; // 5m x 576
     case '1M': step = 60 * 60_000; count = 30 * 6; break;    // 1h x 180

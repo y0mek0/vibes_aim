@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = new URL('..', import.meta.url);
 const files = ['client/js/main.js', 'client/js/game.js', 'client/js/build.js', 'client/js/ui/combo.js', 'client/js/core/stats.js', 'client/js/core/ballistics.js',
-  'client/js/core/gunplay.js', 'client/js/core/stalker.js', 'client/js/core/crosshair.js', 'client/js/data/themes.js', 'client/js/three/katana.js',
+  'client/js/core/gunplay.js', 'client/js/core/stalker.js', 'client/js/core/crosshair.js', 'client/js/data/themes.js',
   'client/js/fx/audio.js', 'client/js/three/world.js', 'client/js/three/targets.js', 'client/js/three/effects.js',
   'client/js/data/guns.js', 'client/js/data/mechanics.js'];
 

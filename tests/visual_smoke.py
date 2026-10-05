@@ -160,7 +160,7 @@ def main():
             out2 = os.path.join(SCREENSHOTS_DIR, "02-terminal.png")
             page.screenshot(path=out2)
             summary["screenshots"].append(out2)
-            summary["dom"]["terminal_stable"] = page.eval_on_selector('[data-vt-balance]', 'el => el.textContent')
+            summary["dom"]["terminal_usd"] = page.eval_on_selector('[data-vt-assets-total]', 'el => el.textContent')
             # Switch directly through the shared primary navigation.
             page.click("#vibes-open-missions", timeout=10000)
             # Do not rely on a wall-clock sleep: the panel renders from

@@ -76,8 +76,8 @@ export const spawnDist = (band, r) => {
   return b[0] + u * (b[1] - b[0]);
 };
 
-// Loadout slots (VALORANT: 1 primary, 2 secondary, 3 melee)
-export const slotForClass = cls => (cls === 'Sidearm' ? 2 : cls === 'Melee' ? 3 : 1);
+// Loadout slots: primary and secondary.
+export const slotForClass = cls => cls === 'Sidearm' ? 2 : 1;
 // Spawn intro: targets pop in with an overshoot ease over ~0.25 s so they
 // visibly "arrive" (1 = fully in). Pure + tested.
 export const easeOutBack = k => { const c = 1.70158; k = Math.min(1, Math.max(0, k)); return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
@@ -86,4 +86,4 @@ export const spawnIntro = ageMs => 0.3 + 0.7 * easeOutBack(ageMs / 250);
 // Base orb geometry r=0.26; scale multiplies it.
 export const ORB_SIZES = { xs: 0.6, s: 0.8, m: 1.0, l: 1.3, xl: 1.7 };
 export const orbScale = key => ORB_SIZES[key] || 1;
-export const cycleSlot = (cur, dir) => ((cur - 1 + dir + 3) % 3) + 1;
+export const cycleSlot = (cur, dir) => ((cur - 1 + dir + 2) % 2) + 1;

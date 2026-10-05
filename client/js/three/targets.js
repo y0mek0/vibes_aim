@@ -8,13 +8,12 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 export function createTargets(scene) {
   const orbGeo = new THREE.SphereGeometry(0.26, 18, 12);
-  // vivid violet: max hue distance from radianite teal + red decor (see palette
-  // study), bright on near-black walls. Emissive pulses in idle() for shine.
-  const orbMat = new THREE.MeshLambertMaterial({ color: 0xc251ff, emissive: 0xa83df0, emissiveIntensity: 1.0 });
-  const orbFlash = new THREE.MeshBasicMaterial({ color: 0xeafff8 });
-  const bodyMat = new THREE.MeshLambertMaterial({ color: 0x7c2f2f, emissive: 0x1a0808, emissiveIntensity: 0.5 });
-  const headMat = new THREE.MeshLambertMaterial({ color: 0xffd9c2, emissive: 0x7a3520, emissiveIntensity: 0.45 });
-  const visorMat = new THREE.MeshBasicMaterial({ color: 0x101418 });
+  // Project palette: stable yellow targets on a dark field; no animated emissive pulse.
+  const orbMat = new THREE.MeshLambertMaterial({ color: 0xf6d447, emissive: 0x6f5b12, emissiveIntensity: 0.35 });
+  const orbFlash = new THREE.MeshBasicMaterial({ color: 0xf4f1ea });
+  const bodyMat = new THREE.MeshLambertMaterial({ color: 0x26313a, emissive: 0x090d10, emissiveIntensity: 0.2 });
+  const headMat = new THREE.MeshLambertMaterial({ color: 0xf4f1ea, emissive: 0x27303a, emissiveIntensity: 0.2 });
+  const visorMat = new THREE.MeshBasicMaterial({ color: 0x07070c });
   const bodyGeo = new THREE.CapsuleGeometry(0.32, 0.85, 4, 10);
   const headGeo = new THREE.SphereGeometry(0.165, 14, 10);
   const chestGeo = new THREE.BoxGeometry(0.62, 0.5, 0.34);
@@ -23,9 +22,9 @@ export function createTargets(scene) {
   const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25, depthWrite: false });
   // HP bars: 2 shared-material sprites per bot (no per-hit allocation, transform-only updates)
   const hpBgMat = new THREE.SpriteMaterial({ color: 0x0b0e12, transparent: true, opacity: 0.65, depthWrite: false });
-  const hpFgG = new THREE.SpriteMaterial({ color: 0x3df0c2, depthWrite: false });
-  const hpFgY = new THREE.SpriteMaterial({ color: 0xffb454, depthWrite: false });
-  const hpFgR = new THREE.SpriteMaterial({ color: 0xff4655, depthWrite: false });
+  const hpFgG = new THREE.SpriteMaterial({ color: 0x7df9c5, depthWrite: false });
+  const hpFgY = new THREE.SpriteMaterial({ color: 0xf6d447, depthWrite: false });
+  const hpFgR = new THREE.SpriteMaterial({ color: 0x7df9c5, depthWrite: false });
 
   // specular glint: one shared additive sprite per orb, offset top-front so the
   // sphere reads glossy as it moves (1 tiny draw each, no per-frame cost)
@@ -38,7 +37,7 @@ export function createTargets(scene) {
     g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   })();
-  const glintMat = new THREE.SpriteMaterial({ map: glintTex, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  const glintMat = new THREE.SpriteMaterial({ map: glintTex, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false });
 
   const targets = [];
   let meshes = [];
@@ -94,8 +93,6 @@ export function createTargets(scene) {
   }
   function clear() { while (targets.length) remove(targets[0]); }
   function idle(now, move) {
-    // shared emissive pulse: the whole field breathes together (1 uniform, 0 draws)
-    orbMat.emissiveIntensity = 1.0 + Math.sin(now * 0.005) * 0.3;
     for (const t of targets) {
       const age = now - t.spawnT;
       const intro = age < 300 ? spawnIntro(age) : 1; // spawn pop: scale in with overshoot

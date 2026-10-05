@@ -30,7 +30,6 @@ export function shotsToKill(gun, dist, part, hp, altSlug = false) {
 
 // Effective fire rate (rounds/sec) incl. spool position 0..1 and ADS/scoped state
 export function effectiveRpm(gun, { ads = false, scoped = false, spool = 1 } = {}) {
-  if (gun.mode === 'melee') return gun.rpm;
   let rpm = gun.rpm;
   if (gun.spool) rpm = gun.spool.from + (gun.spool.to - gun.spool.from) * Math.min(1, Math.max(0, spool));
   if (scoped && gun.alt?.kind === 'scope' && gun.alt.scopeRpm) return gun.alt.scopeRpm;
