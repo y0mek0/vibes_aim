@@ -57,7 +57,7 @@ export function buildWorld(scene, camera, themeId) {
     g.strokeRect(0, 0, w, h);
     g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
     if (TH.id === 'sakura') { // fallen petals baked in
-      g.fillStyle = 'rgba(255,158,207,0.5)';
+      g.fillStyle = 'rgba(125,249,197,0.22)';
       for (let i = 0; i < 120; i++) { g.beginPath(); g.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 2.5, 0, 7); g.fill(); }
     }
     if (TH.id === 'lunar') { // craters
@@ -98,7 +98,7 @@ export function buildWorld(scene, camera, themeId) {
     if (TH.id === 'abyss') { // portholes baked into the wall
       for (let x = 32; x < w; x += 128) {
         g.fillStyle = '#05090e'; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.fill();
-        g.fillStyle = 'rgba(53,224,255,0.5)'; g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
+        g.fillStyle = 'rgba(125,249,197,0.35)'; g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
         g.strokeStyle = '#3a4a58'; g.lineWidth = 5; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.stroke();
       }
     }
@@ -139,12 +139,12 @@ export function buildWorld(scene, camera, themeId) {
   // ---------- sky (outdoor only) ----------
   if (!TH.indoor) {
     const skies = {
-      day: ['#4f9fd8', '#9fcbe8', '#f2dcae', '#f7cf9a'],
-      snow: ['#7fa8cc', '#c8dcea', '#eef3f6', '#ffffff'],
-      dusk: ['#3a2a5e', '#b45a7a', '#ff9e57', '#ffcf8a'],
-      garden: ['#6fb3a0', '#b8d8c0', '#eef0d0', '#f7ecc0'],
+      day: ['#182027', '#252f36', '#38423f', '#4a4939'],
+      snow: ['#1d262d', '#2a353b', '#3d4748', '#50534b'],
+      dusk: ['#171a22', '#29252c', '#4a4032', '#5a4d31'],
+      garden: ['#15231f', '#24352d', '#35443a', '#46503a'],
       stars: ['#020306', '#05070e', '#0a0d18', '#141a2a'],
-      pink: ['#8fb8e8', '#d8bce0', '#f7c8d8', '#ffe0e8'],
+      pink: ['#1a2028', '#2b3038', '#403e3a', '#504a38'],
     };
     const sc = skies[TH.sky] || skies.day;
     const t = canvasTex(16, 256, (g, w, h) => {
@@ -162,8 +162,8 @@ export function buildWorld(scene, camera, themeId) {
       new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false })));
     if (TH.sky === 'stars') { // Earthrise over the lunar back wall
       const et = canvasTex(128, 128, (g) => {
-        g.fillStyle = '#1a4a8a'; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill();
-        g.fillStyle = '#3a8a4a';
+        g.fillStyle = '#343a40'; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill();
+        g.fillStyle = '#7df9c5';
         g.beginPath(); g.ellipse(45, 50, 22, 14, 0.4, 0, 7); g.fill();
         g.beginPath(); g.ellipse(80, 80, 16, 10, -0.3, 0, 7); g.fill();
         g.fillStyle = 'rgba(255,255,255,0.7)';
@@ -173,7 +173,7 @@ export function buildWorld(scene, camera, themeId) {
       const e = new THREE.Sprite(new THREE.SpriteMaterial({ map: et, transparent: true, fog: false, depthWrite: false }));
       e.position.set(28, 52, -120); e.scale.set(20, 20, 1); add(e);
     } else {
-      const sunTex = glowTex('rgba(255,252,240,1)', TH.id === 'sunset' ? 'rgba(255,140,66,0.55)' : 'rgba(255,240,205,0.5)');
+      const sunTex = glowTex('rgba(246,212,71,0.95)', 'rgba(246,212,71,0.34)');
       const big = TH.id === 'sunset';
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
       sp.position.set(big ? -30 : -46, big ? 16 : 34, -110); sp.scale.set(big ? 46 : 34, big ? 46 : 34, 1); add(sp);
@@ -237,7 +237,11 @@ export function buildWorld(scene, camera, themeId) {
     const frame = new THREE.Mesh(new THREE.BoxGeometry(20, 10.5, 0.4),
       new THREE.MeshLambertMaterial({ color: 0x0b0f14 }));
     frame.position.set(0, TH.indoor ? 9.5 : 11, -69.7); add(frame);
+    let jumboKey = '';
     var drawJumbo = (d) => {
+      const key = [d.mode || 'STANDBY', d.score ?? 0, d.kills ?? 0, d.acc ?? '—', d.time ?? ''].join('|');
+      if (key === jumboKey) return;
+      jumboKey = key;
       const g = jc.getContext('2d');
       g.fillStyle = '#0b1118'; g.fillRect(0, 0, 512, 256);
       g.fillStyle = TH.accent; g.fillRect(0, 0, 512, 10); g.fillRect(0, 246, 512, 10);
@@ -269,7 +273,7 @@ export function buildWorld(scene, camera, themeId) {
     });
   }
   if (has('shafts') || has('rays')) {
-    const col = has('rays') ? 0x6ab8e8 : 0xbfd8ee;
+    const col = TH.glow;
     const shaftMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     [[-10, -22, 0.2], [9, -40, -0.15], [0, -58, 0.1]].forEach(([x, z, tilt]) => {
       const s = new THREE.Mesh(new THREE.PlaneGeometry(7, 15), shaftMat);
@@ -301,9 +305,9 @@ export function buildWorld(scene, camera, themeId) {
   }
   // trees / plants per theme
   if (has('cypress') || has('snowpines') || has('blossom')) {
-    const leaf = has('blossom') ? 0xe8a0c0 : has('snowpines') ? 0xdce8dd : 0x2e5233;
+    const leaf = TH.glow;
     const trunkI = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.16, 1.2, 6),
-      new THREE.MeshLambertMaterial({ color: 0x6b4a33 }), 10);
+      new THREE.MeshLambertMaterial({ color: 0x343a40 }), 10);
     const topI = new THREE.InstancedMesh(
       has('blossom') ? new THREE.SphereGeometry(1.5, 10, 8) : new THREE.ConeGeometry(0.95, 3.6, 7),
       new THREE.MeshLambertMaterial({ color: leaf }), 10);
@@ -318,7 +322,7 @@ export function buildWorld(scene, camera, themeId) {
   }
   if (has('bamboo')) { // dense green stalks along both walls
     const inst = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09, 0.11, 7, 6),
-      new THREE.MeshLambertMaterial({ color: 0x4a7a3a }), 40);
+      new THREE.MeshLambertMaterial({ color: 0x34453d }), 40);
     for (let i = 0; i < 40; i++) {
       const side = i % 2 ? -1 : 1;
       M4.makeTranslation(side * (30 + (i % 5)), 3.5, -5 - Math.floor(i / 2) * 3.1);
@@ -328,9 +332,9 @@ export function buildWorld(scene, camera, themeId) {
   }
   if (has('lanterns')) { // warm paper lanterns on posts
     const posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 3, 0.18),
-      new THREE.MeshLambertMaterial({ color: 0x3a2f26 }), 8);
+      new THREE.MeshLambertMaterial({ color: 0x343a40 }), 8);
     const orbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.32, 10, 8),
-      new THREE.MeshBasicMaterial({ color: 0xffd9a0 }), 8);
+      new THREE.MeshBasicMaterial({ color: TH.accent }), 8);
     [[-30], [-18], [-6], [6], [18], [30], [-42], [42]].forEach(([z], i) => {
       const x = i % 2 ? 33 : -33;
       M4.makeTranslation(x, 1.5, z); posts.setMatrixAt(i, M4);
@@ -348,7 +352,7 @@ export function buildWorld(scene, camera, themeId) {
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffe9a8, size: 0.14, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })));
+    add(new THREE.Points(g, new THREE.PointsMaterial({ color: TH.glow, size: 0.14, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false })));
   }
   if (has('lights')) { // string lights across the courtyard
     const pts = [], bulbs = [];
@@ -374,7 +378,7 @@ export function buildWorld(scene, camera, themeId) {
     inst.instanceMatrix.needsUpdate = true; add(inst);
   }
   if (has('torii')) { // vermilion gate at the far end
-    const red = new THREE.MeshLambertMaterial({ color: 0xc8343e });
+    const red = new THREE.MeshLambertMaterial({ color: TH.accent });
     const dark = new THREE.MeshLambertMaterial({ color: 0x2a2a2e });
     [[-4], [4]].forEach(([x]) => {
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 9, 10), red);
@@ -387,7 +391,7 @@ export function buildWorld(scene, camera, themeId) {
   }
   if (has('icespikes')) {
     const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(0.4, 1, 0.4),
-      new THREE.MeshBasicMaterial({ color: 0x9fdcff }), 8);
+      new THREE.MeshBasicMaterial({ color: TH.glow }), 8);
     const Q = new THREE.Quaternion(), E = new THREE.Euler(), S = new THREE.Vector3(), P = new THREE.Vector3();
     const spots = [[-14, -60, 3.4], [-11, -60, 2.2], [12, -60, 4.1], [15, -60, 2.6], [0, -62, 1.8], [-4, -60, 2.9], [7, -60, 2.3], [20, -55, 3.0]];
     spots.forEach(([x, z, h], i) => {
@@ -397,7 +401,7 @@ export function buildWorld(scene, camera, themeId) {
     inst.instanceMatrix.needsUpdate = true; add(inst);
   }
   // lane furniture shared by all themes
-  const woodMat = new THREE.MeshLambertMaterial({ color: 0x7a5c3e });
+  const woodMat = new THREE.MeshLambertMaterial({ color: 0x343a40 });
   [[-6, -20], [6, -21], [0, -25]].forEach(([x, z]) => {
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.6, 0.12), woodMat);
     post.position.set(x, 0.8, z); add(post);
@@ -411,10 +415,7 @@ export function buildWorld(scene, camera, themeId) {
     b.position.set(x, 0.45, z); b.rotation.y = (x > 0 ? -1 : 1) * 0.15; add(b);
     occluders.push(b);
   });
-  [15, 20, 25, 30, 35].forEach(d => {
-    const s = new THREE.Mesh(new THREE.PlaneGeometry(30, 0.12), new THREE.MeshBasicMaterial({ color: TH.accent }));
-    s.rotation.x = -Math.PI / 2; s.position.set(0, 0.02, -d); add(s);
-  });
+
   return {
     group, occluders,
     updateJumbo: has('jumbo') ? drawJumbo : () => {},

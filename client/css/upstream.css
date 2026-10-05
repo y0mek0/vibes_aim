@@ -2,7 +2,7 @@
    Art is CSS only (halftone plates, chromatic misregistration, hard ink). */
 :root{
   --ink:#07070c; --paper:#f4f1ea; --paper-dim:#cfc9bc;
-  --red:#ff2e4d; --red-dk:#b3122e; --yellow:#ffd21f; --teal:#2ee6a8; --blue:#3b5bff;
+  --red:#f6d447; --red-dk:#8a751d; --yellow:#f6d447; --teal:#7df9c5; --blue:#7df9c5;
   --bg:#07070c; --panel:#12121a; --panel2:#0e0e16; --line:#f4f1ea; --line2:#2a2a36;
   --text:#f4f1ea; --dim:#a09aa8;
   --plate: 7px 7px 0 #000, -2px 0 0 var(--red), 2px 0 0 var(--teal);
@@ -12,8 +12,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 /* print stock: one fine plate, plus a single cinematic rift — not wallpaper noise */
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    linear-gradient(118deg,transparent 58%,rgba(255,46,77,.07) 78%,rgba(46,230,168,.08) 100%),
-    radial-gradient(900px 520px at 92% -8%,rgba(255,46,77,.12) 0%,transparent 62%),
+    linear-gradient(118deg,transparent 58%,rgba(246,212,71,.04) 78%,rgba(125,249,197,.07) 100%),
+    radial-gradient(900px 520px at 92% -8%,rgba(125,249,197,.08) 0%,transparent 62%),
     radial-gradient(rgba(244,241,234,.05) 1.15px,transparent 1.55px);
   background-size:auto,auto,10px 10px}
 body.playing::before,body.paused::before{visibility:hidden}
@@ -121,10 +121,10 @@ body.playing .hintline{display:block}
 .overlay{position:fixed;inset:0;z-index:10;display:none;visibility:hidden;opacity:0;overflow:auto;
   pointer-events:none;
   background:
-    linear-gradient(118deg,transparent 56%,rgba(255,46,77,.10) 82%,rgba(46,230,168,.07) 100%),
-    radial-gradient(1100px 520px at 88% -12%,rgba(255,46,77,.14) 0%,transparent 58%),
+    linear-gradient(118deg,transparent 56%,rgba(246,212,71,.06) 82%,rgba(125,249,197,.08) 100%),
+    radial-gradient(1100px 520px at 88% -12%,rgba(125,249,197,.09) 0%,transparent 58%),
     radial-gradient(rgba(244,241,234,.045) 1.15px,transparent 1.55px),
-    linear-gradient(165deg,#0c0c14 0%,#07070c 55%,#0a0610 100%);
+    linear-gradient(165deg,#0c0f14 0%,#070a0c 55%,#0a0c10 100%);
   background-size:auto,auto,10px 10px,auto}
 .overlay.open{display:block;visibility:visible;opacity:1;pointer-events:auto}
 #menu{overflow:hidden}

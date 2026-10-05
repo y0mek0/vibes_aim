@@ -31,10 +31,10 @@
   --aapl-dim: #5d626a;
   --nvda: #7df9c5;
   --nvda-dim: #2b6b54;
-  --spcx: #ffb347;
+  --spcx: #f6d447;
   --pre: #9aa3b2;
   --gain: #7df9c5;
-  --loss: #ff5d6c;
+  --loss: #8a751d;
 
   /* — legacy valotrainer vars (used inside upstream.css) — */
   --red: #f6d447;
@@ -94,7 +94,7 @@ body { overflow-x: hidden; }
 body::before {
   background:
     radial-gradient(900px 520px at 92% -8%, rgba(125, 249, 197, 0.06) 0%, transparent 62%),
-    radial-gradient(700px 420px at 6% 110%, rgba(255, 179, 71, 0.05) 0%, transparent 60%),
+    radial-gradient(700px 420px at 6% 110%, rgba(246, 212, 71, 0.05) 0%, transparent 60%),
     linear-gradient(180deg, #0b0d12 0%, #0a0c10 100%) !important;
   background-size: auto, auto, auto !important;
   opacity: 0.85;

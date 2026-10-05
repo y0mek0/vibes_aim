@@ -23,11 +23,11 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
   const tracerGeo = new THREE.BoxGeometry(0.02, 0.02, 1);
   const tracers = [];
   for (let i = 0; i < 10; i++) {
-    const m = new THREE.Mesh(tracerGeo, new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    const m = new THREE.Mesh(tracerGeo, new THREE.MeshBasicMaterial({ color: 0xf6d447, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
     m.visible = false; scene.add(m); tracers.push({ m, t: 1 });
   }
   let tracerIdx = 0;
-  const tracer = (from, to, color = 0xffe9a8) => {
+  const tracer = (from, to, color = 0xf6d447) => {
     const tr = tracers[tracerIdx++ % tracers.length];
     TV.addVectors(from, to).multiplyScalar(0.5);
     tr.m.position.copy(TV); tr.m.lookAt(to);
@@ -38,7 +38,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
   const decalGeo = new THREE.CircleGeometry(0.09, 10);
   const decals = [];
   for (let i = 0; i < 18; i++) {
-    const m = new THREE.Mesh(decalGeo, new THREE.MeshBasicMaterial({ color: 0x1a1512, transparent: true, opacity: 0, depthWrite: false }));
+    const m = new THREE.Mesh(decalGeo, new THREE.MeshBasicMaterial({ color: 0x343a40, transparent: true, opacity: 0, depthWrite: false }));
     m.visible = false; scene.add(m); decals.push({ m, t: 1 });
   }
   let decalIdx = 0;
@@ -54,16 +54,16 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
 
   // --- viewmodels: one silhouette per class, only the equipped is visible ---
   // (Sheriff -> Vandal is unmistakable now). Anchor `gun` keeps kick/bob.
-  const CLASS_TINT = { Sidearm: 0x2e3944, SMG: 0x2e4438, Shotgun: 0x6b4a2e, Rifle: 0x2e3944, Sniper: 0x3a2e44, Heavy: 0x44402e };
+  const CLASS_TINT = { Sidearm: 0x343a40, SMG: 0x293d36, Shotgun: 0x4a4635, Rifle: 0x343a40, Sniper: 0x3b3945, Heavy: 0x4a4635 };
   const gun = new THREE.Group();
-  const _dotMat = new THREE.MeshBasicMaterial({ color: 0xff4655 });
+  const _dotMat = new THREE.MeshBasicMaterial({ color: 0xf6d447 });
   const models = {};
 
   function modelFor(cls) {
     if (models[cls]) return models[cls];
-    const dark = new THREE.MeshLambertMaterial({ color: 0x1b2129 });
-    const mid = new THREE.MeshLambertMaterial({ color: 0x2e3944 });
-    const tint = new THREE.MeshLambertMaterial({ color: CLASS_TINT[cls] || 0x2e3944 });
+    const dark = new THREE.MeshLambertMaterial({ color: 0x151a20 });
+    const mid = new THREE.MeshLambertMaterial({ color: 0x343a40 });
+    const tint = new THREE.MeshLambertMaterial({ color: CLASS_TINT[cls] || 0x343a40 });
     const g = new THREE.Group();
     const a = (w, h, d, x, y, z, m) => { const q = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m || dark); q.position.set(x, y, z); g.add(q); };
     const dot = (x, y, z) => { const d = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.06), _dotMat); d.position.set(x, y, z); g.add(d); };
@@ -95,7 +95,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
   setGunClass('Rifle');
   const setSniperScope = on => { gun.visible = !on; }; // hide viewmodel when scoped like real ADS
 
-  const muzzle = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xffd28a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+  const muzzle = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xf6d447, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
   muzzle.position.set(0.22, -0.18, -1.28); muzzle.scale.set(0.22, 0.22, 1);
   camera.add(muzzle);
   let muzzleT = 1;

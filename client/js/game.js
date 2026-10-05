@@ -47,8 +47,8 @@ const MENU = 0, COUNT = 1, PLAYING = 2, PAUSED = 3, RESULTS = 4;
 export function boot() {
   // ---------- renderer / camera ----------
   const canvas = $('game');
-  const glCtx = canvas.getContext('webgl2', { antialias: false, desynchronized: true, powerPreference: 'high-performance', alpha: false })
-    || canvas.getContext('webgl', { antialias: false, desynchronized: true, powerPreference: 'high-performance', alpha: false });
+  const glCtx = canvas.getContext('webgl2', { antialias: true, powerPreference: 'high-performance', alpha: false })
+    || canvas.getContext('webgl', { antialias: true, powerPreference: 'high-performance', alpha: false });
   const renderer = new THREE.WebGLRenderer({ canvas, context: glCtx });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
@@ -312,7 +312,7 @@ export function boot() {
         if (i === 0) {
           if (oHit) {
             FX.tracer(from, oHit.point);
-            FX.spark(oHit.point, 0x9a8f7a);
+            FX.spark(oHit.point, 0x7b8087);
             _n.copy(oHit.face.normal).transformDirection(oHit.object.matrixWorld);
             FX.decal(oHit.point, _n);
           } else FX.tracer(from, _hit.copy(camera.position).addScaledVector(_dir, 40));
@@ -320,7 +320,7 @@ export function boot() {
         continue;
       }
       const h = tHit, ud = h.object.userData;
-      FX.tracer(from, h.point, gun.silenced ? 0x9fd8cf : 0xffe9a8);
+      FX.tracer(from, h.point, gun.silenced ? 0x7df9c5 : 0xf6d447);
       if (!ud || !ud.t) { FX.spark(h.point, 0x888888); continue; }
       _hit.copy(h.point);
       const t = ud.t, dist = camera.position.distanceTo(h.point);
@@ -328,7 +328,7 @@ export function boot() {
         // one-shot modes: any valid hit kills the orb — no weapon damage math
         hitAny = true; stats.raw.pelletHits++; stats.raw.hits++;
         stats.raw.damage += 100;
-        FX.spark(h.point, 0xd9a7ff);
+        FX.spark(h.point, 0xf6d447);
         FX.dmgNum(h.point, '+100', false);
         markHit(false);
         killTarget(t, now, false, dist, 100);
@@ -340,7 +340,7 @@ export function boot() {
       else dmg = damageAtRange(gun, dist, part);
       totalDmg += dmg; if (part === 'head') headDmg += dmg;
       hitAny = true; stats.raw.pelletHits++;
-      FX.spark(h.point, part === 'head' ? 0xff4655 : t.type === 'orb' ? 0xd9a7ff : 0xffaa66);
+      FX.spark(h.point, part === 'head' ? 0xf6d447 : t.type === 'orb' ? 0xf6d447 : 0x7df9c5);
       t.hp -= dmg;
       if (t.type === 'bot') T.setHpBar(t);
       if (t.hp <= 0 && t.alive) killInfo = { t, part, dist, dmg: totalDmg };
@@ -390,12 +390,12 @@ export function boot() {
         clamp(pos.z + fz * d + rz * lx, -63, 11));
       let ok = p.distanceTo(pos) > 2;
       if (ok) for (const t of T.targets) if (t.group.position.distanceTo(p) < 1.5) { ok = false; break; }
-      if (ok) { const t = T.spawnOrb(p, armorHp(), orbScale(settings.orbSize)); FX.spark(p, 0xd9a7ff); return t; }
+      if (ok) { const t = T.spawnOrb(p, armorHp(), orbScale(settings.orbSize)); FX.spark(p, 0xf6d447); return t; }
     }
     const d = bandDist();
     const fp = new THREE.Vector3(clamp(pos.x - Math.sin(yaw) * d, -32, 32), 2,
       clamp(pos.z - Math.cos(yaw) * d, -63, 11));
-    FX.spark(fp, 0xd9a7ff);
+    FX.spark(fp, 0xf6d447);
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
@@ -406,7 +406,7 @@ export function boot() {
       clamp(pos.x + fx * dd + rx * lx, -32, 32),
       clamp(pos.y + Math.sin(el) * d, 0.6, 4.5),
       clamp(pos.z + fz * dd + rz * lx, -63, 11));
-    FX.spark(p, 0xd9a7ff);
+    FX.spark(p, 0xf6d447);
     return T.spawnOrb(p, armorHp(), orbScale(settings.orbSize));
   }
   function spawnRangeBot() {
@@ -955,10 +955,10 @@ export function boot() {
           if (tHit && (!oHit || tHit.distance <= oHit.distance)) {
             stats.raw.onT += dt; stats.raw.hits++; stats.raw.damage += 1;
             trackBot.head.scale.setScalar(1.3);
-            if (Math.random() < dt * 8) FX.spark(tHit.point, 0xffaa66);
+            if (Math.random() < dt * 8) FX.spark(tHit.point, 0xf6d447);
           } else {
             trackBot.head.scale.setScalar(1);
-            if (oHit && Math.random() < dt * 8) FX.spark(oHit.point, 0x9a8f7a);
+            if (oHit && Math.random() < dt * 8) FX.spark(oHit.point, 0x7b8087);
           }
         } else if (trackBot.head && !mouseDown) trackBot.head.scale.setScalar(1);
         if (mouseDown && gun.mode === 'auto' && ammo <= 0 && gun.mag !== Infinity && !reloading && settings.reload === 'auto') startReload();
