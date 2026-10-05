@@ -1066,3 +1066,50 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
 #menu .mode-grid > .mode.mode-bots { grid-column: 1; grid-row: 3; }
 #menu #vibes-open-terminal,
 #menu #vibes-open-missions { position: relative; inset: auto; }
+
+
+/* Main dashboard cleanup: stats is a destination, not a fourth footer strip. */
+#menu .dashboard-stats-panel { display: none; }
+#menu .dashboard.stats-view { padding-top: 28px; }
+#menu .dashboard.stats-view .dashboard-intro,
+#menu .dashboard.stats-view .dashboard-grid { display: none; }
+#menu .dashboard.stats-view .dashboard-stats-panel { display: block; }
+#menu .stats-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; }
+#menu .stats-records-panel,
+#menu .stats-sessions-panel { min-width: 0; border: 1px solid var(--dash-line); background: var(--dash-panel); border-radius: 5px; padding: 17px 18px 18px; }
+#menu .mode-record-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+#menu .mode-record-card,
+#menu .session-window { min-width: 0; border: 1px solid var(--dash-line); background: rgba(255,255,255,.025); padding: 13px; }
+#menu .mode-record-head,
+#menu .session-window-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+#menu .mode-record-head span,
+#menu .session-window-head b { color: var(--dash-soft); font: 600 11px var(--font-mono); letter-spacing: .08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#menu .mode-record-head b,
+#menu .session-window-head span { color: var(--dash-muted); font: 9px var(--font-mono); white-space: nowrap; }
+#menu .mode-record-values,
+#menu .session-window-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 17px; }
+#menu .session-window-values { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 14px; }
+#menu .mode-record-values strong,
+#menu .session-window-values strong { display: block; color: var(--dash-soft); font: 600 16px var(--font-mono); }
+#menu .mode-record-values small,
+#menu .session-window-values small { display: block; margin-top: 4px; color: var(--dash-muted); font: 8px var(--font-mono); letter-spacing: .1em; }
+#menu .session-window-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+#menu .stats-empty { grid-column: 1 / -1; padding: 22px 0; color: var(--dash-muted); font: 11px var(--font-mono); }
+#menu .road-card-head > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#menu .road-card-head small { color: var(--dash-muted); font: 8px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+#menu .road-foot { align-items: baseline; }
+#menu .road-foot span:first-child { flex: 1 1 auto; min-width: 0; }
+#menu .road-foot span:last-child { flex: 0 0 auto; white-space: nowrap; }
+
+/* The engine stylesheet disables selection globally; the dashboard must remain selectable. */
+*, *::before, *::after { -webkit-user-select: text; user-select: text; }
+button, input, select, textarea, option { -webkit-user-select: text; user-select: text; }
+canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: none; }
+
+@media (max-width: 900px) {
+  #menu .stats-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  #menu .mode-record-grid,
+  #menu .session-window-grid { grid-template-columns: 1fr; }
+}

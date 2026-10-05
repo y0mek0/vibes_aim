@@ -682,23 +682,30 @@ export function boot() {
       el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startGame(id); } });
       list.appendChild(el);
     }
-    const imps = Object.keys(MODE_DEFS).map(m => ({ m, imp: improvement(m) })).filter(x => x.imp !== null);
-    const bd = $('impbreakdown'); bd.innerHTML = '';
-    for (const id of Object.keys(MODE_DEFS)) {
-      const x = imps.find(i => i.m === id), hs = modeHistory(id);
-      const row = document.createElement('div'); row.className = 'modeimp';
-      row.innerHTML = `<span>${MODE_DEFS[id].name}</span><b>${x ? (x.imp >= 0 ? '+' : '') + x.imp.toFixed(1) + '%' : (hs.length ? `${hs.length}/4 sessions` : '—')}</b>`;
-      bd.appendChild(row);
-    }
-    if (imps.length) {
-      const avg = imps.reduce((a, b) => a + b.imp, 0) / imps.length;
-      $('overall-imp').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(1) + '%';
-      $('goalbar').style.width = clamp(avg / 50 * 100, 0, 100) + '%';
-    } else { $('overall-imp').textContent = '—'; $('goalbar').style.width = '0%'; }
-
     const recent = history.slice().sort((a, b) => (b.d || 0) - (a.d || 0));
     const latest = recent[0];
     const put = (selector, value) => document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
+    const records = document.querySelector('[data-mode-records]');
+    if (records) {
+      records.innerHTML = '';
+      for (const id of Object.keys(MODE_DEFS)) {
+        const d = MODE_DEFS[id], hs = modeHistory(id);
+        const bestScore = hs.length ? Math.max(...hs.map(h => h.score || 0)) : '—';
+        const bestAcc = hs.length ? Math.max(...hs.map(h => h.acc || 0)) + '%' : '—';
+        const card = document.createElement('article');
+        card.className = 'mode-record-card';
+        card.innerHTML = `<div class="mode-record-head"><span>${d.name}</span><b>${hs.length ? hs.length : 0} runs</b></div><div class="mode-record-values"><div><strong>${bestScore}</strong><small>BEST SCORE</small></div><div><strong>${bestAcc}</strong><small>BEST ACCURACY</small></div></div>`;
+        records.appendChild(card);
+      }
+    }
+    const sessions = document.querySelector('[data-session-history]');
+    if (sessions) {
+      sessions.innerHTML = recent.length ? recent.slice(0, 6).map((h) => {
+        const name = MODE_DEFS[h.m]?.name || h.m || 'SESSION';
+        const stamp = h.d ? new Date(h.d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—';
+        return `<article class="session-window"><div class="session-window-head"><b>${name}</b><span>${stamp}</span></div><div class="session-window-values"><div><strong>${h.score || 0}</strong><small>SCORE</small></div><div><strong>${h.acc ?? 0}%</strong><small>ACCURACY</small></div><div><strong>${h.gun || '—'}</strong><small>LOADOUT</small></div></div></article>`;
+      }).join('') : '<div class="stats-empty">No sessions yet. Finish a run to create the first record.</div>';
+    }
     put('[data-dashboard-sessions]', String(recent.length));
     put('[data-dashboard-best]', recent.length ? String(Math.max(...recent.map(h => h.score || 0))) : '—');
     if (latest) {

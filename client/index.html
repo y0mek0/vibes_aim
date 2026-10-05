@@ -182,22 +182,16 @@
           <p>Every clean hit adds to your active ticker. Train, build a position and see the result in your portfolio.</p>
         </div>
         <div class="road-card">
-          <div class="road-card-head"><span>ROAD TO NVDA</span><b id="overall-imp">—</b></div>
+          <div class="road-card-head"><div><span>ROAD TO NVDA</span><small>Unlock requirement</small></div><b id="overall-imp">0 / 6</b></div>
           <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
-          <div class="road-foot"><span>Complete the AAPL chain to unlock more markets</span><span id="impbreakdown"></span></div>
+          <div class="road-foot"><span>Complete all six AAPL missions to unlock NVDA.</span><span id="impbreakdown">0 / 6 complete</span></div>
         </div>
       </section>
 
       <section class="dashboard-grid" data-dashboard-section-target="train">
         <div class="training-column">
-          <div class="panel-heading"><div><span class="section-kicker">Train</span><h2>Choose a session</h2></div><span class="panel-meta">Aim, earn, improve</span></div>
+          <div class="panel-heading"><div><span class="section-kicker">Train</span><h2>Choose a session</h2></div></div>
           <section class="training-panel"><div id="modelist" class="mode-grid"></div></section>
-          <section class="recent-panel" id="recent-session">
-            <div class="panel-heading compact"><h2>Recent session</h2><span class="panel-meta">Last run</span></div>
-            <div class="recent-session-row">
-              <div><span class="recent-label">MODE</span><b data-recent-mode>NO SESSION</b></div><div><span class="recent-label">SCORE</span><b data-recent-score>—</b></div><div><span class="recent-label">ACCURACY</span><b data-recent-accuracy>—</b></div><div><span class="recent-label">EARNED</span><b class="positive" data-recent-earned>+0.0000 AAPL</b></div>
-            </div>
-          </section>
         </div>
 
         <aside class="market-column" data-dashboard-section-target="market">
@@ -219,7 +213,18 @@
         </aside>
       </section>
 
-      <section class="dashboard-stats" data-dashboard-section-target="stats"><div class="stats-strip-item"><span>HIT STREAK</span><b data-dashboard-streak>0</b></div><div class="stats-strip-item"><span>BEST SCORE</span><b data-dashboard-best>—</b></div><div class="stats-strip-item"><span>SESSIONS</span><b data-dashboard-sessions>0</b></div><div class="stats-strip-item"><span>ACTIVE TICKER</span><b data-dashboard-ticker>AAPL</b></div></section>
+      <section class="dashboard-stats-panel" data-dashboard-section-target="stats">
+        <div class="stats-layout">
+          <section class="stats-records-panel">
+            <div class="panel-heading compact"><div><span class="section-kicker">Records</span><h2>Records by mode</h2></div><span class="panel-meta">Personal bests</span></div>
+            <div class="mode-record-grid" data-mode-records></div>
+          </section>
+          <section class="stats-sessions-panel">
+            <div class="panel-heading compact"><div><span class="section-kicker">History</span><h2>Recent sessions</h2></div><span class="panel-meta">Last six runs</span></div>
+            <div class="session-window-grid" data-session-history></div>
+          </section>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -318,9 +323,16 @@
     document.querySelectorAll('[data-customize-tab]').forEach((item) => item.classList.toggle('active', item === tab));
     document.querySelectorAll('[data-customize-pane]').forEach((pane) => pane.classList.toggle('active', pane.dataset.customizePane === name));
   }));
+  const dashboard = document.getElementById('dashboard-main');
+  const setDashboardSection = (target) => {
+    if (!dashboard) return;
+    dashboard.classList.toggle('stats-view', target === 'stats');
+    document.querySelectorAll('[data-dashboard-section]').forEach((item) => item.classList.toggle('active', item.dataset.dashboardSection === target));
+  };
+  document.querySelector('[data-dashboard-home]')?.addEventListener('click', () => setDashboardSection('train'));
   document.querySelectorAll('[data-dashboard-section]').forEach((link) => link.addEventListener('click', () => {
     const target = link.dataset.dashboardSection;
-    document.querySelectorAll('[data-dashboard-section]').forEach((item) => item.classList.toggle('active', item === link));
+    setDashboardSection(target);
     document.querySelector(`[data-dashboard-section-target="${target}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
 </script>

@@ -74,6 +74,12 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     const claimed = missions.filter((m) => m.claimed).length;
     setText(els.claimed, claimed);
     setText(els.total, MISSIONS.length);
+    const roadCount = document.getElementById('overall-imp');
+    const roadBar = document.getElementById('goalbar');
+    const roadBreakdown = document.getElementById('impbreakdown');
+    setText(roadCount, `${claimed} / ${MISSIONS.length}`);
+    setText(roadBreakdown, `${claimed} / ${MISSIONS.length} complete`);
+    if (roadBar) roadBar.style.width = `${Math.round((claimed / MISSIONS.length) * 100)}%`;
 
     // unlock card: visible if every mission is claimed
     if (allMissionsClaimed(missions)) {
