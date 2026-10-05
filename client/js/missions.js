@@ -20,6 +20,16 @@ const SELECTORS = {
   unlockBtn: '[data-vm-unlock-btn]',
 };
 
+const MISSION_GROUPS = {
+  first_10_hits: 'Aim',
+  earn_half_aapl: 'Aim',
+  first_trade: 'Trading',
+  first_profit: 'Trading',
+  hold_60s: 'Trading',
+  precise_session: 'Aim',
+};
+
+function missionGroup(kind) { return MISSION_GROUPS[kind] || 'Objective'; }
 function setText(el, value) { if (el) el.textContent = value; }
 
 export function mountMissions({ root, onTickerUnlocked } = {}) {
@@ -35,35 +45,40 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
 
   let unlockedThisSession = false;
   let lastUnlocks = new Set();
+  let activeFilter = 'all';
 
   function renderMissions() {
     if (!els.body) return;
     els.body.innerHTML = '';
     const missions = store.state.missions || [];
-    for (const def of MISSIONS) {
+    const visibleDefs = MISSIONS.filter((def) => {
+      if (activeFilter === 'all') return true;
+      const live = missions.find((m) => m.kind === def.kind) || {};
+      if (activeFilter === 'completed') return Boolean(live.claimed);
+      return missionGroup(def.kind).toLowerCase() === activeFilter;
+    });
+    for (const def of visibleDefs) {
       const live = missions.find((m) => m.kind === def.kind) || { kind: def.kind, progress: 0, done: false, claimed: false };
       const tr = document.createElement('tr');
       tr.dataset.vmKind = def.kind;
       const pct = def.target > 0 ? Math.min(1, (live.progress || 0) / def.target) : 0;
       const barWidth = `${Math.round(pct * 100)}%`;
-      const status = live.claimed
-        ? '<span class="vm-status claimed">claimed</span>'
-        : (live.done ? '<span class="vm-status done">ready</span>' : '<span class="vm-status">in progress</span>');
+      const statusLabel = live.claimed ? 'claimed' : (live.done ? 'complete' : 'in progress');
+      const statusClass = live.claimed ? 'claimed' : (live.done ? 'done' : '');
+      const claimControl = live.done && !live.claimed
+        ? `<button type="button" class="vm-claim-btn" data-vm-claim="${def.kind}">Claim</button>`
+        : '';
       tr.innerHTML = `
-        <td>
-          <div class="vm-label">${def.label}</div>
-          <div class="vm-progress"><span class="vm-bar" style="width:${barWidth}"></span></div>
-        </td>
-        <td class="num">${formatProgress(def, live.progress || 0)}</td>
-        <td class="num">+${def.reward}</td>
-        <td>${status}</td>
-        <td>
-          <button type="button" class="vm-claim-btn" data-vm-claim="${def.kind}" ${live.claimed || !live.done ? 'disabled' : ''}>
-            ${live.claimed ? 'Claimed' : 'Claim'}
-          </button>
+        <td class="vm-mission-cell">
+          <div class="vm-mission-top"><div class="vm-label">${def.label}</div><div class="vm-reward num">+${def.reward}</div></div>
+          <div class="vm-mission-meta"><span class="vm-group">${missionGroup(def.kind)}</span><span class="vm-progress-value num">${formatProgress(def, live.progress || 0)}</span><span class="vm-status ${statusClass}">${statusLabel}</span>${claimControl}</div>
+          <div class="vm-progress" aria-label="${formatProgress(def, live.progress || 0)} progress"><span class="vm-bar" style="width:${barWidth}"></span></div>
         </td>
       `;
       els.body.appendChild(tr);
+    }
+    if (!visibleDefs.length) {
+      els.body.innerHTML = '<tr class="vm-empty"><td>No completed missions yet.</td></tr>';
     }
     // wire claim buttons
     els.body.querySelectorAll('[data-vm-claim]').forEach((btn) => {
@@ -147,6 +162,12 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     }
     lastUnlocks = unlocks;
   }
+
+  panel.querySelectorAll('[data-vm-filter]').forEach((filter) => filter.addEventListener('click', () => {
+    activeFilter = filter.dataset.vmFilter || 'all';
+    panel.querySelectorAll('[data-vm-filter]').forEach((item) => item.classList.toggle('active', item === filter));
+    renderMissions();
+  }));
 
   const unsub = store.subscribe(() => {
     checkUnlocks();

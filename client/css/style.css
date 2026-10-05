@@ -1411,3 +1411,50 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
   #menu .app-shell > #vibes-terminal .vt-body,
   #menu .app-shell > #vibes-missions .vm-body { padding-top: 24px; }
 }
+
+/* Missions feed: one objective is text, number, and a thin progress line. */
+#menu .app-shell > #vibes-missions .vm-board {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#menu .app-shell > #vibes-missions .vm-board-head { margin-bottom: 12px; }
+#menu .app-shell > #vibes-missions .vm-board-title { margin-top: 5px; color: var(--fg); font: 600 22px/1.2 var(--font-ui); letter-spacing: -.02em; }
+#menu .app-shell > #vibes-missions .vm-board-note { color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .04em; }
+#menu .vm-filters { display: flex; align-items: center; gap: 17px; margin: 0 0 3px; }
+#menu .vm-filter {
+  padding: 0 0 6px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--dash-muted);
+  cursor: pointer;
+  font: 10px var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+#menu .vm-filter:hover, #menu .vm-filter.active { color: var(--fg); border-bottom-color: #f6d447; }
+#menu .app-shell > #vibes-missions .vm-table { display: block; min-width: 0; font-size: 12px; }
+#menu .app-shell > #vibes-missions .vm-table tbody { display: block; }
+#menu .app-shell > #vibes-missions .vm-table tr { display: block; border-bottom: 1px solid var(--dash-line); }
+#menu .app-shell > #vibes-missions .vm-table td { display: block; padding: 18px 0 17px; border-bottom: 0; }
+#menu .app-shell > #vibes-missions .vm-mission-top { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+#menu .app-shell > #vibes-missions .vm-label { color: var(--fg); font: 600 13px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+#menu .app-shell > #vibes-missions .vm-reward { flex: 0 0 auto; color: #f6d447; font: 600 12px var(--font-mono); }
+#menu .app-shell > #vibes-missions .vm-mission-meta { display: flex; align-items: center; gap: 13px; margin-top: 8px; color: var(--dash-muted); font: 10px var(--font-mono); letter-spacing: .04em; }
+#menu .app-shell > #vibes-missions .vm-group { color: var(--dash-soft); text-transform: uppercase; letter-spacing: .12em; }
+#menu .app-shell > #vibes-missions .vm-progress-value { color: var(--dash-soft); }
+#menu .app-shell > #vibes-missions .vm-status { color: var(--dash-muted); text-transform: uppercase; letter-spacing: .1em; }
+#menu .app-shell > #vibes-missions .vm-status.done { color: #f6d447; }
+#menu .app-shell > #vibes-missions .vm-status.claimed { color: var(--dash-muted); }
+#menu .app-shell > #vibes-missions .vm-claim-btn { margin-left: auto; padding: 3px 8px; border: 1px solid rgba(246,212,71,.55); border-radius: 2px; background: transparent; color: #f6d447; font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; cursor: pointer; }
+#menu .app-shell > #vibes-missions .vm-claim-btn:hover { background: rgba(246,212,71,.1); }
+#menu .app-shell > #vibes-missions .vm-progress { width: 100%; max-width: none; height: 3px; margin-top: 10px; border-radius: 0; background: rgba(160,174,194,.14); }
+#menu .app-shell > #vibes-missions .vm-bar { background: #f6d447; box-shadow: none; }
+#menu .app-shell > #vibes-missions .vm-empty td { padding: 20px 0; color: var(--dash-muted); font: 11px var(--font-mono); }
+
+@media (max-width: 760px) {
+  #menu .vm-filters { gap: 12px; overflow-x: auto; }
+  #menu .app-shell > #vibes-missions .vm-mission-meta { gap: 9px; flex-wrap: wrap; }
+}
