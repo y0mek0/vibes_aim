@@ -31,6 +31,7 @@ export function setActiveTicker(t) {
   activeTicker = t;
   try { localStorage.setItem(ACTIVE_TICKER_KEY, t); } catch { /* ignore */ }
   if (tickerEl) tickerEl.textContent = t;
+  if (typeof document !== 'undefined') document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = t; });
   if (chipEl) chipEl.wrap.setAttribute('aria-label', activeTickerLabel(t));
 }
 
@@ -79,6 +80,11 @@ function flashChip(unit) {
   total += unit;
   chipEl.val.textContent = unit.toFixed(4);
   chipEl.tot.textContent = `| total ${total.toFixed(4)}`;
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('[data-dashboard-session-units], [data-recent-earned]').forEach((el) => { el.textContent = `+${total.toFixed(4)} ${activeTicker}`; });
+    document.querySelectorAll('[data-dashboard-today]').forEach((el) => { el.textContent = `+${total.toFixed(4)}`; });
+    document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = activeTicker; });
+  }
   chipEl.wrap.style.opacity = '1';
   clearTimeout(flashChip._t);
   flashChip._t = setTimeout(() => { chipEl.wrap.style.opacity = '0.55'; }, 180);

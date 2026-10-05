@@ -675,8 +675,10 @@ export function boot() {
       const best = hs.length ? Math.max(...hs.map(h => h.score)) : null;
       const el = document.createElement('div'); el.className = 'mode mode-' + id;
       el.tabIndex = 0; el.setAttribute('role', 'button');
-      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p><div class="stats">${best !== null ? `best ${best} · ${hs.length} sessions` : 'no sessions yet — click to start'}</div></div>`;
+      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${best !== null ? `best ${best} · ${hs.length} sessions` : 'no sessions yet — click to start'}</div>${mi === 1 ? '<button type="button" class="mode-play">Play</button>' : ''}</div>`;
       el.addEventListener('click', () => startGame(id));
+      const play = el.querySelector('.mode-play');
+      if (play) play.addEventListener('click', e => { e.stopPropagation(); startGame(id); });
       el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startGame(id); } });
       list.appendChild(el);
     }
@@ -693,6 +695,17 @@ export function boot() {
       $('overall-imp').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(1) + '%';
       $('goalbar').style.width = clamp(avg / 50 * 100, 0, 100) + '%';
     } else { $('overall-imp').textContent = '—'; $('goalbar').style.width = '0%'; }
+
+    const recent = history.slice().sort((a, b) => (b.d || 0) - (a.d || 0));
+    const latest = recent[0];
+    const put = (selector, value) => document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
+    put('[data-dashboard-sessions]', String(recent.length));
+    put('[data-dashboard-best]', recent.length ? String(Math.max(...recent.map(h => h.score || 0))) : '—');
+    if (latest) {
+      put('[data-recent-mode]', MODE_DEFS[latest.m]?.name || latest.m || 'SESSION');
+      put('[data-recent-score]', String(latest.score || 0));
+      put('[data-recent-accuracy]', (latest.acc ?? 0) + '%');
+    }
   }
   function bandStr(g) {
     return g.bands.map(([r, h, b, l]) => `${r >= 999 ? '50m+' : '0–' + r + 'm'}: ${h}/${b}/${l}`).join(' · ');

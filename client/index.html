@@ -94,10 +94,6 @@
   </div>
 </div>
 
-<!-- Tab button that opens the terminal -->
-<button type="button" id="vibes-open-missions" class="vm-open-tab">Missions</button>
-<button type="button" id="vibes-open-terminal" class="vt-open-tab">Terminal</button>
-
 <!-- vibes_aim: missions panel. Hidden by default; the engine's menu
      has a Missions button that shows it. The unlock card inside
      appears once all 6 missions are claimed. -->
@@ -128,25 +124,6 @@
   </div>
 </div>
 
-<!-- vibes_aim: floating chart panel. Lives above the canvas, below the aim-bridge chip. -->
-<div id="vibes-chart" hidden>
-  <div class="vc-head">
-    <span class="vc-kicker">// chart</span>
-    <span class="vc-ticker" data-vc-ticker>AAPL</span>
-    <span class="vc-price" data-vc-price>—</span>
-    <span class="vc-change" data-vc-change>—</span>
-    <span class="vc-status" data-vc-status></span>
-    <div class="vc-tickers" role="tablist" aria-label="ticker">
-      <button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button>
-      <button type="button" data-vc-ticker-btn="NVDA">NVDA</button>
-    </div>
-    <div class="vc-ranges" role="tablist" aria-label="range">
-      <button type="button" data-vc-range-btn="1D" class="active">1D</button>
-      <button type="button" data-vc-range-btn="5D">5D</button>
-    </div>
-  </div>
-  <div class="vc-body" data-vc-body></div>
-</div>
 <div id="startfade"></div>
 <div id="vignette"></div>
 <div id="scope"></div>
@@ -177,105 +154,92 @@
 
 <div id="countdown"><div id="cdtext">READY</div></div>
 
-<div id="menu" class="overlay open"><div class="wrap board-wrap">
-  <header class="hero board-hero">
-    <div class="hero-title">
-      <div class="hero-kicker"><span></span>vibes_aim · build v0.1</div>
-      <h1 class="glitch" data-text="vibes_aim">vibes<em>_aim</em></h1>
-    </div>
-    <div class="hero-road">
-      <div class="road-label">ROAD TO NVDA</div>
-      <div class="road-main"><span class="goal-num" id="overall-imp">—</span>
-        <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
+<div id="menu" class="overlay open">
+  <div class="app-shell">
+    <header class="app-nav">
+      <button class="brand-mark" type="button" data-dashboard-home aria-label="Go to dashboard">
+        <span class="brand-main">MARKET</span><span class="brand-accent">//AIM</span>
+      </button>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <button type="button" class="nav-link active" data-dashboard-section="train">Train</button>
+        <button type="button" class="nav-link" id="vibes-open-terminal">Market</button>
+        <button type="button" class="nav-link" id="vibes-open-missions">Missions</button>
+        <button type="button" class="nav-link" data-dashboard-section="stats">Stats</button>
+      </nav>
+      <div class="nav-account">
+        <span id="buildtag" hidden></span>
+        <button type="button" class="nav-customize" id="customize-open">Customize</button>
+        <span class="nav-level">LVL <b id="profile-level">01</b></span>
+        <span class="nav-stable">Stable <b data-dashboard-stable>200.00</b></span>
       </div>
-      <div class="small" id="impbreakdown"></div>
-    </div>
-    <div class="hero-side">
-      <div class="hero-sub">aim farms assets · chart decides value</div>
-      <div class="hero-actions"><span id="buildtag">BUILD</span> <button class="btn ghost mini" id="pwa-install" hidden>Install app</button>
-      <button class="btn ghost mini" id="resetprog">Reset</button></div>
-    </div>
-  </header>
-  <div class="board">
-  <section class="tile tile-modes"><h2>// Training modes</h2><div id="modelist" class="mode-grid"></div></section>
-  <section class="tile tile-loadout"><h2>// Loadout</h2>
-      <div class="tile-body">
-      <div class="row"><label>Class</label><select id="lo-class" data-search></select></div>
-      <div class="row"><label>Weapon</label><select id="lo-gun" data-search></select></div>
-      <div id="gun-card"></div>
-      <p class="note">Press <b>B</b> in-game for the buy menu. Engine data is sourced from valotrainer (MIT) — see CHANGELOG.md.</p>
-      </div>
-  </section>
-  <section class="tile tile-cross"><h2>// Crosshair</h2>
-    <div class="tile-body">
-    <div class="xboard">
-      <div class="xcol">
-        <div class="xprev"><div id="chpreview"></div>
-          <div class="xcolrows">
-            <div class="row"><label>Color</label><select id="x-color-preset" data-search></select></div>
-            <div class="row"><label>Custom hex</label><input type="color" id="x-color-custom"></div>
-            <div class="row"><label>Outlines</label><input type="checkbox" id="x-outline"></div>
-            <div class="row"><label>Outline op/th</label><span><input type="range" id="x-outline-op" min="0" max="1" step="0.05" style="width:64px"> <input type="range" id="x-outline-th" min="1" max="6" step="1" style="width:56px"></span></div>
-            <div class="row"><label>Center dot</label><input type="checkbox" id="x-dot"></div>
-            <div class="row"><label>Dot op/size</label><span><input type="range" id="x-dot-op" min="0" max="1" step="0.05" style="width:64px"> <input type="range" id="x-dot-size" min="1" max="6" step="1" style="width:56px"></span></div>
-          </div>
+    </header>
+
+    <main class="dashboard" id="dashboard-main">
+      <section class="dashboard-intro">
+        <div>
+          <div class="section-kicker">Training ground</div>
+          <h1>Build precision.<br><em>Earn the market.</em></h1>
+          <p>Every clean hit adds to your active ticker. Train, build a position and see the result in your portfolio.</p>
+        </div>
+        <div class="road-card">
+          <div class="road-card-head"><span>ROAD TO NVDA</span><b id="overall-imp">—</b></div>
+          <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
+          <div class="road-foot"><span>Complete the AAPL chain to unlock more markets</span><span id="impbreakdown"></span></div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid" data-dashboard-section-target="train">
+        <div class="training-column">
+          <div class="panel-heading"><div><span class="section-kicker">Train</span><h2>Choose a session</h2></div><span class="panel-meta">Aim, earn, improve</span></div>
+          <section class="training-panel"><div id="modelist" class="mode-grid"></div></section>
+          <section class="recent-panel" id="recent-session">
+            <div class="panel-heading compact"><h2>Recent session</h2><span class="panel-meta">Last run</span></div>
+            <div class="recent-session-row">
+              <div><span class="recent-label">MODE</span><b data-recent-mode>NO SESSION</b></div><div><span class="recent-label">SCORE</span><b data-recent-score>—</b></div><div><span class="recent-label">ACCURACY</span><b data-recent-accuracy>—</b></div><div><span class="recent-label">EARNED</span><b class="positive" data-recent-earned>+0.0000 AAPL</b></div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="market-column" data-dashboard-section-target="market">
+          <section class="portfolio-panel">
+            <div class="panel-heading compact"><div><span class="section-kicker">Portfolio</span><h2>Your position</h2></div><span class="live-state"><i></i> PAPER</span></div>
+            <div class="portfolio-total"><span data-dashboard-portfolio-total>200.00</span><small>Stable total</small></div>
+            <div class="portfolio-change"><span data-dashboard-today>+0.00</span><small>earned this session</small></div>
+            <div class="portfolio-line"></div>
+          </section>
+
+          <section class="market-panel">
+            <div class="market-panel-head"><div><span class="section-kicker">Active market</span><h2><span data-vc-ticker-label>AAPL</span> <span class="market-price" data-vc-price-label>—</span></h2></div><button type="button" class="panel-action" id="vibes-open-terminal-secondary">Trade</button></div>
+            <div id="vibes-chart" hidden>
+              <div class="vc-head"><span class="vc-kicker">Market feed</span><span class="vc-ticker" data-vc-ticker>AAPL</span><span class="vc-price" data-vc-price>—</span><span class="vc-change" data-vc-change>—</span><span class="vc-status" data-vc-status></span><div class="vc-tickers" role="tablist" aria-label="ticker"><button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button><button type="button" data-vc-ticker-btn="NVDA">NVDA</button></div><div class="vc-ranges" role="tablist" aria-label="range"><button type="button" data-vc-range-btn="1D" class="active">1D</button><button type="button" data-vc-range-btn="5D">5D</button></div></div>
+              <div class="vc-body" data-vc-body></div>
+            </div>
+            <div class="market-earnings"><b data-dashboard-session-units>+0.0000 AAPL</b><span>earned this session</span></div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="dashboard-stats" data-dashboard-section-target="stats"><div class="stats-strip-item"><span>HIT STREAK</span><b data-dashboard-streak>0</b></div><div class="stats-strip-item"><span>BEST SCORE</span><b data-dashboard-best>—</b></div><div class="stats-strip-item"><span>SESSIONS</span><b data-dashboard-sessions>0</b></div><div class="stats-strip-item"><span>ACTIVE TICKER</span><b data-dashboard-ticker>AAPL</b></div></section>
+    </main>
+  </div>
+
+  <div id="customize" class="customize-backdrop" hidden>
+    <section class="customize-modal" role="dialog" aria-modal="true" aria-labelledby="customize-title">
+      <header class="customize-head"><div><span class="section-kicker">Player controls</span><h2 id="customize-title">Customize</h2></div><button type="button" class="modal-close" id="customize-close" aria-label="Close customize">×</button></header>
+      <div class="customize-layout">
+        <nav class="customize-tabs" aria-label="Customize tabs"><button type="button" class="customize-tab active" data-customize-tab="loadout">Loadout</button><button type="button" class="customize-tab" data-customize-tab="crosshair">Crosshair</button><button type="button" class="customize-tab" data-customize-tab="bots">Bots</button><button type="button" class="customize-tab" data-customize-tab="audio">Audio</button><button type="button" class="customize-tab" data-customize-tab="display">Display</button><button type="button" class="customize-tab" data-customize-tab="profile">Profile</button></nav>
+        <div class="customize-content">
+          <section class="customize-pane active" data-customize-pane="loadout"><div class="customize-pane-title"><h3>Loadout</h3><p>Choose the gun you take into every session.</p></div><div class="customize-form-grid"><div class="row"><label>Class</label><select id="lo-class" data-search></select></div><div class="row"><label>Weapon</label><select id="lo-gun" data-search></select></div></div><div id="gun-card" class="gun-detail-card"></div></section>
+          <section class="customize-pane" data-customize-pane="crosshair"><div class="customize-pane-title"><h3>Crosshair</h3><p>Keep the sight readable, then take it into the range.</p></div><div class="xboard"><div class="xcol"><div class="xprev"><div id="chpreview"></div><div class="xcolrows"><div class="row"><label>Color</label><select id="x-color-preset" data-search></select></div><div class="row"><label>Custom color</label><input type="color" id="x-color-custom"></div><div class="row"><label>Outlines</label><input type="checkbox" id="x-outline"></div><div class="row"><label>Outline opacity / thickness</label><span><input type="range" id="x-outline-op" min="0" max="1" step="0.05"><input type="range" id="x-outline-th" min="1" max="6" step="1"></span></div><div class="row"><label>Center dot</label><input type="checkbox" id="x-dot"></div><div class="row"><label>Dot opacity / size</label><span><input type="range" id="x-dot-op" min="0" max="1" step="0.05"><input type="range" id="x-dot-size" min="1" max="6" step="1"></span></div></div></div></div><div class="xcol"><h3>Inner lines</h3><div class="row"><label>Show</label><input type="checkbox" id="x-inner"></div><div class="row"><label>Length</label><input type="range" id="x-len" min="0" max="20" step="1"></div><div class="row"><label>Thickness</label><input type="range" id="x-thick" min="0" max="10" step="1"></div><div class="row"><label>Offset</label><input type="range" id="x-gap" min="0" max="20" step="1"></div><div class="row"><label>Opacity</label><input type="range" id="x-op" min="0" max="1" step="0.05"></div><h3 class="subhead">Error behavior</h3><div class="row"><label>Move error</label><span><input type="checkbox" id="x-moveerr"><input type="number" id="x-move-mult" min="0" max="3" step="0.1"></span></div><div class="row"><label>Fire error</label><span><input type="checkbox" id="x-fireerr"><input type="number" id="x-fire-mult" min="0" max="3" step="0.1"></span></div><div class="row"><label>Fade with fire</label><input type="checkbox" id="x-fade"></div><h3 class="subhead">Outer lines</h3><div class="row"><label>Show</label><input type="checkbox" id="x-outer"></div><div class="row"><label>Length / thickness</label><span><input type="range" id="x-olen" min="0" max="10" step="1"><input type="range" id="x-othick" min="0" max="10" step="1"></span></div><div class="row"><label>Offset / opacity</label><span><input type="range" id="x-ogap" min="0" max="40" step="1"><input type="range" id="x-oop" min="0" max="1" step="0.05"></span></div></div></div></section>
+          <section class="customize-pane" data-customize-pane="bots"><div class="customize-pane-title"><h3>Bot behavior</h3><p>Set the movement profile before you start.</p></div><div class="settings-grid"><div class="row"><label>Tracking</label><select id="s-track"><option value="easy">Easy, long strafes</option><option value="medium">Medium, mixed</option><option value="hard">Hard, jukes and crouch</option></select></div><div class="row"><label>Distance</label><select id="s-dist"><option value="close">Close, 4-9m</option><option value="standard">Standard, 10-20m</option><option value="long">Long, 20-35m</option></select></div><div class="row"><label>Orb movement</label><select id="s-orbmove"><option value="still">Still</option><option value="drift">Drift</option><option value="strafe">Strafe</option></select></div><div class="row"><label>Orb size</label><select id="s-orbsize"><option value="xs">XS</option><option value="s">S</option><option value="m">M</option><option value="l">L</option><option value="xl">XL</option></select></div></div></section>
+          <section class="customize-pane" data-customize-pane="audio"><div class="customize-pane-title"><h3>Audio</h3><p>Keep feedback audible without covering the game.</p></div><div class="settings-grid"><div class="row"><label>Volume</label><input type="range" id="s-vol" min="0" max="1" step="0.05"></div></div></section>
+          <section class="customize-pane" data-customize-pane="display"><div class="customize-pane-title"><h3>Display and controls</h3><p>Match sensitivity, response and visual treatment to your setup.</p></div><div class="settings-grid"><div class="row"><label>Sensitivity</label><input type="number" id="s-sens" step="0.01" min="0.01" max="10"></div><div class="row"><label>Scope multiplier</label><input type="number" id="s-scope" step="0.001" min="0.1" max="2"></div><div class="row"><label>Armor</label><select id="s-armor"><option value="none">No armor, 100</option><option value="light">Light, 125</option><option value="heavy">Heavy, 150</option></select></div><div class="row"><label>Reload</label><select id="s-reload"><option value="auto">Auto</option><option value="manual">Manual, R only</option><option value="off">Off, infinite mag</option></select></div><div class="row"><label>Theme</label><select id="s-theme" data-search></select></div><div class="row"><label>Render scale</label><select id="s-scale"><option value="0.75">0.75x, lowest latency</option><option value="1">1x</option><option value="dpr">Native, sharpest</option></select></div><div class="row"><label>Zeroing presets</label><span><button class="btn ghost mini" id="zero-ads">ADS 0.870</button><button class="btn ghost mini" id="zero-scope">Scope 0.747</button></span></div></div></section>
+          <section class="customize-pane" data-customize-pane="profile"><div class="customize-pane-title"><h3>Profile</h3><p>Export or import your crosshair profile and manage local training data.</p></div><div class="profile-tools"><div class="row"><label>Export</label><span class="inline-field"><input type="text" id="x-export" readonly onclick="this.select()"><button class="btn ghost mini" id="x-copy">Copy</button></span></div><div class="row"><label>Import</label><span class="inline-field"><input type="text" id="x-import" placeholder="paste profile code"><button class="btn ghost mini" id="x-doimport">Apply</button></span></div><div class="small" id="x-implabel">Crosshair profile codes round-trip with the engine format.</div><button class="btn ghost" id="resetprog">Reset training history</button><button class="btn ghost" id="pwa-install" hidden>Install app</button></div></section>
         </div>
       </div>
-      <div class="xcol">
-        <h2>// Inner lines</h2>
-        <div class="row"><label>Show</label><input type="checkbox" id="x-inner"></div>
-        <div class="row"><label>Length 0–20</label><input type="range" id="x-len" min="0" max="20" step="1"></div>
-        <div class="row"><label>Thickness 0–10</label><input type="range" id="x-thick" min="0" max="10" step="1"></div>
-        <div class="row"><label>Offset 0–20</label><input type="range" id="x-gap" min="0" max="20" step="1"></div>
-        <div class="row"><label>Opacity</label><input type="range" id="x-op" min="0" max="1" step="0.05"></div>
-      </div>
-    </div>
-    </div>
-  </section>
-  <section class="tile tile-cross2">
-    <div class="tile-body">
-    <div class="xpack">
-      <div>
-        <h2>// Error behavior</h2>
-        <div class="row"><label>Move err ×</label><span><input type="checkbox" id="x-moveerr"> <input type="number" id="x-move-mult" min="0" max="3" step="0.1" style="width:56px"></span></div>
-        <div class="row"><label>Fire err ×</label><span><input type="checkbox" id="x-fireerr"> <input type="number" id="x-fire-mult" min="0" max="3" step="0.1" style="width:56px"></span></div>
-        <div class="row"><label>Fade w/ fire</label><input type="checkbox" id="x-fade"></div>
-      </div>
-      <div>
-        <h2>// Outer lines</h2>
-        <div class="row"><label>Show</label><input type="checkbox" id="x-outer"></div>
-        <div class="row"><label>Length 0–10</label><input type="range" id="x-olen" min="0" max="10" step="1"></div>
-        <div class="row"><label>Thickness 0–10</label><input type="range" id="x-othick" min="0" max="10" step="1"></div>
-        <div class="row"><label>Offset 0–40</label><input type="range" id="x-ogap" min="0" max="40" step="1"></div>
-        <div class="row"><label>Opacity</label><input type="range" id="x-oop" min="0" max="1" step="0.05"></div>
-      </div>
-      <div>
-        <h2>// Profile code</h2>
-        <div class="row"><label>Export</label><span style="flex:1;display:flex;gap:6px"><input type="text" id="x-export" readonly style="flex:1;width:auto" onclick="this.select()"> <button class="btn ghost mini" id="x-copy">Copy</button></span></div>
-        <div class="row"><label>Import</label><span style="flex:1;display:flex;gap:6px"><input type="text" id="x-import" placeholder="paste code…" style="flex:1;width:auto"> <button class="btn ghost mini" id="x-doimport">Apply</button></span></div>
-        <div class="small" id="x-implabel">Crosshair profile codes round-trip with the engine format.</div>
-      </div>
-    </div>
-    </div>
-  </section>
-  <section class="tile tile-set"><h2>// Settings</h2>
-      <div class="tile-body">
-      <div class="row"><label>Sensitivity</label><input type="number" id="s-sens" step="0.01" min="0.01" max="10"></div>
-      <div class="row"><label>Scope mult</label><input type="number" id="s-scope" step="0.001" min="0.1" max="2"></div>
-      <div class="row"><label>0% match</label><span><button class="btn ghost mini" id="zero-ads">ADS 0.870</button> <button class="btn ghost mini" id="zero-scope">Scope 0.747</button></span></div>
-      <div class="row"><label>Armor</label><select id="s-armor"><option value="none">No armor · 100</option><option value="light">Light · 125</option><option value="heavy">Heavy · 150</option></select></div>
-      <div class="row"><label>Reload</label><select id="s-reload"><option value="auto">Auto</option><option value="manual">Manual (R only)</option><option value="off">Off (infinite mag)</option></select></div>
-      <div class="row"><label>Tracking</label><select id="s-track"><option value="easy">Easy · long strafes</option><option value="medium">Medium · mixed</option><option value="hard">Hard · jukes + crouch</option></select></div>
-      <div class="row"><label>Distance</label><select id="s-dist"><option value="close">Close 4–9m</option><option value="standard">Standard 10–20m</option><option value="long">Long 20–35m</option></select></div>
-      <div class="row"><label>Theme</label><select id="s-theme" data-search></select></div>
-      <div class="row"><label>Orb move/size</label><span><select id="s-orbmove" style="width:86px"><option value="still">Still</option><option value="drift">Drift</option><option value="strafe">Strafe</option></select> <select id="s-orbsize" style="width:86px"><option value="xs">XS</option><option value="s">S</option><option value="m">M</option><option value="l">L</option><option value="xl">XL</option></select></span></div>
-      <div class="row"><label>Volume</label><input type="range" id="s-vol" min="0" max="1" step="0.05"></div>
-      <div class="row"><label>Render scale</label><select id="s-scale"><option value="0.75">0.75× (lowest latency)</option><option value="1">1×</option><option value="dpr">Native (sharpest)</option></select></div>
-      </div>
-  </section>
+    </section>
   </div>
-</div></div>
-
+</div>
 <div id="buy" class="overlay"><div class="card buyphase">
   <div class="buy-head"><div><div class="buy-kicker">BUY PHASE</div><h2>Choose your weapon</h2></div><div class="credits">∞ CREDITS</div></div>
   <div class="small">click to equip instantly — run continues · <b>B</b> or <b>ESC</b> to close</div>
@@ -332,11 +296,38 @@
   const missionsCloseBtn = document.querySelector('[data-vm-cancel]');
   if (missionsOpenBtn) missionsOpenBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = false; });
   if (missionsCloseBtn) missionsCloseBtn.addEventListener('click', () => { if (missionsPanel) missionsPanel.hidden = true; });
+
+  const terminalSecondary = document.getElementById('vibes-open-terminal-secondary');
+  if (terminalSecondary) terminalSecondary.addEventListener('click', () => { if (panel) panel.hidden = false; });
+
+  const customize = document.getElementById('customize');
+  const customizeOpen = document.getElementById('customize-open');
+  const customizeClose = document.getElementById('customize-close');
+  const setCustomizeOpen = (open) => {
+    if (!customize) return;
+    customize.hidden = !open;
+    document.body.classList.toggle('customize-open', open);
+    if (open) document.querySelector('[data-customize-tab].active')?.focus();
+  };
+  customizeOpen?.addEventListener('click', () => setCustomizeOpen(true));
+  customizeClose?.addEventListener('click', () => setCustomizeOpen(false));
+  customize?.addEventListener('click', (event) => { if (event.target === customize) setCustomizeOpen(false); });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && customize && !customize.hidden) setCustomizeOpen(false); });
+  document.querySelectorAll('[data-customize-tab]').forEach((tab) => tab.addEventListener('click', () => {
+    const name = tab.dataset.customizeTab;
+    document.querySelectorAll('[data-customize-tab]').forEach((item) => item.classList.toggle('active', item === tab));
+    document.querySelectorAll('[data-customize-pane]').forEach((pane) => pane.classList.toggle('active', pane.dataset.customizePane === name));
+  }));
+  document.querySelectorAll('[data-dashboard-section]').forEach((link) => link.addEventListener('click', () => {
+    const target = link.dataset.dashboardSection;
+    document.querySelectorAll('[data-dashboard-section]').forEach((item) => item.classList.toggle('active', item === link));
+    document.querySelector(`[data-dashboard-section-target="${target}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>
   <div class="vibes-boot-card">
-    <div class="vibes-boot-kicker">// vibes_aim</div>
+    <div class="vibes-boot-kicker">// market</div>
     <div class="vibes-boot-title">Connecting to market data</div>
     <div class="vibes-boot-sub" data-vibes-boot-sub>Looking for the server on <span data-vibes-boot-base>http://127.0.0.1:3000</span>…</div>
     <div class="vibes-boot-actions">

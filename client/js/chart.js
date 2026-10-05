@@ -19,13 +19,21 @@ const POLL_MS = 1000;
 
 let TV = null;
 let lightweightChartsPromise = null;
+const LIGHTWEIGHT_CHARTS_CDN = 'https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js';
 
 function loadLightweightCharts() {
   if (TV) return Promise.resolve(TV);
   if (!lightweightChartsPromise) {
-    lightweightChartsPromise = import('lightweight-charts')
-      .then((m) => { TV = m; return m; })
-      .catch((err) => { console.warn('[vibes] lightweight-charts load failed:', err && err.message); return null; });
+    lightweightChartsPromise = new Promise((resolve) => {
+      if (typeof window === 'undefined' || typeof document === 'undefined') { resolve(null); return; }
+      if (window.LightweightCharts) { TV = window.LightweightCharts; resolve(TV); return; }
+      const script = document.createElement('script');
+      script.src = LIGHTWEIGHT_CHARTS_CDN;
+      script.async = true;
+      script.onload = () => { TV = window.LightweightCharts || null; resolve(TV); };
+      script.onerror = () => { console.warn('[vibes] lightweight-charts load failed'); resolve(null); };
+      document.head.appendChild(script);
+    });
   }
   return lightweightChartsPromise;
 }
@@ -171,11 +179,11 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       crosshair: { mode: 1 },
       autoSize: true,
     });
-    const color = accentColor(active.ticker);
+    const color = '#f6d447';
     series = chart.addCandlestickSeries({
-      upColor: color, downColor: '#ff5d6c',
-      borderUpColor: color, borderDownColor: '#ff5d6c',
-      wickUpColor: color, wickDownColor: '#ff5d6c',
+      upColor: color, downColor: '#ffffff',
+      borderUpColor: color, borderDownColor: '#ffffff',
+      wickUpColor: color, wickDownColor: '#ffffff',
     });
   }
 
@@ -189,6 +197,8 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     const h = buildHeader(quote);
     setText(els.price, h.price);
     setText(els.change, h.change);
+    document.querySelectorAll('[data-vc-price-label]').forEach((el) => { el.textContent = h.price; });
+    document.querySelectorAll('[data-vc-ticker-label]').forEach((el) => { el.textContent = active.ticker; });
     if (els.change) {
       els.change.classList.remove('pos', 'neg');
       if (h.changeClass) els.change.classList.add(h.changeClass);
@@ -218,7 +228,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         const q = await fetchQuote(active.ticker);
         if (q && q.price != null) {
           const t = q.ts || Date.now();
-          if (series) series.update({ time: Math.floor(t / 1000), value: q.price });
+          if (series) series.update({ time: Math.floor(t / 1000), open: q.price, high: q.price, low: q.price, close: q.price });
           applyHeader(q);
           lastTickTs = Date.now();
           markStatus('live');
@@ -255,7 +265,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
           return;
         }
         const t = tick.ts || Date.now();
-        if (series) series.update({ time: Math.floor(t / 1000), value: tick.price });
+        if (series) series.update({ time: Math.floor(t / 1000), open: tick.price, high: tick.price, low: tick.price, close: tick.price });
         applyHeader({ price: tick.price, dp: null, status: tick.status });
         lastTickTs = Date.now();
         markStatus('live');

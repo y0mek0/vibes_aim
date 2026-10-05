@@ -74,7 +74,7 @@ export function mountTerminal({ root, onClose } = {}) {
     }
     for (const t of tickers) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="num">${t}</td><td class="num">${round8(balances[t] || 0).toFixed(8)}</td>`;
+      tr.innerHTML = `<td class="num">${t}</td><td class="num">${Number(balances[t] || 0).toFixed(8)}</td>`;
       els.holdings.appendChild(tr);
     }
   }
@@ -186,6 +186,13 @@ export function mountTerminal({ root, onClose } = {}) {
     if (els.otSubmit) els.otSubmit.disabled = !preview.marginOk || state.entryPrice === 0;
   }
 
+  function renderDashboard(player, v) {
+    const put = (selector, value) => document.querySelectorAll(selector).forEach((el) => { el.textContent = value; });
+    put('[data-dashboard-stable]', fmtMoney(player.stable));
+    put('[data-dashboard-portfolio-total]', fmtMoney(v.total));
+    put('[data-dashboard-today]', v.openPnl > 0 ? '+' + fmtMoney(v.openPnl) : fmtMoney(v.openPnl));
+  }
+
   function renderPortfolio() {
     const player = store.state.player;
     if (!player) return;
@@ -206,6 +213,7 @@ export function mountTerminal({ root, onClose } = {}) {
     setText(els.openPnl, formatPnl(v.openPnl).text);
     setClass(els.openPnl, 'pos', v.openPnl > 0);
     setClass(els.openPnl, 'neg', v.openPnl < 0);
+    renderDashboard(player, v);
   }
 
   function refreshAll() {
