@@ -1,6 +1,7 @@
 // server/src/routes/market.js — read-only market data routes.
 import { sendJson, HttpError } from '../util/json.js';
 import { RANGES } from '../market/provider.js';
+import { streamSymbol } from '../market/stream.js';
 
 export function marketRoutes(r, { market }) {
   r.get('/market/status', async (_req, res) => {
@@ -31,5 +32,13 @@ export function marketRoutes(r, { market }) {
       if (e.status) return sendJson(res, e.status, { error: e.code, message: e.message });
       sendJson(res, 502, { error: 'market_provider_error', message: e.message });
     }
+  });
+
+  // Server-Sent Events feed of the latest ticks for one symbol. The
+  // client opens `new EventSource('/market/stream/AAPL')` and receives
+  // one event per provider tick. Polling fallback is built into the
+  // stream module, so this endpoint works for every provider.
+  r.get('/market/stream/:symbol', (_req, res, params) => {
+    streamSymbol(market, params.symbol, res);
   });
 }

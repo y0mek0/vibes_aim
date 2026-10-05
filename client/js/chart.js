@@ -93,6 +93,36 @@ export async function fetchQuote(ticker) {
 
 function setText(el, value) { if (el) el.textContent = value; }
 
+// EventSource-driven live updates. Tries the SSE feed first; if the
+// stream is unavailable (older server, transport blocked), every
+// incoming tick simply stops and the polling timer below keeps the UI
+// fresh, so SSE is a strict upgrade — never a regression.
+export function openQuoteStream(ticker, onTick) {
+  if (typeof EventSource === 'undefined') return () => {};
+  let closed = false;
+  // SSE must hit the API origin, not the static-host origin. EventSource
+  // can not set cross-origin mode (it is always same-origin), so we
+  // expand the URL through api.baseUrl() and fall back to a relative
+  // path when the static host is also the API host.
+  const base = (typeof window !== 'undefined' && api.baseUrl) ? api.baseUrl() : '';
+  const url = `${base}/market/stream/${encodeURIComponent(ticker)}`;
+  const es = new EventSource(url);
+  es.addEventListener('tick', (ev) => {
+    if (closed) return;
+    try { onTick(JSON.parse(ev.data)); } catch (_) { /* malformed */ }
+  });
+  es.addEventListener('error', () => {
+    // EventSource auto-reconnects; do nothing. If the server returns
+    // a non-2xx status EventSource dispatches a final error and stops
+    // retrying. We just fall back to polling — that's fine.
+  });
+  return () => {
+    if (closed) return;
+    closed = true;
+    try { es.close(); } catch (_) { /* noop */ }
+  };
+}
+
 export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   const panel = root || document.getElementById('vibes-chart');
   if (!panel) return { unmount() {}, setTicker() {}, setRange() {}, state: null };
@@ -184,32 +214,59 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   }
 
   async function pollOnce() {
-    try {
-      const q = await fetchQuote(active.ticker);
-      if (q && q.price != null) {
-        const t = q.ts || Date.now();
-        if (series) series.update({ time: Math.floor(t / 1000), value: q.price });
-        applyHeader(q);
+      try {
+        const q = await fetchQuote(active.ticker);
+        if (q && q.price != null) {
+          const t = q.ts || Date.now();
+          if (series) series.update({ time: Math.floor(t / 1000), value: q.price });
+          applyHeader(q);
+          lastTickTs = Date.now();
+          markStatus('live');
+          clearTimeout(staleTimer);
+          staleTimer = setTimeout(() => { if (!stopped) markStatus('stale', true); }, STALE_AFTER_MS);
+        } else if (q && q.status === 'pre_ipo') {
+          markStatus('awaiting market', true);
+          setText(els.price, '—');
+          setText(els.change, '—');
+        }
+      } catch (_) { /* keep last good state */ }
+    }
+
+    function startPolling() {
+      stopPolling();
+      pollTimer = setInterval(pollOnce, POLL_MS);
+    }
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      if (staleTimer) { clearTimeout(staleTimer); staleTimer = null; }
+    }
+
+    // SSE — when available, prefer it over polling. Polling remains as
+    // the resilient fallback so older servers still get fresh quotes.
+    let closeStream = () => {};
+    function startStream() {
+      if (typeof EventSource === 'undefined') return;
+      closeStream = openQuoteStream(active.ticker, (tick) => {
+        if (stopped || tick.symbol !== active.ticker) return;
+        if (tick.price == null) {
+          markStatus('awaiting market', true);
+          setText(els.price, '—');
+          setText(els.change, '—');
+          return;
+        }
+        const t = tick.ts || Date.now();
+        if (series) series.update({ time: Math.floor(t / 1000), value: tick.price });
+        applyHeader({ price: tick.price, dp: null, status: tick.status });
         lastTickTs = Date.now();
         markStatus('live');
         clearTimeout(staleTimer);
         staleTimer = setTimeout(() => { if (!stopped) markStatus('stale', true); }, STALE_AFTER_MS);
-      } else if (q && q.status === 'pre_ipo') {
-        markStatus('awaiting market', true);
-        setText(els.price, '—');
-        setText(els.change, '—');
-      }
-    } catch (_) { /* keep last good state */ }
-  }
-
-  function startPolling() {
-    stopPolling();
-    pollTimer = setInterval(pollOnce, POLL_MS);
-  }
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    if (staleTimer) { clearTimeout(staleTimer); staleTimer = null; }
-  }
+      });
+    }
+    function stopStream() {
+      try { closeStream(); } catch (_) { /* noop */ }
+      closeStream = () => {};
+    }
 
   els.tickerBtns.forEach((b) => b.addEventListener('click', () => {
     const t = b.dataset.vcTickerBtn;
@@ -239,29 +296,35 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   }
 
   function setActiveTicker(t) {
-    if (!t) return;
-    active.ticker = t;
-    panel.dataset.ticker = t;
-    if (els.ticker) els.ticker.textContent = t;
-    els.tickerBtns.forEach((b) => b.classList.toggle('active', b.dataset.vcTickerBtn === t));
-    if (chart) {
-      const color = accentColor(t);
-      try {
-        series.applyOptions({
-          upColor: color, downColor: '#ff5d6c',
-          borderUpColor: color, borderDownColor: '#ff5d6c',
-          wickUpColor: color, wickDownColor: '#ff5d6c',
-        });
-      } catch (_) { /* noop */ }
+      if (!t) return;
+      active.ticker = t;
+      panel.dataset.ticker = t;
+      if (els.ticker) els.ticker.textContent = t;
+      els.tickerBtns.forEach((b) => b.classList.toggle('active', b.dataset.vcTickerBtn === t));
+      if (chart) {
+        const color = accentColor(t);
+        try {
+          series.applyOptions({
+            upColor: color, downColor: '#ff5d6c',
+            borderUpColor: color, borderDownColor: '#ff5d6c',
+            wickUpColor: color, wickDownColor: '#ff5d6c',
+          });
+        } catch (_) { /* noop */ }
+      }
+      // SSE is bound to the URL — when the ticker changes we have to
+      // close the old stream and open a new one. Polling keeps working
+      // through the gap.
+      stopStream();
+      loadCandles();
+      startStream();
     }
-    loadCandles();
-  }
 
   loadCandles().then(() => {
-    if (stopped) return;
-    pollOnce();
-    startPolling();
-  });
+      if (stopped) return;
+      pollOnce();
+      startPolling();
+      startStream();
+    });
 
   // React to store updates: when the player unlocks a new ticker (e.g.
   // NVDA after the AAPL chain), make its button visible.
@@ -269,12 +332,13 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   refreshUnlockedTickers();
 
   function unmount() {
-    stopped = true;
-    stopPolling();
-    try { unsubStore && unsubStore(); } catch (_) { /* noop */ }
-    try { chart && chart.remove(); } catch (_) { /* noop */ }
-    chart = null; series = null;
-  }
+      stopped = true;
+      stopPolling();
+      stopStream();
+      try { unsubStore && unsubStore(); } catch (_) { /* noop */ }
+      try { chart && chart.remove(); } catch (_) { /* noop */ }
+      chart = null; series = null;
+    }
 
   return { unmount, setTicker: setActiveTicker, setRange: (r) => { active.range = r; loadCandles(); }, state: () => ({ ...active }) };
 }

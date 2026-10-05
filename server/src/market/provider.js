@@ -7,6 +7,15 @@
 //   async getTradingStatus(symbol)      -> { provider, isOpen, session, ... }
 //   async getSymbols()                  -> [{ symbol, name, market }]
 //
+// Optional streaming API (used by the SSE /market/stream endpoint):
+//   subscribe(symbol, listener) -> { unsubscribe() }
+//     listener({ symbol, price, ts, currency, status? }) is called for
+//     every new tick the provider can produce. Providers without a real
+//     upstream feed (e.g. stub) may synthesize ticks from getQuote().
+//     If subscribe is missing the server falls back to polling the
+//     provider's getQuote() on its own interval, so SSE is always
+//     available regardless of provider implementation.
+//
 // Ranges supported by the in-game chart:
 //   '1D' = 1-minute candles, 24h
 //   '5D' = 5-minute candles, 5 days
