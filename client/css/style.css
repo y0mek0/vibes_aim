@@ -288,17 +288,18 @@ canvas#game {
 }
 .vibes-boot-actions button:hover { color: var(--accent); border-color: var(--accent); }
 
-/* — vibes_aim floating chart panel — */
+/* — chart panel (lives next to the terminal/missions look) — */
 #vibes-chart {
   position: fixed;
   right: 14px;
   top: 14px;
-  width: min(360px, 38vw);
+  width: min(440px, 46vw);
   z-index: 15;          /* above the canvas, below the aim-bridge chip (z=30) */
   background: var(--bg-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
+  border-top: 2px solid var(--accent);
   border-radius: var(--radius-3);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   font-family: var(--font-ui);
   color: var(--fg);
   font-size: var(--fs-small);
@@ -378,8 +379,8 @@ canvas#game {
 
 .vc-body {
   position: relative;
-  height: 200px;
-  background: var(--bg-2);
+  height: 260px;
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-3) 100%);
 }
 .vc-body canvas { display: block; width: 100% !important; height: 100% !important; }
 
