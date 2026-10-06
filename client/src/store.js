@@ -2,10 +2,10 @@
 // Pulls from /portfolio and /missions on demand, exposes a tiny event
 // emitter so the UI can subscribe. No third-party state lib.
 
-import { api } from './api.js';
-import { getPlayerId, setPlayerId } from './api.js';
-import { getSessionId } from './session.js';
-import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js';
+import { api } from './api.js?v=20261006-4';
+import { getPlayerId, setPlayerId } from './api.js?v=20261006-4';
+import { getSessionId } from './session.js?v=20261006-4';
+import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261006-4';
 
 function createStore() {
   const listeners = new Set();
