@@ -28,6 +28,7 @@ export function createStore(supabaseConfig) {
     missions: new Map(),   // `${playerId}:${kind}` -> mission
     unlocks: new Map(),    // `${playerId}:${ticker}` -> entry
     loadout: new Map(),    // `${playerId}:${gunId}` -> { playerId, gunId, purchasedAt }
+    sessions: new Map(),   // tokenHash -> { tokenHash, playerId, expiresAt }
   };
 
   function keyBal(playerId, ticker) { return `${playerId}:${ticker}`; }
@@ -179,6 +180,107 @@ export function createStore(supabaseConfig) {
       const e = { playerId, gunId, purchasedAt: Date.now() };
       mem.loadout.set(k, e);
       return e;
+    },
+
+    // ----- google identity + sessions -----
+    // (In-memory stubs only. Supabase implementation lives in supabase.js.
+    //  The store contract is the same on both sides.)
+    async findPlayerByGoogleId({ googleId }) {
+      for (const p of mem.players.values()) {
+        if (p.googleId === googleId) return p;
+      }
+      return null;
+    },
+    async createPlayerWithGoogle({ googleId, email }) {
+      // Use the google sub as the player id so we never need a separate
+      // mapping. Existing row gets a fresh createdAt only if absent.
+      const now = Date.now();
+      const existing = mem.players.get(googleId);
+      if (existing) {
+        existing.email = email || existing.email;
+        existing.googleId = existing.googleId || googleId;
+        existing.updatedAt = now;
+        return existing;
+      }
+      const p = {
+        id: googleId, googleId, email: email || null,
+        stable: 200, preciseBest: 0,
+        createdAt: now, updatedAt: now,
+      };
+      mem.players.set(googleId, p);
+      return p;
+    },
+    async updatePlayerIdentity({ playerId, email }) {
+      const p = mem.players.get(playerId) ?? (await this.getOrCreatePlayer(playerId));
+      if (email) p.email = email;
+      p.updatedAt = Date.now();
+      return p;
+    },
+    async mergeGuestIntoPlayer({ fromPlayerId, toPlayerId }) {
+      // Move rows belonging to fromPlayerId onto toPlayerId, then delete
+      // the guest. Errors are swallowed per collection so a single bad
+      // row doesn't roll back the whole merge.
+      const guest = mem.players.get(fromPlayerId);
+      const target = mem.players.get(toPlayerId);
+      if (!guest || !target || guest.id === target.id) return target;
+      target.stable = round((target.stable + guest.stable), 6);
+      target.updatedAt = Date.now();
+      for (const [k, b] of mem.balances.entries()) {
+        if (b.playerId !== fromPlayerId) continue;
+        const tk = b.ticker;
+        const targetBal = mem.balances.get(keyBal(toPlayerId, tk)) ?? { playerId: toPlayerId, ticker: tk, qty: 0, updatedAt: 0 };
+        targetBal.qty = round(targetBal.qty + b.qty, 8);
+        targetBal.updatedAt = Date.now();
+        mem.balances.set(keyBal(toPlayerId, tk), targetBal);
+        mem.balances.delete(k);
+      }
+      for (const [k, u] of mem.unlocks.entries()) {
+        if (u.playerId !== fromPlayerId) continue;
+        const newK = keyUnlock(toPlayerId, u.ticker);
+        if (!mem.unlocks.has(newK)) mem.unlocks.set(newK, { ...u, playerId: toPlayerId });
+        mem.unlocks.delete(k);
+      }
+      for (const [k, l] of mem.loadout.entries()) {
+        if (l.playerId !== fromPlayerId) continue;
+        const newK = keyLoadout(toPlayerId, l.gunId);
+        if (!mem.loadout.has(newK)) mem.loadout.set(newK, { ...l, playerId: toPlayerId });
+        mem.loadout.delete(k);
+      }
+      for (const [k, m] of mem.missions.entries()) {
+        if (m.playerId !== fromPlayerId) continue;
+        const newK = keyMission(toPlayerId, m.kind);
+        const cur = mem.missions.get(newK);
+        if (!cur) {
+          mem.missions.set(newK, { ...m, playerId: toPlayerId });
+        } else {
+          if (Number(m.progress) > Number(cur.progress)) cur.progress = m.progress;
+          if (m.done) cur.done = true;
+          if (m.claimedAt && !cur.claimedAt) cur.claimedAt = m.claimedAt;
+        }
+        mem.missions.delete(k);
+      }
+      for (const t of mem.trades.values()) {
+        if (t.playerId === fromPlayerId) t.playerId = toPlayerId;
+      }
+      for (const h of mem.hitLog.values()) {
+        if (h.playerId === fromPlayerId) h.playerId = toPlayerId;
+      }
+      mem.players.delete(fromPlayerId);
+      return target;
+    },
+
+    // ----- sessions -----
+    async createSession({ tokenHash, playerId, expiresAt }) {
+      const exp = expiresAt instanceof Date ? expiresAt.toISOString() : expiresAt;
+      mem.sessions.set(tokenHash, { tokenHash, playerId, expiresAt: exp });
+      return mem.sessions.get(tokenHash);
+    },
+    async findSessionByHash({ tokenHash }) {
+      return mem.sessions.get(tokenHash) ?? null;
+    },
+    async deleteSession({ tokenHash }) {
+      mem.sessions.delete(tokenHash);
+      return true;
     },
   };
 }

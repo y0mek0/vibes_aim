@@ -30,6 +30,10 @@ export const config = {
     url: readString('SUPABASE_URL', ''),
     serviceKey: readString('SUPABASE_SERVICE_KEY', ''),
   },
+  google: {
+    // OAuth client id used to verify id_token audience (aud claim).
+    clientId: readString('GOOGLE_CLIENT_ID', ''),
+  },
   aim: {
     hitRps: readNumber('AIM_HIT_RPS', 15),
     hitUnit: readNumber('AIM_HIT_UNIT', 0.0008),

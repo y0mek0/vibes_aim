@@ -24,6 +24,8 @@ const TABLE = {
   hitLog:   'hit_log',
   missions: 'missions',
   unlocks:  'unlocks',
+  loadout:  'loadout',
+  sessions: 'sessions',
 };
 
 function round6(n) { return Math.round(n * 1e6) / 1e6; }
@@ -69,6 +71,8 @@ export function createSupabaseStore({ url, serviceKey }) {
       stable: Number(row.stable),
       // Backward-compatible for a row created before migration 0002.
       preciseBest: Number.isFinite(Number(row.precise_best)) ? Number(row.precise_best) : 0,
+      googleId: row.google_id || null,
+      email: row.email || null,
     };
   }
 
@@ -87,6 +91,101 @@ export function createSupabaseStore({ url, serviceKey }) {
     async getPlayer(playerId) {
       const rows = await rpc(TABLE.players, `?${eqFilter('id', playerId)}&limit=1`);
       return rows && rows[0] ? toPlayer(rows[0]) : null;
+    },
+    async findPlayerByGoogleId({ googleId }) {
+      const rows = await rpc(TABLE.players, `?${eqFilter('google_id', googleId)}&limit=1`);
+      return rows && rows[0] ? toPlayer(rows[0]) : null;
+    },
+    async createPlayerWithGoogle({ googleId, email }) {
+      // Reuse getOrCreatePlayer logic; the player id == google sub for a
+      // signed-in account, so this is the same row.
+      const cur = await this.getOrCreatePlayer(googleId);
+      if (!cur.googleId) {
+        const now = new Date().toISOString();
+        const rows = await rpc(TABLE.players,
+          `?${eqFilter('id', googleId)}`,
+          { method: 'PATCH',
+            body: { google_id: googleId, email: email || null, updated_at: now },
+            headers: { 'Prefer': 'return=representation' } });
+        if (rows && rows[0]) return toPlayer(rows[0]);
+      }
+      return cur;
+    },
+    async updatePlayerIdentity({ playerId, email }) {
+      const now = new Date().toISOString();
+      const body = { updated_at: now };
+      if (email) body.email = email;
+      const rows = await rpc(TABLE.players,
+        `?${eqFilter('id', playerId)}`,
+        { method: 'PATCH', body, headers: { 'Prefer': 'return=representation' } });
+      return rows && rows[0] ? toPlayer(rows[0]) : await this.getOrCreatePlayer(playerId);
+    },
+    async mergeGuestIntoPlayer({ fromPlayerId, toPlayerId }) {
+      // Move rows belonging to fromPlayerId onto toPlayerId, then delete
+      // the guest. We do this by re-pointing in each collection via
+      // PATCH (or DELETE for owned rows). Errors are swallowed per
+      // collection so a single bad row doesn't roll back the whole merge.
+      const collections = [
+        { table: TABLE.balances, key: 'player_id' },
+        { table: TABLE.unlocks,  key: 'player_id' },
+        { table: TABLE.loadout,  key: 'player_id' },
+        { table: TABLE.missions, key: 'player_id' },
+        { table: TABLE.trades,   key: 'player_id' },
+        { table: TABLE.hitLog,   key: 'player_id' },
+      ];
+      for (const { table, key } of collections) {
+        try {
+          const rows = await rpc(table, `?${eqFilter(key, fromPlayerId)}&select=id`);
+          for (const r of rows || []) {
+            try {
+              await rpc(table, `?id=eq.${r.id}`,
+                { method: 'PATCH', body: { [key]: toPlayerId } });
+            } catch (_) { /* skip */ }
+          }
+        } catch (_) { /* skip */ }
+      }
+      // Sum guest stable into target.
+      try {
+        const g = await this.getPlayer(fromPlayerId);
+        const t = await this.getOrCreatePlayer(toPlayerId);
+        if (g && t && g.id !== t.id) {
+          const next = round6(Number(t.stable) + Number(g.stable));
+          await rpc(TABLE.players, `?${eqFilter('id', toPlayerId)}`,
+            { method: 'PATCH', body: { stable: next, updated_at: new Date().toISOString() },
+              headers: { 'Prefer': 'return=representation' } });
+        }
+      } catch (_) { /* skip */ }
+      // Best-effort delete the guest row.
+      try { await rpc(TABLE.players, `?${eqFilter('id', fromPlayerId)}`, { method: 'DELETE' }); }
+      catch (_) { /* skip */ }
+      return this.getOrCreatePlayer(toPlayerId);
+    },
+
+    // ----- sessions -----
+    async createSession({ tokenHash, playerId, expiresAt }) {
+      const exp = expiresAt instanceof Date ? expiresAt.toISOString() : expiresAt;
+      const rows = await rpc(TABLE.sessions, `?${select()}`, {
+        method: 'POST',
+        body: [{ token_hash: tokenHash, player_id: playerId, expires_at: exp }],
+        headers: { 'Prefer': 'return=representation' },
+      });
+      return rows && rows[0]
+        ? { tokenHash, playerId, expiresAt: rows[0].expires_at }
+        : { tokenHash, playerId, expiresAt: exp };
+    },
+    async findSessionByHash({ tokenHash }) {
+      const rows = await rpc(TABLE.sessions,
+        `?${eqFilter('token_hash', tokenHash)}&limit=1`);
+      if (!rows || !rows[0]) return null;
+      return {
+        tokenHash,
+        playerId: rows[0].player_id,
+        expiresAt: rows[0].expires_at,
+      };
+    },
+    async deleteSession({ tokenHash }) {
+      await rpc(TABLE.sessions, `?${eqFilter('token_hash', tokenHash)}`, { method: 'DELETE' });
+      return true;
     },
     async addStable(playerId, amount) {
       const cur = await this.getOrCreatePlayer(playerId);
@@ -302,6 +401,41 @@ export function createSupabaseStore({ url, serviceKey }) {
     async listUnlocks(playerId) {
       const rows = await rpc(TABLE.unlocks, `?${eqFilter('player_id', playerId)}`);
       return (rows || []).map((r) => ({ playerId, ticker: r.ticker, unlockedAt: Date.parse(r.unlocked_at) || 0 }));
+    },
+
+    // ----- loadout (one-time gun purchases for stable) -----
+    async ownsGun(playerId, gunId) {
+      const rows = await rpc(TABLE.loadout,
+        `?${eqFilter('player_id', playerId)}&${eqFilter('gun_id', gunId)}&limit=1`);
+      return !!(rows && rows[0]);
+    },
+    async getOwnedGuns(playerId) {
+      const rows = await rpc(TABLE.loadout, `?${eqFilter('player_id', playerId)}`);
+      return (rows || []).map((r) => ({
+        playerId: r.player_id,
+        gunId: r.gun_id,
+        purchasedAt: Date.parse(r.purchased_at) || 0,
+      }));
+    },
+    async grantGun(playerId, gunId) {
+      // Idempotent: only insert if not already present.
+      const exists = await this.ownsGun(playerId, gunId);
+      if (exists) {
+        const rows = await rpc(TABLE.loadout,
+          `?${eqFilter('player_id', playerId)}&${eqFilter('gun_id', gunId)}&limit=1`);
+        return rows && rows[0]
+          ? { playerId, gunId, purchasedAt: Date.parse(rows[0].purchased_at) || 0 }
+          : { playerId, gunId, purchasedAt: Date.now() };
+      }
+      const now = new Date().toISOString();
+      const rows = await rpc(TABLE.loadout, `?${select()}`, {
+        method: 'POST',
+        body: [{ player_id: playerId, gun_id: gunId, purchased_at: now }],
+        headers: { 'Prefer': 'return=representation' },
+      });
+      return rows && rows[0]
+        ? { playerId, gunId, purchasedAt: Date.parse(rows[0].purchased_at) || Date.now() }
+        : { playerId, gunId, purchasedAt: Date.now() };
     },
   };
 }
