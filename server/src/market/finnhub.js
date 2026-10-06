@@ -28,6 +28,7 @@ const NAMES = {
 
 // RANGES (matching provider.js)
 const RANGE_TO_FH = {
+  '5m': { resolution: 1, fromDays: 5 / 1440, aggregate: '1' },
   '15m': { resolution: 1, fromDays: 15 / 1440, aggregate: '1' },
   '1H': { resolution: 1, fromDays: 1 / 24, aggregate: '1' },
   '4H': { resolution: 5, fromDays: 4 / 24, aggregate: '5' },

@@ -19,6 +19,7 @@ import { buildWorld, disposeWorld } from './three/world.js';
 import { THEMES } from './data/themes.js';
 import { createTargets } from './three/targets.js';
 import { createEffects } from './three/effects.js';
+import { getActiveTicker } from './aim-bridge.js';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -320,7 +321,7 @@ export function boot() {
         continue;
       }
       const h = tHit, ud = h.object.userData;
-      FX.tracer(from, h.point, gun.silenced ? 0x7df9c5 : 0xf6d447);
+      FX.tracer(from, h.point, gun.silenced ? 0xf6d447 : 0xf6d447);
       if (!ud || !ud.t) { FX.spark(h.point, 0x888888); continue; }
       _hit.copy(h.point);
       const t = ud.t, dist = camera.position.distanceTo(h.point);
@@ -340,7 +341,7 @@ export function boot() {
       else dmg = damageAtRange(gun, dist, part);
       totalDmg += dmg; if (part === 'head') headDmg += dmg;
       hitAny = true; stats.raw.pelletHits++;
-      FX.spark(h.point, part === 'head' ? 0xf6d447 : t.type === 'orb' ? 0xf6d447 : 0x7df9c5);
+      FX.spark(h.point, part === 'head' ? 0xf6d447 : t.type === 'orb' ? 0xf6d447 : 0xf6d447);
       t.hp -= dmg;
       if (t.type === 'bot') T.setHpBar(t);
       if (t.hp <= 0 && t.alive) killInfo = { t, part, dist, dmg: totalDmg };
@@ -383,7 +384,10 @@ export function boot() {
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     for (let i = 0; i < 40; i++) {
       const d = bandDist() * (0.85 + Math.random() * 0.3);
-      const lx = (Math.random() * 2 - 1) * Math.min(8, d * 0.45);
+      // Keep targets in a narrow forward cone. The old 0.45d spread put
+      // gridshot orbs far into the side vision, which looked like off-screen
+      // spawns when the player turned.
+      const lx = (Math.random() * 2 - 1) * Math.min(4.5, d * 0.24);
       const p = new THREE.Vector3(
         clamp(pos.x + fx * d + rx * lx, -32, 32),
         1.0 + Math.random() * 2.6,
@@ -399,7 +403,7 @@ export function boot() {
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
-    const az = (Math.random() * 2 - 1) * 30 * DEG, el = (Math.random() * 14 - 2) * DEG, d = bandDist();
+    const az = (Math.random() * 2 - 1) * 16 * DEG, el = (Math.random() * 14 - 2) * DEG, d = bandDist();
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     const lx = Math.sin(az) * d, dd = Math.cos(az) * d;
     const p = new THREE.Vector3(
@@ -411,7 +415,7 @@ export function boot() {
   }
   function spawnRangeBot() {
     const d = bandDist();
-    const lx = (Math.random() * 2 - 1) * Math.min(8, d * 0.4);
+    const lx = (Math.random() * 2 - 1) * Math.min(4.5, d * 0.24);
     return T.spawnBot(new THREE.Vector3(
       clamp(pos.x - Math.sin(yaw) * d + Math.cos(yaw) * lx, -32, 32), 0,
       clamp(pos.z - Math.cos(yaw) * d - Math.sin(yaw) * lx, -63, 11)), armorHp());
@@ -479,11 +483,55 @@ export function boot() {
     history.push({ m: mode, gun: gun.id, score: r.score, acc, d: Date.now() }); saveHistory();
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
     $('res-score').textContent = r.score;
+    // --- Earned-this-run snapshot. Read from the aim-bridge HUD chip so the
+    // values match what the player saw live. The bridge accumulates the
+    // total of /aim/hit units the server returned for this session. ---
+    const bridgeChip = document.querySelector('#vibes-aim-bridge');
+    const earnedAaplText = (bridgeChip?.children?.[2]?.textContent || '0.0000').trim();
+    const earnedAapl = Number(earnedAaplText) || 0;
+    const earnedAaplEl = $('res-earned-aapl');
+    if (earnedAaplEl) {
+      earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${getActiveTicker()}`;
+      earnedAaplEl.classList.toggle('pos', earnedAapl > 0);
+    }
+    // --- USD this run: realised P/L from any closed trades plus stable
+    // mission bonuses. We do a fresh portfolio pull, but never block the
+    // results screen on it: if the network is slow we still show "—". ---
+    const earnedUsdEl = $('res-earned-usd');
+    if (earnedUsdEl) earnedUsdEl.textContent = '…';
+    const streakEl = $('res-earned-streak');
+    if (streakEl) {
+      // Best streak % bonus used to live only in /aim/hit. Surface the
+      // peak streak the player achieved this run as a % over base.
+      const baseStreak = 5;
+      const bonus = r.bestStreak > baseStreak
+        ? Math.round(((r.bestStreak - baseStreak) / baseStreak) * 20)
+        : 0;
+      streakEl.textContent = bonus > 0 ? `+${bonus}%` : '—';
+    }
+    const missionEl = $('res-earned-missions');
+    if (missionEl) missionEl.textContent = '…';
+    if (window?.store?.state) {
+      const s = window.store.state;
+      const claimed = (s.missions || []).filter(m => m.claimed).length;
+      const totalM = (s.missions || []).length;
+      // USD earned this run = (current stable − baseline) − un-claimed
+      // mission deltas. The missions system never debits player stable,
+      // so this is the realised wallet delta from completed missions.
+      const baselineStable = 200;
+      const usdDelta = (s.player?.stable ?? 0) - baselineStable;
+      if (earnedUsdEl) {
+        earnedUsdEl.textContent = `${usdDelta >= 0 ? '+' : '−'}$${Math.abs(usdDelta).toFixed(2)}`;
+        earnedUsdEl.classList.toggle('pos', usdDelta > 0);
+        earnedUsdEl.classList.toggle('neg', usdDelta < 0);
+      }
+      if (missionEl) missionEl.textContent = `${claimed} / ${totalM}`;
+    }
     const g = $('res-grid'); g.innerHTML = '';
     const hsp = r.hits ? Math.round(100 * r.head / r.hits) : 0;
     const cell = (k, v) => { const d = document.createElement('div'); d.innerHTML = `<div class="v">${v}</div><div class="k">${k}</div>`; g.appendChild(d); };
     cell('kills', r.kills); cell('headshot %', hsp + '%'); cell('accuracy', acc + '%');
-    cell('damage', Math.round(r.damage)); cell('best streak', r.bestStreak);
+    cell('best streak', r.bestStreak);
     if (mode === 'tracking') {
       const cons = trackSecs.length ? Math.round(100 * trackSecs.filter(b => b >= 0.5).length / trackSecs.length) : 0;
       cell('time on target', r.onT.toFixed(1) + 's');

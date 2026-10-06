@@ -28,7 +28,7 @@
 // Adapters are isolated. The router never imports a provider directly;
 // it uses the factory in market/index.js.
 
-export const RANGES = ['15m', '1H', '4H', '1D', '5D', '1M', '3M'];
+export const RANGES = ['5m', '15m', '1H', '4H', '1D', '5D', '1M', '3M'];
 
 /** Throws HttpError(503) if the provider is not configured. */
 export function assertProviderReady(provider, name) {

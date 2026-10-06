@@ -25,23 +25,23 @@
   --paper-dim: #8a91a0;
 
   /* — accents — */
-  --accent: #7df9c5;
-  --accent-dim: #2b6b54;
+  --accent: #f6d447;
+  --accent-dim: #8a751d;
   --aapl: #c9ccd1;
   --aapl-dim: #5d626a;
-  --nvda: #7df9c5;
-  --nvda-dim: #2b6b54;
+  --nvda: #f6d447;
+  --nvda-dim: #8a751d;
   --spcx: #f6d447;
   --pre: #9aa3b2;
-  --gain: #7df9c5;
+  --gain: #f6d447;
   --loss: #8a751d;
 
   /* — legacy valotrainer vars (used inside upstream.css) — */
   --red: #f6d447;
   --red-dk: #8a751d;
   --yellow: #f6d447;
-  --teal: #7df9c5;
-  --blue: #7df9c5;
+  --teal: #f6d447;
+  --blue: #f6d447;
 
   /* — typography — */
   --font-ui: 'Inter', system-ui, sans-serif;
@@ -93,7 +93,7 @@ body { overflow-x: hidden; }
 /* engine background plate: turn the loud halftone into a calm dark gradient */
 body::before {
   background:
-    radial-gradient(900px 520px at 92% -8%, rgba(125, 249, 197, 0.06) 0%, transparent 62%),
+    radial-gradient(900px 520px at 92% -8%, rgba(246, 212, 71, 0.06) 0%, transparent 62%),
     radial-gradient(700px 420px at 6% 110%, rgba(246, 212, 71, 0.05) 0%, transparent 60%),
     linear-gradient(180deg, #0b0d12 0%, #0a0c10 100%) !important;
   background-size: auto, auto, auto !important;
@@ -267,7 +267,7 @@ canvas#game {
 .vibes-boot-sub code {
   font-family: var(--font-mono);
   color: var(--accent);
-  background: rgba(125, 249, 197, 0.08);
+  background: rgba(246, 212, 71, 0.08);
   padding: 1px 4px;
   border-radius: 2px;
 }
@@ -814,11 +814,11 @@ canvas#game {
   --dash-line-strong: rgba(160, 174, 194, .28);
   --dash-muted: #7c8798;
   --dash-soft: #a8b2c1;
-  --dash-accent: #7df9c5;
-  --dash-accent-dim: rgba(125, 249, 197, .13);
+  --dash-accent: #f6d447;
+  --dash-accent-dim: rgba(246, 212, 71, .13);
 }
 
-#menu.overlay.open { display: block; overflow: auto; background: radial-gradient(circle at 78% 8%, rgba(55, 91, 89, .14), transparent 28%), var(--dash-bg); }
+#menu.overlay.open { display: block; overflow: auto; background: radial-gradient(circle at 78% 8%, rgba(246, 212, 71, .08), transparent 28%), var(--dash-bg); }
 #menu .app-shell { min-height: 100dvh; width: min(1480px, 100%); margin: 0 auto; padding: 0 30px 34px; color: var(--fg); font-family: var(--font-ui); }
 #menu .app-nav { min-height: 70px; display: flex; align-items: center; gap: 34px; border-bottom: 1px solid var(--dash-line); }
 #menu .brand-mark { border: 0; background: none; color: var(--fg); padding: 0; display: inline-flex; gap: 5px; align-items: baseline; cursor: pointer; font-family: var(--font-mono); letter-spacing: .06em; font-weight: 700; font-size: 17px; }
@@ -831,7 +831,7 @@ canvas#game {
 #menu .nav-account { margin-left: auto; display: flex; align-items: center; gap: 17px; color: var(--dash-muted); font: 10px var(--font-mono); letter-spacing: .11em; text-transform: uppercase; white-space: nowrap; }
 #menu .nav-account b { color: var(--fg); font-weight: 600; }
 #menu .nav-customize { border: 1px solid var(--dash-line-strong); color: var(--dash-soft); background: rgba(255,255,255,.025); padding: 9px 13px; border-radius: 4px; cursor: pointer; font: 600 10px var(--font-mono); text-transform: uppercase; letter-spacing: .12em; }
-#menu .nav-customize:hover { color: var(--dash-accent); border-color: rgba(125,249,197,.55); background: var(--dash-accent-dim); }
+#menu .nav-customize:hover { color: var(--dash-accent); border-color: rgba(246,212,71,.55); background: var(--dash-accent-dim); }
 #menu .dashboard { padding: 38px 0 0; }
 #menu .dashboard-intro { display: flex; justify-content: space-between; gap: 48px; align-items: end; padding: 4px 0 34px; }
 #menu .section-kicker { display: block; color: var(--dash-accent); font: 600 10px var(--font-mono); text-transform: uppercase; letter-spacing: .2em; margin-bottom: 10px; }
@@ -845,7 +845,7 @@ canvas#game {
 #menu .road-foot { color: var(--dash-muted); font-size: 9px; line-height: 1.45; margin-top: 10px; letter-spacing: .04em; text-transform: none; }
 #menu .road-foot span:last-child { color: var(--dash-soft); text-align: right; }
 #menu .road-bar { height: 5px; margin-top: 14px; background: rgba(255,255,255,.08); border: 0; }
-#menu .road-bar i { background: var(--dash-accent); box-shadow: 0 0 14px rgba(125,249,197,.3); }
+#menu .road-bar i { background: var(--dash-accent); box-shadow: 0 0 14px rgba(246,212,71,.3); }
 #menu .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(360px, .7fr); gap: 22px; align-items: start; }
 #menu .training-column, #menu .market-column { min-width: 0; }
 #menu .panel-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 11px; }
@@ -857,8 +857,8 @@ canvas#game {
 #menu .training-panel { padding: 16px; }
 #menu .mode-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
 #menu .mode { min-height: 112px; border: 1px solid var(--dash-line); background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 150ms ease, border-color 150ms ease, background 150ms ease; }
-#menu .mode:hover, #menu .mode:focus-visible { transform: translateY(-2px); border-color: rgba(125,249,197,.62); background: linear-gradient(135deg, rgba(125,249,197,.12), rgba(255,255,255,.018)); outline: none; }
-#menu .mode:first-child { grid-column: span 2; min-height: 165px; background: linear-gradient(135deg, rgba(125,249,197,.13), rgba(16,21,29,.9) 55%); border-color: rgba(125,249,197,.28); }
+#menu .mode:hover, #menu .mode:focus-visible { transform: translateY(-2px); border-color: rgba(246,212,71,.62); background: linear-gradient(135deg, rgba(246,212,71,.12), rgba(255,255,255,.018)); outline: none; }
+#menu .mode:first-child { grid-column: span 2; min-height: 165px; background: linear-gradient(135deg, rgba(246,212,71,.13), rgba(16,21,29,.9) 55%); border-color: rgba(246,212,71,.28); }
 #menu .mode-idx { color: var(--dash-accent); font: 10px var(--font-mono); letter-spacing: .14em; }
 #menu .mode-body h3 { margin: 0 0 6px; color: var(--fg); font: 600 17px var(--font-ui); letter-spacing: .02em; }
 #menu .mode-body p { max-width: 530px; margin: 0; color: var(--dash-muted); font-size: 11px; line-height: 1.45; }
@@ -875,13 +875,13 @@ canvas#game {
 #menu .portfolio-total { margin-top: 20px; color: var(--fg); font: 600 34px var(--font-mono); letter-spacing: -.05em; }
 #menu .portfolio-total small, #menu .portfolio-change small { display: block; color: var(--dash-muted); font: 10px var(--font-mono); letter-spacing: .08em; margin-top: 5px; }
 #menu .portfolio-change { margin-top: 22px; color: var(--dash-accent); font: 600 18px var(--font-mono); }
-#menu .portfolio-line { height: 32px; margin-top: 20px; opacity: .7; background: linear-gradient(155deg, transparent 4%, transparent 18%, rgba(125,249,197,.15) 19%, rgba(125,249,197,.6) 21%, transparent 22%, transparent 37%, rgba(125,249,197,.35) 38%, rgba(125,249,197,.6) 40%, transparent 41%, transparent 52%, rgba(125,249,197,.35) 53%, rgba(125,249,197,.55) 55%, transparent 56%, transparent 68%, rgba(125,249,197,.3) 69%, rgba(125,249,197,.5) 71%, transparent 72%); border-bottom: 1px solid rgba(125,249,197,.25); }
+#menu .portfolio-line { height: 32px; margin-top: 20px; opacity: .7; background: linear-gradient(155deg, transparent 4%, transparent 18%, rgba(246,212,71,.15) 19%, rgba(246,212,71,.6) 21%, transparent 22%, transparent 37%, rgba(246,212,71,.35) 38%, rgba(246,212,71,.6) 40%, transparent 41%, transparent 52%, rgba(246,212,71,.35) 53%, rgba(246,212,71,.55) 55%, transparent 56%, transparent 68%, rgba(246,212,71,.3) 69%, rgba(246,212,71,.5) 71%, transparent 72%); border-bottom: 1px solid rgba(246,212,71,.25); }
 #menu .market-column { display: grid; gap: 22px; }
 #menu .market-panel { overflow: hidden; }
 #menu .market-panel-head { display: flex; justify-content: space-between; align-items: end; padding: 17px 18px 13px; }
 #menu .market-price { color: var(--dash-soft); font: 500 14px var(--font-mono); margin-left: 6px; }
-#menu .panel-action { border: 1px solid rgba(125,249,197,.38); background: var(--dash-accent-dim); color: var(--dash-accent); padding: 8px 11px; border-radius: 3px; cursor: pointer; font: 600 10px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
-#menu .panel-action:hover { background: rgba(125,249,197,.22); }
+#menu .panel-action { border: 1px solid rgba(246,212,71,.38); background: var(--dash-accent-dim); color: var(--dash-accent); padding: 8px 11px; border-radius: 3px; cursor: pointer; font: 600 10px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
+#menu .panel-action:hover { background: rgba(246,212,71,.22); }
 #menu #vibes-chart { position: relative; inset: auto; width: auto; z-index: auto; display: block; border: 0; border-top: 1px solid var(--dash-line); border-radius: 0; box-shadow: none; background: transparent; }
 #menu #vibes-chart .vc-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 11px 18px 0; background: transparent; }
 #menu #vibes-chart .vc-kicker { color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }

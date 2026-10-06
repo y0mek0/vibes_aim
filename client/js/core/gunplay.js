@@ -70,6 +70,7 @@ export const bloomDecay = (bloom, recovery, dt) => bloom * Math.exp((-3 * dt) / 
 // Bot spawn distance bands (Settings -> Distance). Player-relative, meters.
 // Close band reaches knife range (2.2 m) once you walk up to the bot.
 export const SPAWN_BANDS = { close: [4, 9], standard: [10, 20], long: [20, 35] };
+export const FORWARD_CONE_HALF_ANGLE_DEG = 16;
 export const spawnDist = (band, r) => {
   const b = SPAWN_BANDS[band] || SPAWN_BANDS.standard;
   const u = r === undefined ? Math.random() : r;

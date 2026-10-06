@@ -163,7 +163,7 @@
           <section class="market-panel">
             <div class="market-panel-head"><div><span class="section-kicker">Active market</span><h2><span data-vc-ticker-label>AAPL</span> <span class="market-price" data-vc-price-label>—</span></h2></div><button type="button" class="panel-action" id="vibes-open-terminal-secondary">Trade</button></div>
             <div id="vibes-chart" hidden>
-              <div class="vc-head"><span class="vc-kicker">Market feed</span><span class="vc-ticker" data-vc-ticker>AAPL</span><span class="vc-price" data-vc-price>—</span><span class="vc-change" data-vc-change>—</span><span class="vc-status" data-vc-status></span><div class="vc-tickers" role="tablist" aria-label="ticker"><button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button><button type="button" data-vc-ticker-btn="NVDA">NVDA</button></div><div class="vc-ranges" role="tablist" aria-label="range"><button type="button" data-vc-range-btn="15m">15m</button><button type="button" data-vc-range-btn="1H">1h</button><button type="button" data-vc-range-btn="4H">4h</button><button type="button" data-vc-range-btn="1D" class="active">1D</button><button type="button" data-vc-range-btn="5D">5D</button></div></div>
+              <div class="vc-head"><span class="vc-kicker">Market feed</span><span class="vc-ticker" data-vc-ticker>AAPL</span><span class="vc-price" data-vc-price>—</span><span class="vc-change" data-vc-change>—</span><span class="vc-status" data-vc-status></span><div class="vc-tickers" role="tablist" aria-label="ticker"><button type="button" data-vc-ticker-btn="AAPL" class="active">AAPL</button><button type="button" data-vc-ticker-btn="NVDA">NVDA</button></div><div class="vc-ranges" role="tablist" aria-label="range"><button type="button" data-vc-range-btn="5m">5m</button><button type="button" data-vc-range-btn="15m">15m</button><button type="button" data-vc-range-btn="1H">1h</button><button type="button" data-vc-range-btn="4H">4h</button><button type="button" data-vc-range-btn="1D" class="active">1D</button><button type="button" data-vc-range-btn="5D">5D</button></div></div>
               <div class="vc-body" data-vc-body></div>
             </div>
           </section>
@@ -215,6 +215,24 @@
   <div class="small" style="letter-spacing:.2em;margin-bottom:8px">SCORE</div>
   <div class="accbar"><i id="res-accbar"></i></div>
   <div class="small" style="margin-bottom:4px">ACCURACY</div>
+  <div class="res-earned">
+    <div class="res-earned-row">
+      <span class="k">AAPL earned</span>
+      <span class="v" id="res-earned-aapl">+0.0000</span>
+    </div>
+    <div class="res-earned-row">
+      <span class="k">USD from trades</span>
+      <span class="v" id="res-earned-usd">$0.00</span>
+    </div>
+    <div class="res-earned-row">
+      <span class="k">Best streak bonus</span>
+      <span class="v" id="res-earned-streak">+0%</span>
+    </div>
+    <div class="res-earned-row">
+      <span class="k">Mission unlocks</span>
+      <span class="v" id="res-earned-missions">0 / 0</span>
+    </div>
+  </div>
   <div class="res-grid" id="res-grid"></div>
   <div id="res-improve"></div>
   <button class="btn" id="res-retry">Retry</button>

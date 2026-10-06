@@ -47,7 +47,7 @@ function ensureChip() {
     'position:fixed', 'right:14px', 'bottom:14px', 'z-index:30',
     'font-family:JetBrains Mono,ui-monospace,monospace',
     'background:#0b0d12', 'color:#e6e8ee',
-    'border:1px solid rgba(125,249,197,0.4)', 'border-radius:4px',
+    'border:1px solid rgba(246,212,71,0.4)', 'border-radius:4px',
     'padding:8px 12px', 'display:flex', 'gap:10px', 'align-items:center',
     'pointer-events:none', 'transition:opacity 220ms cubic-bezier(0.32,0.72,0,1)'
   ].join(';');
@@ -55,7 +55,7 @@ function ensureChip() {
   tag.style.cssText = 'color:#8a91a0;font-size:10px;letter-spacing:0.18em;text-transform:uppercase';
   tag.textContent = 'active';
   tickerEl = document.createElement('span');
-  tickerEl.style.cssText = 'color:#7df9c5;font-size:12px;letter-spacing:0.18em';
+  tickerEl.style.cssText = 'color:#f6d447;font-size:12px;letter-spacing:0.18em';
   tickerEl.textContent = activeTicker;
   const val = document.createElement('span');
   val.style.cssText = 'color:#e6e8ee;font-size:12px';

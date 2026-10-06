@@ -38,3 +38,4 @@ out/
 __pycache__/
 *.pyc
 *.pyo
+.local-installers/

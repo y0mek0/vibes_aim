@@ -25,10 +25,10 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
 
 // ---------- Pure helpers ----------
 {
-  // accentColor: AAPL silver, NVDA green, SPCX amber, Pre-IPO dim, others silver.
+  // accentColor: AAPL silver, tradeable tickers yellow, Pre-IPO dim, others silver.
   assert.equal(accentColor('AAPL'), '#c9ccd1');
-  assert.equal(accentColor('NVDA'), '#7df9c5');
-  assert.equal(accentColor('SPCX'), '#ffb347');
+  assert.equal(accentColor('NVDA'), '#f6d447');
+  assert.equal(accentColor('SPCX'), '#f6d447');
   assert.equal(accentColor('OPENAI'), '#9aa3b2');
   assert.equal(accentColor('ANTHROPIC'), '#9aa3b2');
   assert.equal(accentColor('NOPE'), '#c9ccd1');
@@ -152,6 +152,19 @@ async function integration() {
   assert.equal(series.length, r1.body.candles.length);
   assert.equal(series[0].time, Math.floor(c0.t / 1000));
   ok('GET /market/candles/AAPL shape matches buildSeriesData input');
+
+  // 3. Short ranges must be real, distinct datasets rather than a relabelled
+  // copy of the same candles. The 5m feed is 5 one-minute bars; 15m is 15.
+  const rShort = await get('/market/candles/AAPL?range=5m');
+  const rQuarter = await get('/market/candles/AAPL?range=15m');
+  assert.equal(rShort.status, 200);
+  assert.equal(rQuarter.status, 200);
+  assert.equal(rShort.body.range, '5m');
+  assert.equal(rQuarter.body.range, '15m');
+  assert.equal(rShort.body.candles.length, 5);
+  assert.equal(rQuarter.body.candles.length, 15);
+  assert.notDeepEqual(rShort.body.candles, rQuarter.body.candles.slice(-5));
+  ok('5m and 15m return distinct timeframe-specific OHLC data');
 
   // 2. /market/quote/AAPL returns the shape buildHeader consumes
   const r2 = await get('/market/quote/AAPL');

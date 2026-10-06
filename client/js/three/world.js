@@ -57,7 +57,7 @@ export function buildWorld(scene, camera, themeId) {
     g.strokeRect(0, 0, w, h);
     g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
     if (TH.id === 'sakura') { // fallen petals baked in
-      g.fillStyle = 'rgba(125,249,197,0.22)';
+      g.fillStyle = 'rgba(246,212,71,0.22)';
       for (let i = 0; i < 120; i++) { g.beginPath(); g.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 2.5, 0, 7); g.fill(); }
     }
     if (TH.id === 'lunar') { // craters
@@ -98,7 +98,7 @@ export function buildWorld(scene, camera, themeId) {
     if (TH.id === 'abyss') { // portholes baked into the wall
       for (let x = 32; x < w; x += 128) {
         g.fillStyle = '#05090e'; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.fill();
-        g.fillStyle = 'rgba(125,249,197,0.35)'; g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
+        g.fillStyle = 'rgba(246,212,71,0.35)'; g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
         g.strokeStyle = '#3a4a58'; g.lineWidth = 5; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.stroke();
       }
     }
@@ -230,13 +230,26 @@ export function buildWorld(scene, camera, themeId) {
   }
   if (has('jumbo')) {
     const jc = document.createElement('canvas'); jc.width = 512; jc.height = 256;
-    const jt = new THREE.CanvasTexture(jc); jt.colorSpace = THREE.SRGBColorSpace;
+    const jt = new THREE.CanvasTexture(jc);
+    // Stable texture sampling + mipmaps OFF — without these the texture
+    // aliases against the back-frame at subpixel camera rotation, which
+    // shows up as the scoreboard shimmering every time the mouse moves.
+    jt.magFilter = THREE.LinearFilter;
+    jt.minFilter = THREE.LinearFilter;
+    jt.generateMipmaps = false;
+    jt.colorSpace = THREE.SRGBColorSpace;
+    jt.anisotropy = 1;
+    // The screen is a back wall — make the giant board sit cleanly in front
+    // of the frame with a deep enough offset that no Z-fighting can occur.
     const jumbo = new THREE.Mesh(new THREE.PlaneGeometry(19, 9.5),
-      new THREE.MeshBasicMaterial({ map: jt }));
-    jumbo.position.set(0, TH.indoor ? 9.5 : 11, -69.4); add(occ(jumbo));
+      new THREE.MeshBasicMaterial({ map: jt, depthWrite: true, toneMapped: false }));
+    jumbo.position.set(0, TH.indoor ? 9.5 : 11, -68.9);
+    // The dark back-plate is just a flat wall — give it its own group so it
+    // can never be co-planar with the texture plane.
     const frame = new THREE.Mesh(new THREE.BoxGeometry(20, 10.5, 0.4),
       new THREE.MeshLambertMaterial({ color: 0x0b0f14 }));
-    frame.position.set(0, TH.indoor ? 9.5 : 11, -69.7); add(frame);
+    frame.position.set(0, TH.indoor ? 9.5 : 11, -69.7);
+    add(frame); add(jumbo); add(occ(jumbo));
     let jumboKey = '';
     var drawJumbo = (d) => {
       const key = [d.mode || 'STANDBY', d.score ?? 0, d.kills ?? 0, d.acc ?? '—', d.time ?? ''].join('|');

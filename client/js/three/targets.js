@@ -22,9 +22,9 @@ export function createTargets(scene) {
   const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25, depthWrite: false });
   // HP bars: 2 shared-material sprites per bot (no per-hit allocation, transform-only updates)
   const hpBgMat = new THREE.SpriteMaterial({ color: 0x0b0e12, transparent: true, opacity: 0.65, depthWrite: false });
-  const hpFgG = new THREE.SpriteMaterial({ color: 0x7df9c5, depthWrite: false });
+  const hpFgG = new THREE.SpriteMaterial({ color: 0xf6d447, depthWrite: false });
   const hpFgY = new THREE.SpriteMaterial({ color: 0xf6d447, depthWrite: false });
-  const hpFgR = new THREE.SpriteMaterial({ color: 0x7df9c5, depthWrite: false });
+  const hpFgR = new THREE.SpriteMaterial({ color: 0xf6d447, depthWrite: false });
 
   // specular glint: one shared additive sprite per orb, offset top-front so the
   // sphere reads glossy as it moves (1 tiny draw each, no per-frame cost)

@@ -41,8 +41,8 @@ function loadLightweightCharts() {
 // --- Pure helpers (testable) -----------------------------------------
 
 export function accentColor(t) {
-  if (t === 'NVDA') return '#7df9c5';
-  if (t === 'SPCX') return '#ffb347';
+  if (t === 'NVDA') return '#f6d447';
+  if (t === 'SPCX') return '#f6d447';
   if (t === 'OPENAI' || t === 'ANTHROPIC') return '#9aa3b2';
   return '#c9ccd1';
 }
@@ -315,9 +315,9 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         const color = accentColor(t);
         try {
           series.applyOptions({
-            upColor: color, downColor: '#ff5d6c',
-            borderUpColor: color, borderDownColor: '#ff5d6c',
-            wickUpColor: color, wickDownColor: '#ff5d6c',
+            upColor: color, downColor: '#f4f1ea',
+            borderUpColor: color, borderDownColor: '#f4f1ea',
+            wickUpColor: color, wickDownColor: '#f4f1ea',
           });
         } catch (_) { /* noop */ }
       }
