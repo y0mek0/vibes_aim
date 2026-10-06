@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#0b0d12">
 <meta name="description" content="Browser aim-trading game. Aim hits farm simulated units of real-market tickers; trade them in a paper terminal.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- Google Identity Services: renderButton / prompt reads this client_id
+     and uses it to select which OAuth client to authenticate against.
+     The same value is configured in the Google Cloud Console under
+     "Authorized JavaScript origins" for this app. -->
+<meta name="google-oauth-client-id" content="522584825551-71s35cg5t24vuq10min4qmnrn7s988p0.apps.googleusercontent.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -128,6 +133,11 @@
         <button type="button" class="nav-customize" id="customize-open">Customize</button>
         <span class="nav-level">LVL <b id="profile-level">01</b></span>
         <span class="nav-usd">USD <b data-dashboard-stable>200.00</b> <small>wallet</small></span>
+        <button type="button" class="nav-signin" id="auth-signin" hidden>Sign in with Google</button>
+        <span class="nav-profile" id="auth-profile" hidden>
+          <span class="nav-profile-email" id="auth-email"></span>
+          <button type="button" class="nav-profile-out" id="auth-signout" title="Sign out">Sign out</button>
+        </span>
       </div>
     </header>
 
@@ -264,16 +274,22 @@
     }
   } catch (_) { /* no-op in browsers that lack these APIs */ }
 </script>
-<script type="module" src="src/bootstrap.js?v=20261006-4"></script>
+<script type="module" src="src/bootstrap.js?v=20261006-5"></script>
+<script type="module" src="js/auth.js?v=20261006-6"></script>
 <!-- vibes_aim bridge (auto-registers the aim-bridge and boots the server-availability check) -->
-<script type="module" src="js/aim-bridge.js?v=20261006-4"></script>
-<!-- vibes_aim chart (TradingView Lightweight Charts, polled from /market/quote) -->
-<script type="module" src="js/chart.js?v=20261006-4"></script>
+<script type="module" src="js/aim-bridge.js?v=20261006-5"></script>
+<!-- Google Identity Services: loads the GIS script that renders the
+     Sign-in button and yields id_tokens. We use it in FedCM-style
+     popup mode and disable it for any local/dev origin where the
+     configured OAuth client doesn't have http://127.0.0.1 as an
+     authorized origin. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script type="module" src="js/chart.js?v=20261006-5"></script>
 <!-- vibes_aim terminal (paper-trading UI) -->
-<script type="module" src="js/terminal.js?v=20261006-4"></script>
+<script type="module" src="js/terminal.js?v=20261006-5"></script>
 <!-- vibes_aim missions panel (AAPL -> NVDA chain) -->
-<script type="module" src="js/missions.js?v=20261006-4"></script>
-<script type="module" src="js/main.js?v=20261006-4"></script>
+<script type="module" src="js/missions.js?v=20261006-5"></script>
+<script type="module" src="js/main.js?v=20261006-5"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

@@ -1022,6 +1022,32 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
 #menu .panel-action:hover,
 #menu .mode:hover,
 #menu .mode:focus-visible { border-color: #f6d447; }
+
+/* Google sign-in button (in nav-account, next to Customize). Same shape
+   as .nav-customize but with the project's yellow accent. */
+.nav-signin {
+  border: 1px solid var(--accent);
+  color: var(--bg);
+  background: var(--accent);
+  padding: 9px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font: 700 10px var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: filter .12s ease, transform .09s ease;
+}
+.nav-signin:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.nav-signin:active { transform: translateY(0); }
+.nav-signin[disabled] { opacity: .5; cursor: progress; }
+
+/* When the user is signed in, show their email + sign-out instead of
+   the sign-in button. */
+.nav-profile { display: flex; align-items: center; gap: 9px; color: var(--dash-soft); font: 600 10px var(--font-mono); letter-spacing: .1em; }
+.nav-profile-email { color: var(--fg); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-profile-out { border: 1px solid var(--dash-line-strong); color: var(--dash-muted); background: transparent; padding: 6px 10px; border-radius: 4px; cursor: pointer; font: 600 9px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.nav-profile-out:hover { color: var(--fg); border-color: var(--accent); }
+
 #menu .road-bar i { background: #f6d447; box-shadow: 0 0 12px rgba(246,212,71,.24); }
 #menu .dashboard-intro { padding-bottom: 25px; }
 #menu .road-card { width: min(350px, 34%); padding-left: 18px; }
