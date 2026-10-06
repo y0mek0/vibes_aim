@@ -471,7 +471,7 @@ export function boot() {
     const n = Math.min(3, hs.length), cur = hs.slice(-n).reduce((a, b) => a + b.score, 0) / n;
     return base <= 0 ? null : (cur - base) / base * 100;
   }
-  function endGame() {
+  async function endGame() {
     state = RESULTS; mouseDown = false; stats.stopLoop();
     scoped = false; FX.setSniperScope(false); $('scope').classList.remove('on'); document.body.classList.toggle('scoped', scoped);
     if (locked()) document.exitPointerLock();
@@ -483,49 +483,65 @@ export function boot() {
     history.push({ m: mode, gun: gun.id, score: r.score, acc, d: Date.now() }); saveHistory();
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
     $('res-score').textContent = r.score;
-    // --- Earned-this-run snapshot. Read from the aim-bridge HUD chip so the
-    // values match what the player saw live. The bridge accumulates the
-    // total of /aim/hit units the server returned for this session. ---
-    const bridgeChip = document.querySelector('#vibes-aim-bridge');
-    const earnedAaplText = (bridgeChip?.children?.[2]?.textContent || '0.0000').trim();
-    const earnedAapl = Number(earnedAaplText) || 0;
+    // --- Earned-this-run snapshot. Snapshot the store BEFORE we call
+    // refresh() so we can diff "before" vs "after" reliably. ---
+    const storeRef = window?.store;
+    const beforeBalances = storeRef ? { ...(storeRef.state.balances || {}) } : null;
+    const beforeStable = storeRef?.state?.player?.stable;
+    const beforeAapl = beforeBalances?.AAPL ?? 0;
     const earnedAaplEl = $('res-earned-aapl');
-    if (earnedAaplEl) {
-      earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${getActiveTicker()}`;
-      earnedAaplEl.classList.toggle('pos', earnedAapl > 0);
-    }
-    // --- USD this run: realised P/L from any closed trades plus stable
-    // mission bonuses. We do a fresh portfolio pull, but never block the
-    // results screen on it: if the network is slow we still show "—". ---
     const earnedUsdEl = $('res-earned-usd');
-    if (earnedUsdEl) earnedUsdEl.textContent = '…';
     const streakEl = $('res-earned-streak');
-    if (streakEl) {
-      // Best streak % bonus used to live only in /aim/hit. Surface the
-      // peak streak the player achieved this run as a % over base.
-      const baseStreak = 5;
-      const bonus = r.bestStreak > baseStreak
-        ? Math.round(((r.bestStreak - baseStreak) / baseStreak) * 20)
-        : 0;
-      streakEl.textContent = bonus > 0 ? `+${bonus}%` : '—';
-    }
     const missionEl = $('res-earned-missions');
+    if (earnedAaplEl) earnedAaplEl.textContent = '…';
+    if (earnedUsdEl) earnedUsdEl.textContent = '…';
+    if (streakEl) streakEl.textContent = '…';
     if (missionEl) missionEl.textContent = '…';
-    if (window?.store?.state) {
-      const s = window.store.state;
-      const claimed = (s.missions || []).filter(m => m.claimed).length;
-      const totalM = (s.missions || []).length;
-      // USD earned this run = (current stable − baseline) − un-claimed
-      // mission deltas. The missions system never debits player stable,
-      // so this is the realised wallet delta from completed missions.
-      const baselineStable = 200;
-      const usdDelta = (s.player?.stable ?? 0) - baselineStable;
+    if (storeRef) {
+      try {
+        await storeRef.refresh();
+      } catch (_) { /* server may be down; leave placeholders */ }
+      const s = storeRef.state;
+      const afterAapl = s.balances?.AAPL ?? 0;
+      const aaplDelta = afterAapl - beforeAapl;
+      const usdDelta = (s.player?.stable ?? 0) - (beforeStable ?? s.player?.stable ?? 0);
+      if (earnedAaplEl) {
+        earnedAaplEl.textContent = `${aaplDelta >= 0 ? '+' : '−'}${Math.abs(aaplDelta).toFixed(4)} ${getActiveTicker()}`;
+        earnedAaplEl.classList.toggle('pos', aaplDelta > 0);
+        earnedAaplEl.classList.toggle('neg', aaplDelta < 0);
+      }
       if (earnedUsdEl) {
         earnedUsdEl.textContent = `${usdDelta >= 0 ? '+' : '−'}$${Math.abs(usdDelta).toFixed(2)}`;
         earnedUsdEl.classList.toggle('pos', usdDelta > 0);
         earnedUsdEl.classList.toggle('neg', usdDelta < 0);
       }
-      if (missionEl) missionEl.textContent = `${claimed} / ${totalM}`;
+      if (streakEl) {
+        const baseStreak = 5;
+        const bonus = r.bestStreak > baseStreak
+          ? Math.round(((r.bestStreak - baseStreak) / baseStreak) * 20)
+          : 0;
+        streakEl.textContent = bonus > 0 ? `+${bonus}%` : '—';
+      }
+      if (missionEl) {
+        const claimed = (s.missions || []).filter(m => m.claimed).length;
+        const totalM = (s.missions || []).length;
+        missionEl.textContent = `${claimed} / ${totalM}`;
+      }
+    } else {
+      // No store available (game launched before bootstrap finished):
+      // fall back to the legacy HUD-chip read so the report never shows
+      // just zeros if the user already had earn flow running.
+      const bridgeChip = document.querySelector('#vibes-aim-bridge');
+      const earnedAaplText = (bridgeChip?.children?.[2]?.textContent || '0.0000').trim();
+      const earnedAapl = Number(earnedAaplText) || 0;
+      if (earnedAaplEl) earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${getActiveTicker()}`;
+      if (streakEl) {
+        const baseStreak = 5;
+        const bonus = r.bestStreak > baseStreak
+          ? Math.round(((r.bestStreak - baseStreak) / baseStreak) * 20)
+          : 0;
+        streakEl.textContent = bonus > 0 ? `+${bonus}%` : '—';
+      }
     }
     const g = $('res-grid'); g.innerHTML = '';
     const hsp = r.hits ? Math.round(100 * r.head / r.hits) : 0;
@@ -542,8 +558,16 @@ export function boot() {
       : mode === 'tracking' ? (r.held > 0 ? Math.round(100 * r.onT / r.held) + '%' : '—')
       : (elapsed > 1 ? (r.kills / elapsed).toFixed(2) : '—'));
     const imp = improvement(mode), hs = modeHistory(mode), ri = $('res-improve');
-    ri.innerHTML = imp === null ? `Session ${hs.length} — ${Math.max(0, 4 - hs.length)} more to unlock your improvement tracker.`
-      : `Road to +50%: <b>${imp >= 0 ? '+' : ''}${imp.toFixed(1)}%</b> vs your baseline in this mode.`;
+    if (imp === null) {
+      const left = Math.max(0, 4 - hs.length);
+      // Surface the running average so the placeholder is still useful,
+      // not just a generic "do N more" nag.
+      const avg = hs.length ? Math.round(hs.reduce((a, b) => a + b.score, 0) / hs.length) : 0;
+      ri.innerHTML = `Session ${hs.length} · avg <b>${avg}</b> · ${left} more to unlock improvement vs your baseline.`;
+    } else {
+      const best = hs.reduce((m, h) => Math.max(m, h.score), 0);
+      ri.innerHTML = `Best <b>${best}</b> · Road to +50%: <b>${imp >= 0 ? '+' : ''}${imp.toFixed(1)}%</b> vs baseline.`;
+    }
     T.clear(); $('results').classList.add('open'); renderMenuStats();
   }
   function quitToMenu() {
@@ -659,7 +683,7 @@ export function boot() {
     if (sessions) {
       sessions.innerHTML = recent.length ? recent.slice(0, 6).map((h) => {
         const name = MODE_DEFS[h.m]?.name || h.m || 'SESSION';
-        const stamp = h.d ? new Date(h.d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—';
+        const stamp = h.d ? new Date(h.d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
         return `<article class="session-window"><div class="session-window-head"><b>${name}</b><span>${stamp}</span></div><div class="session-window-values"><div><strong>${h.score || 0}</strong><small>SCORE</small></div><div><strong>${h.acc ?? 0}%</strong><small>ACCURACY</small></div><div><strong>${h.gun || '—'}</strong><small>LOADOUT</small></div></div></article>`;
       }).join('') : '<div class="stats-empty">No sessions yet. Finish a run to create the first record.</div>';
     }
