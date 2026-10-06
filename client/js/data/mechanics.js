@@ -18,12 +18,11 @@ export const scopedDPC = (sens, slider, zoom) => SENS_YAW * sens * slider / zoom
 export const MOVE_DEFAULT = { crouchMove: 0.8, walk: 3, run: 6, air: 10 };
 export const MOVE_SHOTGUN = { crouchMove: 0.5, walk: 1, run: 2, air: 4 };
 
-// Target tiers (VALORANT health + shields)
-export const HP_TIERS = [
-  { id: 'none',  name: 'No armor', hp: 100 },
-  { id: 'light', name: 'Light shield', hp: 125 },
-  { id: 'heavy', name: 'Heavy shield', hp: 150 },
-];
+// vibes_aim has a flat 100 HP model — no shields, no armor tiers. Bots
+// also sit at 100 HP; there is nothing for the player to configure.
+// Kept as a single export so any legacy import resolves to a number
+// rather than crashing the build.
+export const PLAYER_HP = 100;
 
 // Stat ticker cadence (ms) — DOM updates throttled, sim stays per-frame
 export const STAT_TICK_MS = 80;

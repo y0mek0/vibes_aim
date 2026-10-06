@@ -16,6 +16,7 @@ function createStore() {
     trades: [],           // [ { id, ticker, side, ... } ]
     unlocks: [],          // [ 'AAPL', 'NVDA' ]
     missions: [],         // [ { kind, progress, done, claimed } ]
+    loadout: { owned: [], catalog: [] }, // { owned: [gunId], catalog: [...] }
     lastError: null,
     lastHit: null,        // last aim/hit result (for the floating HUD chip)
   };
@@ -23,15 +24,19 @@ function createStore() {
   function emit() { for (const l of listeners) l(state); }
 
   async function refresh() {
-    const [p, m] = await Promise.all([
+    const [p, m, l] = await Promise.all([
       api.get('/portfolio'),
       api.get('/missions'),
+      api.get('/loadout').catch(() => null),
     ]);
     state.player = p.player;
     state.balances = p.balances || {};
     state.trades = p.trades || [];
     state.unlocks = (p.unlocks || []).map((u) => u.ticker);
     state.missions = m.missions || [];
+    if (l) {
+      state.loadout = { owned: l.owned || [], catalog: l.catalog || [] };
+    }
     state.ready = true;
     state.lastError = null;
     saveGuestSnapshot(state);
@@ -97,6 +102,18 @@ function createStore() {
     await refresh();
     return r;
   }
+  async function fetchLoadout() {
+    const r = await api.get('/loadout');
+    state.loadout = { owned: r.owned || [], catalog: r.catalog || [] };
+    saveGuestSnapshot(state);
+    emit();
+    return state.loadout;
+  }
+  async function buyGun(gunId) {
+    const r = await api.post('/loadout/buy', { gunId });
+    await refresh();
+    return r;
+  }
   async function fetchQuote(symbol) {
     return api.get(`/market/quote/${encodeURIComponent(symbol)}`);
   }
@@ -135,6 +152,8 @@ function createStore() {
     convertAsset,
     tradeSpot,
     claimMission,
+    buyGun,
+    fetchLoadout,
     fetchQuote,
     fetchCandles,
     fetchSymbols,

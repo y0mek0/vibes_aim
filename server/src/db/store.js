@@ -27,12 +27,14 @@ export function createStore(supabaseConfig) {
     hitLog: new Map(),     // `${sessionId}:${hitId}` -> entry
     missions: new Map(),   // `${playerId}:${kind}` -> mission
     unlocks: new Map(),    // `${playerId}:${ticker}` -> entry
+    loadout: new Map(),    // `${playerId}:${gunId}` -> { playerId, gunId, purchasedAt }
   };
 
   function keyBal(playerId, ticker) { return `${playerId}:${ticker}`; }
   function keyMission(playerId, kind) { return `${playerId}:${kind}`; }
   function keyHit(sessionId, hitId) { return `${sessionId}:${hitId}`; }
   function keyUnlock(playerId, ticker) { return `${playerId}:${ticker}`; }
+  function keyLoadout(playerId, gunId) { return `${playerId}:${gunId}`; }
 
   return {
     backend: useSupabase ? 'supabase' : 'memory',
@@ -157,6 +159,26 @@ export function createStore(supabaseConfig) {
     },
     async listUnlocks(playerId) {
       return [...mem.unlocks.values()].filter((u) => u.playerId === playerId);
+    },
+
+    // ----- loadout (one-time gun purchases for stable) -----
+    // Gated by server: a player can only own a gun once, and only after
+    // paying priceStable from player.stable. Stored as a Map keyed by
+    // `${playerId}:${gunId}`; the price lives in client/js/data/loadout.js
+    // (and is mirrored on the server via GUNS_CATALOG below) so the
+    // server is the source of truth for what is allowed and what it costs.
+    async ownsGun(playerId, gunId) {
+      return mem.loadout.has(keyLoadout(playerId, gunId));
+    },
+    async getOwnedGuns(playerId) {
+      return [...mem.loadout.values()].filter((e) => e.playerId === playerId);
+    },
+    async grantGun(playerId, gunId) {
+      const k = keyLoadout(playerId, gunId);
+      if (mem.loadout.has(k)) return mem.loadout.get(k);
+      const e = { playerId, gunId, purchasedAt: Date.now() };
+      mem.loadout.set(k, e);
+      return e;
     },
   };
 }

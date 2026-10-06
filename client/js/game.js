@@ -2,10 +2,14 @@
 // Conventions: rpm = rounds per SECOND. Angles: input math in radians, data in degrees.
 
 import * as THREE from 'three';
-import { GUNS, gunById, GUN_CLASSES } from './data/guns.js';
+import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js';
 import { slotForClass, cycleSlot } from './core/gunplay.js';
 import { BUILD } from './build.js';
-import { SENS_YAW, HFOV, scopedDPC, ZERO_MATCH, HP_TIERS, STAT_TICK_MS } from './data/mechanics.js';
+import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js';
+// Inline constant for the flat 100 HP model. Imported separately so the
+// game boots even if the mechanics.js export changes name. We never use
+// shields or armor in vibes_aim.
+const PLAYER_HP = 100;
 import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js';
 import { createStalker } from './core/stalker.js';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
@@ -26,11 +30,18 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const DEG = Math.PI / 180;
 const STORE_S = 'vlt_settings_v1', STORE_H = 'vlt_history_v1';
 
-const DEFAULTS = { sens: 0.4, scope: 1.0, volume: 0.5, scale: '1', slot1: 'vandal', slot2: 'classic', armor: 'heavy',
+// Flat 100 HP for player and bots. No shields, no armor tiers. Kept as a
+// function so legacy armorHp() calls still resolve without an import.
+const armorHp = () => PLAYER_HP;
+
+// Default loadout: sidearm in slot 2 (free USP), slot 1 empty until the
+// player buys something. Legacy settings (slot1: 'vandal' / slot2:
+// 'classic') get remapped through resolveGunId on first read.
+const DEFAULTS = { sens: 0.4, scope: 1.0, volume: 0.5, scale: '1', slot1: null, slot2: 'usp',
   reload: 'auto', trackDiff: 'medium', dist: 'standard', orbMove: 'drift', orbSize: 'm', theme: 'protocol',
   ch: freshCrosshair() };
 let settings = (() => { try { const s = JSON.parse(localStorage.getItem(STORE_S)) || {};
-  return { ...DEFAULTS, ...s, ch: migrateCrosshair(s.ch) }; } catch (e) { return { ...DEFAULTS, ch: freshCrosshair() }; } })();
+  return { ...DEFAULTS, ...s, slot1: s.slot1 ? resolveGunId(s.slot1) : null, slot2: resolveGunId(s.slot2 || 'usp'), ch: migrateCrosshair(s.ch) }; } catch (e) { return { ...DEFAULTS, slot2: 'usp', ch: freshCrosshair() }; } })();
 // preserved non-primary segments (ADS/scope) + unknown tokens from the last import
 let chExtra = { segments: { A: null, S: null }, unknown: [] };
 const saveSettings = () => localStorage.setItem(STORE_S, JSON.stringify(settings));
@@ -78,9 +89,23 @@ export function boot() {
   let yaw = 0, pitch = 0, recoil = 0, bloom = 0;
   const pos = new THREE.Vector3(0, 1.6, 2), vel = new THREE.Vector3();
   const keys = {};
-  let gun = gunById('vandal');
-  // loadout slots: 1 primary, 2 secondary
-  const slots = { 1: 'vandal', 2: 'classic' };
+  // Loadout read-through helpers. These pull the latest loadout from the
+  // store if it's been wired up, otherwise fall back to "USP only" so the
+  // buy menu still renders correctly before bootstrap finishes.
+  function loadoutOwned() {
+    const s = window.store?.state?.loadout;
+    if (s && Array.isArray(s.owned)) return s.owned;
+    // Starter kit fallback: USP. Anything else is "not owned" until the
+    // store hydrates from the server.
+    return ['usp'];
+  }
+  function loadoutStable() {
+    return Number(window.store?.state?.player?.stable) || 0;
+  }
+  // gun defaults to USP (free sidearm) — the player has to BUY a primary.
+  let gun = gunById(resolveGunId(settings.slot2 || 'usp') || 'usp');
+  // loadout slots: 1 primary (player-chosen, starts null), 2 sidearm (USP)
+  const slots = { 1: settings.slot1 || null, 2: settings.slot2 || 'usp' };
   let curSlot = 1, lastSlot = 2;
   let lastYaw = 0, lastPitch = 0, lagX = 0, lagY = 0;
   let ammo = gun.mag, reloading = false, reloadT = 0, reloadAmmo0 = 0, equipT = 0;
@@ -99,7 +124,7 @@ export function boot() {
   const _want = new THREE.Vector3(), _Y = new THREE.Vector3(0, 1, 0), _E = new THREE.Euler(0, 0, 0, 'YXZ');
   adsZoom = 1;
 
-  const armorHp = () => (HP_TIERS.find(t => t.id === settings.armor) || HP_TIERS[2]).hp;
+  const armorHp = () => PLAYER_HP;
   const adsActive = () => adsHeld || scoped;
   const curZoom = () => {
     if (scoped && gun.alt?.kind === 'scope') return gun.alt.zooms[Math.min(scopeIdx, gun.alt.zooms.length - 1)];
@@ -123,7 +148,12 @@ export function boot() {
     }
   }
   function applySlot(silent) { // make curSlot's gun live
-    const g = gunById(slots[curSlot]) || gunById('vandal');
+    // Fall back to USP (free starter) if the slot is empty or the gun id
+    // is unrecognised. This keeps the game playable even before the
+    // player has bought a primary.
+    const fallbackId = 'usp';
+    const id = slots[curSlot] || fallbackId;
+    const g = gunById(id) || gunById(fallbackId);
     gun = g;
     ammo = g.mag; reloading = false; burstLeft = 0; burstCool = 0; adsHeld = false; scoped = false; scopeIdx = 0;
     vy = 0; airH = 0; grounded = true;
@@ -462,7 +492,7 @@ export function boot() {
       extra: () => ({ tracking: mode === 'tracking', ammo, reloading, equipping: equipT > 0,
         noReload: settings.reload === 'off', range: centerDist(),
         mag: gun.mag === Infinity ? 0 : gun.mag,
-        hp: (HP_TIERS.find(t => t.id === settings.armor) || HP_TIERS[2]).name.toUpperCase() + ' ' + armorHp() }) });
+        hp: '100 HP' }) });
   }
   function modeHistory(m) { return history.filter(h => h.m === m); }
   function improvement(m) {
@@ -610,16 +640,50 @@ export function boot() {
     GUNS.filter(g => g.cls === buyCls).forEach(g => {
       const maxHead = Math.max(...g.bands.map(b => b[1]));
       const el = document.createElement('div');
+      const ownedSet = new Set(loadoutOwned());
+      const stable = Number(loadoutStable()) || 0;
       el.className = 'buy-item' + (g.id === gun.id ? ' cur' : '');
+      const isOwned = ownedSet.has(g.id) || g.start === true;
+      const priceStable = Number(g.priceStable) || 0;
+      const canAfford = stable + 1e-9 >= priceStable;
+      const status = isOwned
+        ? '<span class="eq">OWNED</span>'
+        : (priceStable === 0
+            ? '<span class="eq">FREE</span>'
+            : (canAfford
+                ? `<span class="eq">BUY $${priceStable.toFixed(2)}</span>`
+                : `<span class="locked">LOCKED $${priceStable.toFixed(2)}</span>`));
       el.innerHTML =
         `<svg class="gsil" viewBox="0 0 120 40"><use href="#sil-${g.cls.toLowerCase()}"/></svg>` +
-        `<div class="buy-meta"><b>${g.name}</b><span class="price">${g.price} cr</span>${g.id === gun.id ? '<span class="eq">EQUIPPED</span>' : ''}</div>` +
+        `<div class="buy-meta"><b>${g.name}</b><span class="price">${status}</span>${g.id === gun.id ? '<span class="eq">EQUIPPED</span>' : ''}</div>` +
         `<div class="buy-bars"><label>PWR ${maxHead}</label>${bar(maxHead / 255 * 100)}` +
         `<label>RPM ${g.rpm}</label>${bar(g.rpm / 16 * 100)}` +
         `<label>MAG ${g.mag === Infinity ? '∞' : g.mag}</label>${bar(g.mag === Infinity ? 100 : g.mag / 100 * 100)}</div>` +
-        `<div class="buy-tag">${g.mode === 'auto' ? 'AUTO' : 'SEMI'} · ${g.pen} PEN${g.silenced ? ' · SUPPRESSED' : ''}</div>`;
-      el.addEventListener('click', () => {
-        buyGun(g.id); toggleBuy(false); // instant switch to its slot, run continues
+        `<div class="buy-tag">${g.mode === 'auto' ? 'AUTO' : 'SEMI'} · ${g.pen} PEN${g.silenced ? ' · SUPPRESSED' : ''} · ${Number(g.earnMult || 1).toFixed(2)}x EARN</div>`;
+      el.classList.toggle('not-owned', !isOwned);
+      el.classList.toggle('locked', !isOwned && !canAfford);
+      el.addEventListener('click', async () => {
+        if (isOwned) {
+          // Already owned: equip it directly.
+          buyGun(g.id);
+          toggleBuy(false);
+          return;
+        }
+        // Not owned: try to buy. If the server says insufficient, surface
+        // the error inline. We do not block the player from doing other
+        // things while the buy is in flight.
+        if (priceStable > 0 && !canAfford) return;
+        try {
+          const r = await window.store.buyGun(g.id);
+          if (r && (r.ok || r.already_owned)) {
+            buyGun(g.id);
+            toggleBuy(false);
+            if (window.renderMenuStats) window.renderMenuStats();
+          }
+        } catch (e) {
+          // Best-effort: show a brief error on the buy card.
+          el.title = e && e.message ? e.message : 'buy failed';
+        }
       });
       list.appendChild(el);
     });
@@ -640,7 +704,10 @@ export function boot() {
     // listens for. The bridge POSTs to /aim/hit. Server is authoritative.
     try {
       const acc = stats.raw.shots > 0 ? stats.raw.hits / stats.raw.shots : 0;
-      const detail = { head: !!head, accuracy: acc, streak: shotStreak, ts: Date.now() };
+      const detail = { head: !!head, accuracy: acc, streak: shotStreak, ts: Date.now(),
+        // Forward the active gunId so the server can apply the per-weapon
+        // earn multiplier. aim-bridge falls back to 1.0x if this is null.
+        gunId: gun && gun.id ? gun.id : null };
       window.dispatchEvent(new CustomEvent('vibes:hit', { detail }));
     } catch (_) { /* never let bridge failures affect the engine */ }
   }
@@ -812,7 +879,6 @@ export function boot() {
   function initUI() {
     $('s-sens').value = settings.sens; $('s-scope').value = settings.scope;
     $('s-vol').value = settings.volume; $('s-scale').value = settings.scale;
-    $('s-armor').value = settings.armor;
     $('s-reload').value = settings.reload; $('s-track').value = settings.trackDiff;
     $('s-dist').value = settings.dist;
     const themeSel = $('s-theme');
@@ -825,7 +891,6 @@ export function boot() {
     $('s-scope').addEventListener('change', e => { settings.scope = clamp(parseFloat(e.target.value) || 1, 0.1, 2); saveSettings(); });
     $('s-vol').addEventListener('input', e => { settings.volume = parseFloat(e.target.value); audio.vol = settings.volume; saveSettings(); });
     $('s-scale').addEventListener('change', e => { settings.scale = e.target.value; saveSettings(); applySize(); });
-    $('s-armor').addEventListener('change', e => { settings.armor = e.target.value; saveSettings(); });
     $('s-reload').addEventListener('change', e => { settings.reload = e.target.value; saveSettings(); });
     $('s-track').addEventListener('change', e => { settings.trackDiff = e.target.value; saveSettings(); });
     $('s-dist').addEventListener('change', e => { settings.dist = e.target.value; saveSettings(); });

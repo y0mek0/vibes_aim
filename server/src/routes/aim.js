@@ -2,6 +2,7 @@
 // Server is the ONLY place that mints simulated ticker units.
 
 import { sendJson, HttpError, round } from '../util/json.js';
+import { getEarnMult } from '../data/loadout.js';
 
 export function aimRoutes(r, { store, config }) {
   r.post('/aim/hit', async (req, res, _params, _query, body) => {
@@ -42,7 +43,10 @@ export function aimRoutes(r, { store, config }) {
     // Mint simulated units
     const acc = Number(accuracy);
     const streakN = Number(streak);
-    let unit = config.aim.hitUnit;
+    // gunId drives the earn multiplier: shotguns and snipers pay more
+    // per hit, full-auto mags pay less. Unknown / null gunId -> 1.0x.
+    const earnMult = getEarnMult(body?.gunId);
+    let unit = config.aim.hitUnit * earnMult;
     // Slight streak bonus: +20% per 5 in streak, capped at +50% (x1.5)
     if (Number.isFinite(streakN) && streakN > 0) {
       const bonus = Math.min(0.5, Math.floor(streakN / 5) * 0.2);

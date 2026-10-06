@@ -101,6 +101,9 @@ function onHit(ev) {
     accuracy: Number(d.accuracy) || 0,
     streak: Number(d.streak) || 0,
     ts: Number(d.ts) || Date.now(),
+    // Server applies earn multiplier from this gunId. Unknown ids
+    // (e.g. legacy pre-rename) fall back to 1.0x on the server.
+    gunId: typeof d.gunId === 'string' ? d.gunId : null,
   }).then((r) => {
     if (r && typeof r.unit === 'number') flashChip(r.unit);
   }).catch(() => { /* swallow; engine visuals still play. */ })

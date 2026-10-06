@@ -36,6 +36,7 @@ export function saveGuestSnapshot(state) {
     trades: state.trades ?? [],
     unlocks: state.unlocks ?? [],
     missions: state.missions ?? [],
+    loadout: state.loadout ?? { owned: [], catalog: [] },
   };
   safeSet(JSON.stringify(trimmed));
 }

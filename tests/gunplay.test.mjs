@@ -27,8 +27,9 @@ near('vandal interval', minGap(vandal, {}), 1 / 9.75, 1e-9);
 near('vandal ads interval', minGap(vandal, { ads: true }), 1 / 8.32, 1e-9);
 near('stinger sustained ads', effectiveRpm(gunById('stinger'), { ads: true }), 4 * 2.118, 1e-9);
 near('bulldog sustained ads', effectiveRpm(gunById('bulldog'), { ads: true }), 3 * 2.105, 1e-6);
-eq('classic alt rate', gunById('classic').alt.rpm, 2.22);
-eq('classic alt pellets', gunById('classic').alt.pellets, 3);
+// (legacy classic-alt tests removed: USP is the new sidearm and has no
+//  alt-fire — the dual-mode was a game-feel experiment that the new
+//  CS-style roster does not need.)
 
 // --- burst timing: fast pops, slow cooldown ---
 {

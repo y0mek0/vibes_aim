@@ -6,6 +6,7 @@ import { marketRoutes } from './market.js';
 import { aimRoutes } from './aim.js';
 import { portfolioRoutes } from './portfolio.js';
 import { missionsRoutes } from './missions.js';
+import { loadoutRoutes } from './loadout.js';
 
 export function mountRoutes({ market, store, config }) {
   const r = createRouter();
@@ -14,5 +15,6 @@ export function mountRoutes({ market, store, config }) {
   aimRoutes(r, { store, config });
   portfolioRoutes(r, { market, store });
   missionsRoutes(r, { store });
+  loadoutRoutes(r, { store });
   return r;
 }

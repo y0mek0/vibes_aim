@@ -26,9 +26,27 @@ export function getPlayerId() {
 
 // Resolve the server base URL once. Default points at the local server
 // on the documented port. Production: set window.VIBES_API_BASE in index.html.
+//
+// The fallback order is:
+//   1) window.VIBES_API_BASE if explicitly set
+//   2) Same origin as the page but on the API port (so a deployed
+//      reverse-proxy on one host still works)
+//   3) http://127.0.0.1:4174 (the documented local dev port)
+//   4) http://127.0.0.1:3000 (legacy local dev port)
+function defaultBaseUrl() {
+  if (typeof window === 'undefined') return 'http://127.0.0.1:3000';
+  const { protocol, hostname } = window.location;
+  // If the user is on the dev static port, assume the dev API port.
+  if (hostname === '127.0.0.1' || hostname === 'localhost') {
+    return `${protocol}//${hostname}:4174`;
+  }
+  // Deployed: API is on the same origin under /api or the same host.
+  return `${protocol}//${window.location.host}`;
+}
+
 function baseUrl() {
   if (typeof window !== 'undefined' && window.VIBES_API_BASE) return window.VIBES_API_BASE;
-  return 'http://127.0.0.1:3000';
+  return defaultBaseUrl();
 }
 
 export class ApiError extends Error {
