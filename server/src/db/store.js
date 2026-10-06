@@ -18,6 +18,14 @@
 
 import { randomUUID } from 'node:crypto';
 
+// Minimal local rounding helpers. Server-side routes get these from
+// util/json.js, but the in-memory store needs them too for the guest
+// merge path.
+const round = (n, places = 6) => {
+  const f = 10 ** places;
+  return Math.round(Number(n) * f) / f;
+};
+
 export function createStore(supabaseConfig) {
   const useSupabase = !!(supabaseConfig?.url && supabaseConfig?.serviceKey);
   const mem = {

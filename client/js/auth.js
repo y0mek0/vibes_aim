@@ -15,7 +15,7 @@
 // The class is exposed as a global singleton so the rest of the app can
 // reach auth state without an explicit dependency on this file.
 
-import { api } from '../src/api.js?v=20261006-5';
+import { api } from '../src/api.js?v=20261006-7';
 
 const TOKEN_KEY = 'vibes_aim.sessionToken.v1';
 const PROFILE_KEY = 'vibes_aim.profile.v1';

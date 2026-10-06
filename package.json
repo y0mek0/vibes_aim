@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Browser aim-trading game: aim farms simulated units of real-market assets, paper-trading terminal uses real charts.",
   "scripts": {
-    "test": "node tests/ballistics.test.mjs && node tests/gunplay.test.mjs && node tests/css.test.mjs && node tests/imports.test.mjs && node tests/crosshair.test.mjs && node tests/stalker.test.mjs && node tests/themes.test.mjs && node tests/server.test.mjs && node tests/dom.test.mjs && node tests/finnhub.test.mjs && node tests/stream.test.mjs && node tests/stream-wire.test.mjs && node tests/client-bridge.test.mjs && node tests/supabase.test.mjs && node tests/chart.test.mjs && node tests/terminal.test.mjs && node tests/missions.test.mjs && node tests/visual.test.mjs",
+    "test": "node tests/ballistics.test.mjs && node tests/gunplay.test.mjs && node tests/css.test.mjs && node tests/imports.test.mjs && node tests/crosshair.test.mjs && node tests/stalker.test.mjs && node tests/themes.test.mjs && node tests/server.test.mjs && node tests/dom.test.mjs && node tests/finnhub.test.mjs && node tests/stream.test.mjs && node tests/stream-wire.test.mjs && node tests/client-bridge.test.mjs && node tests/supabase.test.mjs && node tests/chart.test.mjs && node tests/terminal.test.mjs && node tests/missions.test.mjs && node tests/auth.test.mjs && node tests/visual.test.mjs",
     "test:slow": "node tests/hold60s.test.mjs",
     "start": "npx --yes serve -p 4173 client"
   }

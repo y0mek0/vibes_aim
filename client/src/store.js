@@ -1,11 +1,16 @@
 // client/src/store.js — client-side mirror of the server state.
 // Pulls from /portfolio and /missions on demand, exposes a tiny event
 // emitter so the UI can subscribe. No third-party state lib.
+//
+// Auth is handled by client/js/auth.js which mounts a global window.auth
+// singleton. The store listens to it and re-binds player identity when
+// the user signs in / out, so the rest of the app only has to look at
+// state.player to know who is playing.
 
-import { api } from './api.js?v=20261006-4';
-import { getPlayerId, setPlayerId } from './api.js?v=20261006-4';
-import { getSessionId } from './session.js?v=20261006-4';
-import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261006-4';
+import { api } from './api.js?v=20261006-7';
+import { getPlayerId, setPlayerId } from './api.js?v=20261006-7';
+import { getSessionId } from './session.js?v=20261006-7';
+import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261006-7';
 
 function createStore() {
   const listeners = new Set();
@@ -19,6 +24,7 @@ function createStore() {
     loadout: { owned: [], catalog: [] }, // { owned: [gunId], catalog: [...] }
     lastError: null,
     lastHit: null,        // last aim/hit result (for the floating HUD chip)
+    auth: { signedIn: false, email: null }, // mirror of window.auth
   };
 
   function emit() { for (const l of listeners) l(state); }
@@ -44,6 +50,22 @@ function createStore() {
     return state;
   }
 
+  function applyAuthState(authState) {
+    // Mirror the auth singleton into our store so UI panels can read
+    // state.auth without taking a hard dependency on window.auth.
+    state.auth = {
+      signedIn: !!(authState && authState.player),
+      email: authState?.profile?.email || authState?.player?.email || null,
+      playerId: authState?.player?.id || null,
+    };
+    if (state.auth.signedIn) {
+      // Adopt the signed-in player id so /portfolio, /aim/hit, etc.
+      // start using the persisted Google-backed account.
+      setPlayerId(state.auth.playerId);
+    }
+    emit();
+  }
+
   // Local-only bootstrap: if the user has a saved guest snapshot, use it
   // for an instant first paint while the server round-trip is in flight.
   function bootstrap() {
@@ -55,15 +77,36 @@ function createStore() {
       state.unlocks = snap.unlocks || [];
       state.missions = snap.missions || [];
     }
+    // Subscribe to auth state. auth.js (loaded as a separate module) is
+    // expected to put a singleton on window.auth. We poll briefly so a
+    // race-condition between module load order doesn't leave us deaf.
+    function attach() {
+      if (window.auth && typeof window.auth.onChange === 'function') {
+        window.auth.onChange(applyAuthState);
+        // Sync the initial state in case auth already finished its
+        // /auth/me lookup.
+        applyAuthState(window.auth.state);
+        return true;
+      }
+      return false;
+    }
+    if (!attach()) {
+      let tries = 0;
+      const id = setInterval(() => {
+        if (attach() || ++tries > 50) clearInterval(id);
+      }, 60);
+    }
     // Eagerly kick off a server refresh. mountMissions (and other panels)
     // subscribe to the store; without this, the first render reads an
     // empty state and shows "0/6 claimed" instead of the real data.
     refresh().catch(() => { /* server may be down; keep guest snapshot */ });
   }
 
-  async function recordAimHit({ hitId, ticker, accuracy, streak }) {
+  async function recordAimHit({ hitId, ticker, accuracy, streak, gunId }) {
     const r = await api.post('/aim/hit', {
       hitId, ticker, accuracy, streak, ts: Date.now(),
+      // Pass the gunId so the server can apply per-weapon earnMult.
+      gunId: gunId || null,
     });
     state.lastHit = r;
     // Optimistic local update of the balance, but trust the server on the
