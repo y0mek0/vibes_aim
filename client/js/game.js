@@ -743,6 +743,37 @@ export function boot() {
     }
     const recent = history.slice().sort((a, b) => (b.d || 0) - (a.d || 0));
     const latest = recent[0];
+
+    // Token balance cards (USD / AAPL / NVDA / ...). Reads straight from
+    // the store which is kept in sync by /portfolio. Only renders tokens
+    // that actually have a non-zero balance so the panel stays tidy.
+    const tokensEl = document.querySelector('[data-dashboard-tokens]');
+    if (tokensEl) {
+      const s = window.store && window.store.state;
+      const balances = (s && s.balances) || {};
+      const stable = (s && s.player && Number(s.player.stable)) || 0;
+      const cards = [];
+      // Stable coin first so the user always sees their cash position.
+      cards.push({ sym: 'USD', name: 'USD stable', qty: stable, kind: 'free' });
+      // Then every held ticker (only if balance is non-zero).
+      const tickers = Object.keys(balances)
+        .filter((t) => t !== 'USD' && balances[t] > 0)
+        .map((t) => ({ sym: t, qty: balances[t] }));
+      const nameOf = (sym) => (sym === 'AAPL' ? 'Apple Inc.' : sym === 'NVDA' ? 'NVIDIA Corp.' : sym);
+      for (const t of tickers) {
+        cards.push({ sym: t.sym, name: nameOf(t.sym), qty: t.qty, kind: 'token' });
+      }
+      tokensEl.innerHTML = cards.map((c) => {
+        const qtyText = c.sym === 'USD' ? c.qty.toFixed(2) : c.qty.toFixed(4);
+        const kindClass = c.kind === 'free' ? 'tok-free' : 'tok-token';
+        return `<div class="tok-card ${kindClass}" data-tok-symbol="${c.sym}">
+          <div class="tok-symbol">${c.sym}</div>
+          <div class="tok-name">${c.name}</div>
+          <div class="tok-qty"><b>${qtyText}</b></div>
+        </div>`;
+      }).join('');
+    }
+
     const put = (selector, value) => document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
     const records = document.querySelector('[data-mode-records]');
     if (records) {
@@ -770,17 +801,21 @@ export function boot() {
       }).join('') : '<div class="stats-empty">No sessions yet. Finish a run to create the first record.</div>';
     }
     put('[data-dashboard-sessions]', String(recent.length));
-    put('[data-dashboard-best]', recent.length ? String(Math.max(...recent.map(h => h.score || 0))) : '—');
-    if (latest) {
-      put('[data-recent-mode]', MODE_DEFS[latest.m]?.name || latest.m || 'SESSION');
-      put('[data-recent-score]', String(latest.score || 0));
-      put('[data-recent-accuracy]', (latest.acc ?? 0) + '%');
-    }
-  }
-  function bandStr(g) {
-    return g.bands.map(([r, h, b, l]) => `${r >= 999 ? '50m+' : '0–' + r + 'm'}: ${h}/${b}/${l}`).join(' · ');
-  }
-  function renderLoadout() {
+        put('[data-dashboard-best]', recent.length ? String(Math.max(...recent.map(h => h.score || 0))) : '—');
+        if (latest) {
+          put('[data-recent-mode]', MODE_DEFS[latest.m]?.name || latest.m || 'SESSION');
+          put('[data-recent-score]', String(latest.score || 0));
+          put('[data-recent-accuracy]', (latest.acc ?? 0) + '%');
+        }
+        // Expose for non-module callers (the dashboard token-card subscription
+        // in src/bootstrap.js calls window.renderMenuStats on every store
+        // emit so balances refresh without reopening the menu).
+        if (typeof window !== 'undefined') window.renderMenuStats = renderMenuStats;
+      }
+      function bandStr(g) {
+        return g.bands.map(([r, h, b, l]) => `${r >= 999 ? '50m+' : '0–' + r + 'm'}: ${h}/${b}/${l}`).join(' · ');
+      }
+      function renderLoadout() {
     const clsSel = $('lo-class'), gunSel = $('lo-gun');
     if (!clsSel.options.length) {
       GUN_CLASSES.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; clsSel.appendChild(o); });

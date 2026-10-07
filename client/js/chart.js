@@ -47,6 +47,14 @@ export function accentColor(t) {
   return '#c9ccd1';
 }
 
+// True when the range spans hours rather than days. Used to decide
+// whether the chart axis labels should show HH:MM (intraday) or a date
+// (1D/5D).
+export function isIntraday(range) {
+  if (!range) return false;
+  return /^(\d+)?[mM]$/.test(range) || /^(\d+)?[hH]$/.test(range);
+}
+
 export function fmtPrice(n) {
   if (n == null || !Number.isFinite(n)) return '—';
   return n.toFixed(2);
@@ -174,7 +182,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         vertLines: { color: 'rgba(255,255,255,0.04)' },
         horzLines: { color: 'rgba(255,255,255,0.04)' },
       },
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(255,255,255,0.06)' },
+      timeScale: { timeVisible: isIntraday(range), secondsVisible: false, borderColor: 'rgba(255,255,255,0.06)' },
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.06)' },
       crosshair: { mode: 1 },
       autoSize: true,
@@ -284,12 +292,17 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     setActiveTicker(t);
   }));
   els.rangeBtns.forEach((b) => b.addEventListener('click', () => {
-    const r = b.dataset.vcRangeBtn;
-    if (!r || r === active.range) return;
-    active.range = r;
-    els.rangeBtns.forEach((x) => x.classList.toggle('active', x === b));
-    loadCandles();
-  }));
+      const r = b.dataset.vcRangeBtn;
+      if (!r || r === active.range) return;
+      active.range = r;
+      els.rangeBtns.forEach((x) => x.classList.toggle('active', x === b));
+      // Show time (HH:MM) only for intraday ranges. Daily+ should be
+      // a date label (Oct 6), which is LWC's default when timeVisible:false.
+      if (chart) {
+        try { chart.timeScale().applyOptions({ timeVisible: isIntraday(r) }); } catch (_) { /* noop */ }
+      }
+      loadCandles();
+    }));
 
   // The ticker buttons live in the markup (AAPL, NVDA). This re-renders
   // them based on the player's unlocks. AAPL is always visible (it's the

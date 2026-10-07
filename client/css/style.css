@@ -886,6 +886,31 @@ canvas#game {
 #menu .live-state { color: var(--dash-accent); font: 9px var(--font-mono); letter-spacing: .12em; }
 #menu .live-state i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--dash-accent); margin-right: 5px; vertical-align: 1px; }
 #menu .portfolio-total { margin-top: 20px; color: var(--fg); font: 600 34px var(--font-mono); letter-spacing: -.05em; }
+/* Order ticket: input row with percentage quick-buttons stacked on the right.
+   Mirrors the layout used by Binance / Uniswap for fast percentage picks. */
+.vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; }
+.vt-input-row > input { flex: 1; min-width: 0; }
+.vt-pct-row { display: inline-flex; gap: 4px; }
+.vt-pct-row button {
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--dash-muted);
+  font: 700 10px var(--font-mono);
+  letter-spacing: .04em;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color .12s ease, border-color .12s ease, background .12s ease;
+}
+.vt-pct-row button:hover { color: var(--accent); border-color: var(--accent); }
+.vt-pct-row button.active { color: #f6d447; border-color: #f6d447; background: rgba(246,212,71,.08); }
+#menu .portfolio-tokens { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+#menu .tok-card { flex: 1 1 calc(33.333% - 8px); min-width: 110px; padding: 10px 12px; background: rgba(246,212,71,.04); border: 1px solid rgba(246,212,71,.18); box-shadow: 2px 2px 0 #000; }
+#menu .tok-card.tok-free { background: rgba(255,255,255,.025); border-color: var(--line); }
+#menu .tok-symbol { font: 700 13px var(--font-mono); letter-spacing: .06em; color: var(--accent); }
+#menu .tok-card.tok-free .tok-symbol { color: var(--fg); }
+#menu .tok-name { font-size: 9px; letter-spacing: .18em; color: var(--dim); text-transform: uppercase; margin-top: 2px; }
+#menu .tok-qty { font: 600 16px var(--font-mono); color: var(--fg); margin-top: 4px; letter-spacing: -.02em; }
 #menu .portfolio-total small, #menu .portfolio-change small { display: block; color: var(--dash-muted); font: 10px var(--font-mono); letter-spacing: .08em; margin-top: 5px; }
 #menu .portfolio-change { margin-top: 22px; color: var(--dash-accent); font: 600 18px var(--font-mono); }
 #menu .portfolio-line { height: 32px; margin-top: 20px; opacity: .7; background: linear-gradient(155deg, transparent 4%, transparent 18%, rgba(246,212,71,.15) 19%, rgba(246,212,71,.6) 21%, transparent 22%, transparent 37%, rgba(246,212,71,.35) 38%, rgba(246,212,71,.6) 40%, transparent 41%, transparent 52%, rgba(246,212,71,.35) 53%, rgba(246,212,71,.55) 55%, transparent 56%, transparent 68%, rgba(246,212,71,.3) 69%, rgba(246,212,71,.5) 71%, transparent 72%); border-bottom: 1px solid rgba(246,212,71,.25); }
@@ -1546,7 +1571,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .app-shell > #vibes-missions .vm-status { color: var(--dash-muted); text-transform: uppercase; letter-spacing: .1em; }
 #menu .app-shell > #vibes-missions .vm-status.done { color: #f6d447; }
 #menu .app-shell > #vibes-missions .vm-status.claimed { color: var(--dash-muted); }
-#menu .app-shell > #vibes-missions .vm-claim-btn { margin-left: auto; padding: 3px 8px; border: 1px solid rgba(246,212,71,.55); border-radius: 2px; background: transparent; color: #f6d447; font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; cursor: pointer; }
+#menu .app-shell > #vibes-missions .vm-claim-btn { margin-left: auto; padding: 8px 14px; border: 1px solid rgba(246,212,71,.55); border-radius: 2px; background: transparent; color: #f6d447; font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
 #menu .app-shell > #vibes-missions .vm-claim-btn:hover { background: rgba(246,212,71,.1); }
 #menu .app-shell > #vibes-missions .vm-progress { width: 100%; max-width: none; height: 3px; margin-top: 10px; border-radius: 0; background: rgba(160,174,194,.14); }
 #menu .app-shell > #vibes-missions .vm-bar { background: #f6d447; box-shadow: none; }

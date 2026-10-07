@@ -415,16 +415,38 @@ export function mountTerminal({ root, onClose } = {}) {
     });
   }
   if (els.otNotional) {
-    els.otNotional.addEventListener('input', () => {
-      const n = clampNotional(els.otNotional.value, 1e7);
-      state.notional = n;
-      renderPreview();
+      els.otNotional.addEventListener('input', () => {
+        const n = clampNotional(els.otNotional.value, 1e7);
+        state.notional = n;
+        renderPreview();
+      });
+    }
+    // Percentage quick-buttons (25/50/75/MAX). Sets notional to a fixed
+    // fraction of the player's USD stable balance and updates the preview.
+    // MAX caps at the smaller of (1e7, balance * leverage) so the player
+    // can never borrow beyond what they can actually back with stable.
+    const pctBtns = panel.querySelectorAll('[data-vt-ot-pct]');
+    pctBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pct = Number(btn.dataset.vtOtPct);
+        if (!Number.isFinite(pct)) return;
+        const stable = (store.state && store.state.player && Number(store.state.player.stable)) || 0;
+        const lev = Number(state.leverage) || 1;
+        const maxByLev = Math.min(1e7, stable * Math.max(1, lev));
+        const pctAmt = pct === 100 ? maxByLev : Math.max(1, Math.floor((maxByLev * pct) / 100));
+        if (els.otNotional) {
+          els.otNotional.value = String(clampNotional(pctAmt, 1e7));
+          state.notional = clampNotional(pctAmt, 1e7);
+        }
+        // Visually toggle the active state on the percentage buttons.
+        pctBtns.forEach((b) => b.classList.toggle('active', b === btn));
+        renderPreview();
+      });
     });
-  }
-  if (els.convertTicker) {
-    els.convertTicker.addEventListener('change', refreshConvertQuote);
-  }
-  panel.querySelectorAll(SELECTORS.spotSide).forEach((button) => {
+    if (els.convertTicker) {
+      els.convertTicker.addEventListener('change', refreshConvertQuote);
+    }
+    panel.querySelectorAll(SELECTORS.spotSide).forEach((button) => {
     button.addEventListener('click', () => {
       state.spotSide = button.dataset.vtSpotSide;
       panel.querySelectorAll(SELECTORS.spotSide).forEach((b) => b.classList.toggle('active', b === button));
@@ -455,11 +477,23 @@ export function mountTerminal({ root, onClose } = {}) {
   // Subscribe to store changes
   const unsub = store.subscribe(() => refreshAll());
 
-  // First paint
-  refreshAll();
-  refreshQuote();
-  // Re-quote every 5s so the entry price stays fresh
-  const quoteTimer = setInterval(refreshQuote, 5000);
+  // First paint. If the store hasn't been hydrated yet (cold start, no
+    // prior refresh), fetch the defaults before rendering so we don't
+    // paint the empty holdings view first.
+    if (typeof store.refresh === 'function') {
+      const refreshPromise = (!store.state || !store.state.ready)
+        ? store.refresh().catch(() => {})
+        : Promise.resolve();
+      refreshPromise.then(() => {
+        refreshAll();
+        refreshQuote();
+      });
+    } else {
+      refreshAll();
+      refreshQuote();
+    }
+    // Re-quote every 5s so the entry price stays fresh
+    const quoteTimer = setInterval(refreshQuote, 5000);
 
   function unmount() {
     clearInterval(quoteTimer);
