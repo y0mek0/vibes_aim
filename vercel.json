@@ -33,12 +33,12 @@
   ],
   "rewrites": [
     { "source": "/health", "destination": "/api/index.js" },
-    { "source": "/auth/(.*)", "destination": "/api/index.js" },
-    { "source": "/portfolio/(.*)", "destination": "/api/index.js" },
-    { "source": "/aim/(.*)", "destination": "/api/index.js" },
-    { "source": "/missions/(.*)", "destination": "/api/index.js" },
-    { "source": "/loadout/(.*)", "destination": "/api/index.js" },
-    { "source": "/market/(.*)", "destination": "/api/index.js" }
+    { "source": "/auth/:path*", "destination": "/api/index.js" },
+    { "source": "/portfolio/:path*", "destination": "/api/index.js" },
+    { "source": "/aim/:path*", "destination": "/api/index.js" },
+    { "source": "/missions/:path*", "destination": "/api/index.js" },
+    { "source": "/loadout/:path*", "destination": "/api/index.js" },
+    { "source": "/market/:path*", "destination": "/api/index.js" }
   ],
   "headers": [
     {
