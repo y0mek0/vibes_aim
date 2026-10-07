@@ -189,11 +189,12 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     });
     const color = '#f6d447';
     series = chart.addCandlestickSeries({
-      upColor: color, downColor: '#8a91a0',
-      borderUpColor: color, borderDownColor: '#8a91a0',
-      wickUpColor: color, wickDownColor: '#8a91a0',
-      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
-    });
+          upColor: color, downColor: '#8a91a0',
+          borderUpColor: color, borderDownColor: '#8a91a0',
+          wickUpColor: color, wickDownColor: '#8a91a0',
+          priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+          lastValueVisible: false,
+        });
   }
 
   function markStatus(text, stale = false) {

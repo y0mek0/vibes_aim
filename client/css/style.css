@@ -1608,7 +1608,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .app-shell > #vibes-terminal .vt-side-toggle button:hover, #menu .app-shell > #vibes-terminal .vt-side-toggle button.active { background: rgba(246, 212, 71, .12); color: var(--yellow); }
 #menu .app-shell > #vibes-terminal .vt-side-native { display: none; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 #menu .app-shell > #vibes-terminal .vt-order-field:has(.vt-side-native) .combo { display: none; }
-#menu .app-shell > #vibes-terminal .vt-order-field-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 14px; }
+.vt-order-field-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-bottom: 14px; }
 #menu .app-shell > #vibes-terminal .vt-control { display: block; min-width: 0; }
 #menu .app-shell > #vibes-terminal .vt-control input[type="number"] { box-sizing: border-box; width: 100%; min-height: 31px; padding: 6px 9px; background: var(--bg-3); color: var(--fg); border: 1px solid var(--line-strong); border-radius: 2px; font: 12px var(--font-mono); }
 #menu .app-shell > #vibes-terminal .vt-control .vt-field-label b { float: right; color: var(--fg); font-weight: 500; letter-spacing: 0; }
