@@ -1,0 +1,56 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    {
+      "src": "client/**",
+      "use": "@vercel/static",
+      "config": {
+        "exclude": [
+          "server/**",
+          "tests/**",
+          "docs/**",
+          "tools/**",
+          "deploy/**",
+          "design-system/**",
+          "node_modules/**",
+          "*.mjs",
+          "*.md",
+          ".env*",
+          "package.json",
+          "package-lock.json",
+          "vercel.json"
+        ]
+      }
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 25
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/health", "dest": "/api/index.js" },
+    { "src": "/auth/(.*)", "dest": "/api/index.js" },
+    { "src": "/portfolio/(.*)", "dest": "/api/index.js" },
+    { "src": "/aim/(.*)", "dest": "/api/index.js" },
+    { "src": "/missions/(.*)", "dest": "/api/index.js" },
+    { "src": "/loadout/(.*)", "dest": "/api/index.js" },
+    { "src": "/market/(.*)", "dest": "/api/index.js" },
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/(.*)", "dest": "/client/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

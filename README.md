@@ -30,9 +30,50 @@ npx --yes serve -p 4173 client
 # 3. Open http://127.0.0.1:4173
 ```
 
-The first paint shows a `aim2stock` boot card. It pings `http://127.0.0.1:3000/health`. If reachable, the menu and the chart panel appear. If not, the boot card shows a one-line explanation and a `Skip` button so the player can still look at the menu.
+## Deploy to Vercel
 
-The client reads the API base from `window.VIBES_API_BASE` or falls back to `http://127.0.0.1:3000`. To point at a different host, set it on the host page or via the boot card's `Skip` flow.
+Vercel hosts the static client (`client/`) and runs the API as a serverless function (`api/index.js`). State lives in Supabase, so there is no long-lived server process. The Market SSE stream is short-lived on serverless; the client already falls back to REST polling every second when the stream closes, so live charts keep working.
+
+### One-time setup
+
+1. Push this repo to GitHub (already done).
+2. Open https://vercel.com and import `y0mek0/vibes_aim`. Vercel detects `vercel.json` automatically; framework preset is `Other`.
+3. **Environment Variables** — in the Vercel project, set **Production** values (and optionally Preview values that match):
+
+   | Name | Value |
+   |---|---|
+   | `SUPABASE_URL` | `https://svbxpgzvnfuyowzoltwc.supabase.co` |
+   | `SUPABASE_SERVICE_KEY` | (your service_role secret — never check into git) |
+   | `MARKET_PROVIDER` | `stub` (use `finnhub` later if you have a token) |
+   | `FINNHUB_TOKEN` | (only if `MARKET_PROVIDER=finnhub`) |
+   | `GOOGLE_CLIENT_ID` | OAuth client id (`522584825551-71s35cg5t24vuq10min4qmnrn7s988p0.apps.googleusercontent.com`) |
+   | `GOOGLE_CLIENT_SECRET` | OAuth client secret (set only if you want audience validation server-side) |
+   | `ORIGIN` | `https://<your-project>.vercel.app` (your actual Vercel domain — required for CORS) |
+   | `PORT` | not used on Vercel; harmless to leave unset |
+
+   Secrets go in Vercel Project → Settings → Environment Variables. Mark `SUPABASE_SERVICE_KEY` and `GOOGLE_CLIENT_SECRET` as **Sensitive** so Vercel never echoes them.
+
+4. **OAuth redirect URI** — Google Cloud Console → your OAuth client → Authorized redirect URIs: add:
+   - `https://<your-project>.vercel.app`
+   - `https://<your-domain>` (only if you set a custom domain)
+
+5. **Supabase OAuth provider** — Supabase Dashboard → Authentication → Providers → Google is already enabled in this project. No further setup needed because the server validates id_tokens directly with `https://oauth2.googleapis.com/tokeninfo` rather than going through Supabase Auth.
+
+6. Deploy. Vercel will run `npm run test` indirectly? No, Vercel only runs `vercel build`. The `tests/` directory is excluded from the static build, so it does not ship. Run tests locally before pushing.
+
+### After deploy
+
+- The first cold start may take ~1s while the serverless function warms up. Subsequent requests are <50 ms.
+- If you see `404 /api/...` from the client, check that the route paths in `vercel.json` match what `client/src/api.js` calls. The current config covers `/auth`, `/portfolio`, `/aim`, `/missions`, `/loadout`, `/market`, `/health`.
+- If Google sign-in fails with `audience_mismatch`, make sure `GOOGLE_CLIENT_ID` env on Vercel exactly matches the OAuth client id used in `<meta name="google-oauth-client-id">` in `client/index.html`. The default in the source is a development client; replace it with your production client before going live.
+
+### Custom domain
+
+Vercel Project → Settings → Domains. After adding the domain, set `ORIGIN=https://<your-domain>` and redeploy so CORS matches. Update Google Cloud Console authorized origins accordingly.
+
+The first paint shows a `aim2stock` boot card. It pings `${API_BASE}/health` (resolved in the same priority order as `client/src/api.js`). If reachable, the menu and the chart panel appear. If not, the boot card shows a one-line explanation and a `Skip` button so the player can still look at the menu.
+
+The client reads the API base from `window.VIBES_API_BASE` or falls back to `${protocol}://${hostname}:4174` for local dev, and `${protocol}//${window.location.host}` for any deployed origin. To point at a different host, set it on the host page or via the boot card's `Skip` flow.
 
 ## Run the tests
 
