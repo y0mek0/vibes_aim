@@ -2,28 +2,28 @@
 // Conventions: rpm = rounds per SECOND. Angles: input math in radians, data in degrees.
 
 import * as THREE from 'three';
-import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261006-4';
-import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261006-4';
-import { BUILD } from './build.js?v=20261006-4';
-import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261006-4';
+import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261006-8';
+import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261006-8';
+import { BUILD } from './build.js?v=20261006-8';
+import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261006-8';
 // Inline constant for the flat 100 HP model. Imported separately so the
 // game boots even if the mechanics.js export changes name. We never use
 // shields or armor in vibes_aim.
 const PLAYER_HP = 100;
-import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261006-4';
-import { createStalker } from './core/stalker.js?v=20261006-4';
+import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261006-8';
+import { createStalker } from './core/stalker.js?v=20261006-8';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
-  spawnDist, orbScale } from './core/gunplay.js?v=20261006-4';
-import { createStats, createKillfeed } from './core/stats.js?v=20261006-4';
-import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261006-4';
-import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261006-4';
-import { audio } from './fx/audio.js?v=20261006-4';
-import { buildWorld, disposeWorld } from './three/world.js?v=20261006-4';
-import { THEMES } from './data/themes.js?v=20261006-4';
-import { createTargets } from './three/targets.js?v=20261006-4';
-import { createEffects } from './three/effects.js?v=20261006-4';
-import { getActiveTicker } from './aim-bridge.js?v=20261006-4';
+  spawnDist, orbScale } from './core/gunplay.js?v=20261006-8';
+import { createStats, createKillfeed } from './core/stats.js?v=20261006-8';
+import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261006-8';
+import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261006-8';
+import { audio } from './fx/audio.js?v=20261006-8';
+import { buildWorld, disposeWorld } from './three/world.js?v=20261006-8';
+import { THEMES } from './data/themes.js?v=20261006-8';
+import { createTargets } from './three/targets.js?v=20261006-8';
+import { createEffects } from './three/effects.js?v=20261006-8';
+import { getActiveTicker } from './aim-bridge.js?v=20261006-8';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -38,7 +38,9 @@ const armorHp = () => PLAYER_HP;
 // player buys something. Legacy settings (slot1: 'vandal' / slot2:
 // 'classic') get remapped through resolveGunId on first read.
 const DEFAULTS = { sens: 0.4, scope: 1.0, volume: 0.5, scale: '1', slot1: null, slot2: 'usp',
-  reload: 'auto', trackDiff: 'medium', dist: 'standard', orbMove: 'drift', orbSize: 'm', theme: 'protocol',
+  // Default to infinite mag so the player never has to think about
+  // reloading mid-session. They can switch to manual in Display.
+  reload: 'off', trackDiff: 'medium', dist: 'standard', orbMove: 'drift', orbSize: 'm', theme: 'protocol',
   ch: freshCrosshair() };
 let settings = (() => { try { const s = JSON.parse(localStorage.getItem(STORE_S)) || {};
   return { ...DEFAULTS, ...s, slot1: s.slot1 ? resolveGunId(s.slot1) : null, slot2: resolveGunId(s.slot2 || 'usp'), ch: migrateCrosshair(s.ch) }; } catch (e) { return { ...DEFAULTS, slot2: 'usp', ch: freshCrosshair() }; } })();
@@ -575,29 +577,38 @@ export function boot() {
     }
     const g = $('res-grid'); g.innerHTML = '';
     const hsp = r.hits ? Math.round(100 * r.head / r.hits) : 0;
+    // Headline numbers live in #res-headline (single big token count);
+    // the four small stat cards below it (kills / accuracy / score /
+    // best-streak) share a single visual language — large number, tiny
+    // label. No "improvement vs baseline" nag, no "more to unlock" copy.
+    const tokenLine = $('res-earned-aapl');
+    if (tokenLine) {
+      const earned = (tokenLine.textContent || '+0.0000').trim();
+      tokenLine.textContent = earned;
+      tokenLine.classList.add('big');
+    }
+    // Strip the legacy earned-row label (the headline is self-explanatory)
+    const earnedLabel = document.querySelector('.res-earned-row .k');
+    if (earnedLabel) earnedLabel.style.display = 'none';
     const cell = (k, v) => { const d = document.createElement('div'); d.innerHTML = `<div class="v">${v}</div><div class="k">${k}</div>`; g.appendChild(d); };
-    cell('kills', r.kills); cell('headshot %', hsp + '%'); cell('accuracy', acc + '%');
+    cell('kills', r.kills);
+    cell('accuracy', acc + '%');
+    cell('headshot', hsp + '%');
     cell('best streak', r.bestStreak);
+    // Per-mode extra stat (kept compact, single line).
     if (mode === 'tracking') {
       const cons = trackSecs.length ? Math.round(100 * trackSecs.filter(b => b >= 0.5).length / trackSecs.length) : 0;
-      cell('time on target', r.onT.toFixed(1) + 's');
       cell('consistency', cons + '%');
+    } else if (mode === 'flick' && r.ttks.length) {
+      cell('avg flick', Math.round(r.ttks.reduce((a, b) => a + b, 0) / r.ttks.length) + 'ms');
+    } else if (elapsed > 1) {
+      cell('kills / sec', (r.kills / elapsed).toFixed(2));
     }
-    cell(mode === 'flick' && r.ttks.length ? 'avg flick' : 'k/s',
-      mode === 'flick' && r.ttks.length ? Math.round(r.ttks.reduce((a, b) => a + b, 0) / r.ttks.length) + 'ms'
-      : mode === 'tracking' ? (r.held > 0 ? Math.round(100 * r.onT / r.held) + '%' : '—')
-      : (elapsed > 1 ? (r.kills / elapsed).toFixed(2) : '—'));
-    const imp = improvement(mode), hs = modeHistory(mode), ri = $('res-improve');
-    if (imp === null) {
-      const left = Math.max(0, 4 - hs.length);
-      // Surface the running average so the placeholder is still useful,
-      // not just a generic "do N more" nag.
-      const avg = hs.length ? Math.round(hs.reduce((a, b) => a + b.score, 0) / hs.length) : 0;
-      ri.innerHTML = `Session ${hs.length} · avg <b>${avg}</b> · ${left} more to unlock improvement vs your baseline.`;
-    } else {
-      const best = hs.reduce((m, h) => Math.max(m, h.score), 0);
-      ri.innerHTML = `Best <b>${best}</b> · Road to +50%: <b>${imp >= 0 ? '+' : ''}${imp.toFixed(1)}%</b> vs baseline.`;
-    }
+    // Clear the legacy improvement copy — the four numbers + headline
+    // are the whole story. We keep the node around (empty) so existing
+    // CSS hooks don't break.
+    const ri = $('res-improve');
+    if (ri) ri.textContent = '';
     T.clear(); $('results').classList.add('open'); renderMenuStats();
   }
   function quitToMenu() {
@@ -750,8 +761,12 @@ export function boot() {
     if (sessions) {
       sessions.innerHTML = recent.length ? recent.slice(0, 6).map((h) => {
         const name = MODE_DEFS[h.m]?.name || h.m || 'SESSION';
-        const stamp = h.d ? new Date(h.d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-        return `<article class="session-window"><div class="session-window-head"><b>${name}</b><span>${stamp}</span></div><div class="session-window-values"><div><strong>${h.score || 0}</strong><small>SCORE</small></div><div><strong>${h.acc ?? 0}%</strong><small>ACCURACY</small></div><div><strong>${h.gun || '—'}</strong><small>LOADOUT</small></div></div></article>`;
+                const stamp = h.d ? new Date(h.d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+                // One row per past run: mode + date, big score. No accuracy
+                // (already visible in /aim/hit HUD) and no loadout (the gun id
+                // is irrelevant once the run is over; you can see current
+                // loadout in Customize).
+                return `<article class="session-window"><div class="session-window-head"><b>${name}</b><span>${stamp}</span></div><div class="session-window-score">${h.score || 0}</div></article>`;
       }).join('') : '<div class="stats-empty">No sessions yet. Finish a run to create the first record.</div>';
     }
     put('[data-dashboard-sessions]', String(recent.length));

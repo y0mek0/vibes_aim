@@ -15,7 +15,7 @@
 // The class is exposed as a global singleton so the rest of the app can
 // reach auth state without an explicit dependency on this file.
 
-import { api } from '../src/api.js?v=20261006-7';
+import { api } from '../src/api.js?v=20261006-8';
 
 const TOKEN_KEY = 'vibes_aim.sessionToken.v1';
 const PROFILE_KEY = 'vibes_aim.profile.v1';
@@ -43,17 +43,20 @@ function emit(state) {
 }
 
 function paintAuthUi(state) {
+  // Three states: signed-out, signed-in. The header shows at most one
+  // icon button (Sign in with Google) OR one icon button (Profile)
+  // OR neither. We never show the email or a separate sign-out here
+  // — those live in Customize → Profile so the header stays compact.
   const signinBtn = document.getElementById('auth-signin');
-  const profile = document.getElementById('auth-profile');
-  const emailEl = document.getElementById('auth-email');
-  if (state && state.player) {
-    if (signinBtn) signinBtn.hidden = true;
-    if (profile) profile.hidden = false;
-    if (emailEl) emailEl.textContent = state.profile?.email || state.player.id;
-  } else {
-    if (signinBtn) signinBtn.hidden = false;
-    if (profile) profile.hidden = true;
-    if (emailEl) emailEl.textContent = '';
+  const profileBtn = document.getElementById('auth-profile-btn');
+  const profileAccount = document.getElementById('profile-account');
+  const profileEmail = document.getElementById('profile-email');
+  const signedIn = !!(state && state.player);
+  if (signinBtn) signinBtn.hidden = signedIn;
+  if (profileBtn) profileBtn.hidden = !signedIn;
+  if (profileAccount) profileAccount.hidden = !signedIn;
+  if (profileEmail) {
+    profileEmail.textContent = state?.profile?.email || state?.player?.email || '—';
   }
 }
 
@@ -187,14 +190,13 @@ function wireButton() {
   if (btn) {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
-      btn.textContent = 'Opening Google…';
+      btn.setAttribute('aria-label', 'Opening Google…');
       try {
         // Try to read the current guest playerId from the store so the
         // server can merge balances/missions/loadout into the new account.
         let guestId = null;
         try {
           const s = window.store?.state;
-          // If the user is already signed in, no merge is needed.
           if (s && !auth.state.player) {
             const stored = JSON.parse(localStorage.getItem('vibes_aim.guestSnapshot.v1') || 'null');
             guestId = stored?.player?.id || null;
@@ -203,18 +205,39 @@ function wireButton() {
         await auth.signIn({ guestPlayerId: guestId });
       } catch (e) {
         console.warn('[auth] sign-in failed:', e && e.message);
-        btn.textContent = 'Sign in failed — retry';
-        setTimeout(() => { btn.disabled = false; btn.textContent = 'Sign in with Google'; }, 2000);
+        btn.setAttribute('aria-label', 'Sign in failed — retry');
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.setAttribute('aria-label', 'Sign in with Google');
+        }, 2000);
       } finally {
         btn.disabled = false;
       }
     });
   }
-  const out = document.getElementById('auth-signout');
-  if (out) {
-    out.addEventListener('click', async () => {
+  // Profile icon: open Customize → Profile. Sign-out lives there.
+  const profileBtn = document.getElementById('auth-profile-btn');
+  if (profileBtn) {
+    profileBtn.addEventListener('click', () => {
+      const open = document.getElementById('customize-open');
+      if (open) open.click();
+      // After the modal opens, switch to the Profile tab.
+      requestAnimationFrame(() => {
+        const profileTab = document.querySelector('[data-customize-tab="profile"]');
+        if (profileTab) profileTab.click();
+      });
+    });
+  }
+  // Sign out from the Profile tab. The signed-in email is mirrored into
+  // #profile-email when paintAuthUi runs; we also wire the click here
+  // so users have a single place to log out.
+  const signoutBtn = document.getElementById('auth-signout-profile');
+  if (signoutBtn) {
+    signoutBtn.addEventListener('click', async () => {
+      signoutBtn.disabled = true;
       try { await auth.signOut(); }
       catch (e) { console.warn('[auth] sign-out failed:', e && e.message); }
+      finally { signoutBtn.disabled = false; }
     });
   }
 }

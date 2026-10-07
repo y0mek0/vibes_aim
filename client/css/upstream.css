@@ -310,6 +310,14 @@ body.playing .hintline{display:block}
 /* ================= custom fields ================= */
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-size:14px}
 .row label{color:var(--dim);font-weight:600;flex:none}
+/* Tighter stack inside the crosshair tab: a row that holds a range
+   slider + a number input + a checkbox should let them wrap rather
+   than collide, and reserve minimum room for the controls. */
+.row span{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;align-items:center;min-width:0;row-gap:6px}
+.row input[type="range"]{min-width:0;flex:1 1 120px}
+.row input[type="number"]{width:64px;min-width:0}
+.row input[type="checkbox"]{margin:0}
+.row > input[type="color"]{min-width:36px;width:36px;padding:0;border:0;background:transparent}
 .row input[type=number],.row input[type=text]{
   background:#0a0a10;color:var(--text);border:2px solid var(--paper);padding:4px 8px;width:110px;font-family:inherit;font-weight:600;
   transition:border-color .12s ease,box-shadow .12s ease,transform .08s ease}
@@ -406,24 +414,33 @@ input[type=color]:hover{border-color:var(--yellow)}
   mask-image:linear-gradient(180deg,transparent 0%,#000 28%,#000 100%)}
 .rep-kicker{font-size:12px;letter-spacing:.34em;color:var(--yellow)}
 #results h2{display:flex;color:#fff;font-size:30px;margin:2px 0;justify-content:center;background:none;border:0;padding:0;transform:none}
-#res-score{font-family:'Anton';font-size:76px;color:#fff;line-height:1.05;position:relative;display:inline-block;
-  text-shadow:3px 3px 0 var(--red-dk),6px 6px 0 #000}
-#res-score::before{content:'';position:absolute;inset:-26px -46px;background:var(--yellow);z-index:-1;transform:rotate(-3deg);
-  clip-path:polygon(50% 0%,61% 12%,76% 6%,79% 21%,95% 21%,93% 37%,100% 50%,93% 63%,95% 79%,79% 79%,76% 94%,61% 88%,50% 100%,39% 88%,24% 94%,21% 79%,5% 79%,7% 63%,0% 50%,7% 37%,5% 21%,21% 21%,24% 6%,39% 12%)}
-.accbar{height:10px;background:#000;border:2px solid var(--paper);margin:12px 0 4px}
+#res-score{font-size:0;color:transparent;text-shadow:none}#res-score::before{display:none}
+.accbar{height:10px;background:#000;border:2px solid var(--paper);margin:12px 0 4px;display:none}
 .accbar i{display:block;height:100%;width:0;background:repeating-linear-gradient(-55deg,var(--teal) 0 10px,#d8d8d8 10px 20px);transition:width .5s}
-.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
-.res-grid div{background:#0d0d14;padding:10px;border:2px solid #000;box-shadow:3px 3px 0 #000}
-.res-grid .v{font-family:'Anton';font-size:24px;color:#fff}
-.res-grid .k{font-size:11px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase}
-.res-earned{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:14px 0 4px;padding:10px 12px;background:rgba(246,212,71,.04);border:1px solid rgba(246,212,71,.18);box-shadow:2px 2px 0 #000}
-.res-earned-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.res-earned .k{font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
-.res-earned .v{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#fff}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+.res-grid > div{background:#0d0d14;padding:14px 10px;border:2px solid #000;box-shadow:3px 3px 0 #000;text-align:center}
+.res-grid .v{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:22px;color:#fff;font-weight:600}
+.res-grid .k{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-top:4px}
+.res-earned{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px 0 20px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:transparent;box-shadow:none}
+.res-earned-row{display:flex;justify-content:center;align-items:baseline;gap:10px}
+.res-earned .k{font-size:10px;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;display:none}
+.res-earned .v{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:44px;color:#f6d447;font-weight:600;letter-spacing:-.02em}
+.res-tokens{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px 0 20px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.res-tokens-num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:44px;font-weight:600;color:#f6d447;letter-spacing:-.02em}
+.res-tokens-lbl{font:700 10px var(--font-mono);letter-spacing:.25em;color:var(--dim);text-transform:uppercase}
+/* Profile tab in Customize. The email + Sign out block sits at the
+   top; section titles are subtle separators above each cluster. */
+.profile-tools{display:flex;flex-direction:column;gap:14px}
+.profile-account{display:flex;flex-direction:column;gap:8px;padding:14px;background:rgba(246,212,71,.04);border:1px solid rgba(246,212,71,.18);box-shadow:2px 2px 0 #000}
+.profile-account .row{margin:0}
+.profile-account .profile-email{color:#f6d447;font-weight:600;letter-spacing:.04em}
+.profile-account .btn{margin-top:6px;align-self:flex-start}
+.profile-section-title{font:700 10px var(--font-mono);letter-spacing:.25em;color:var(--dim);text-transform:uppercase;margin-top:6px}
+#auth-signout-profile{background:transparent;border:1px solid var(--red);color:var(--red);padding:8px 14px;border-radius:4px;cursor:pointer;font:600 10px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+#auth-signout-profile:hover{background:var(--red);color:#000}
 .res-earned .v.pos{color:#f6d447}
 .res-earned .v.neg{color:#8a91a0}
-#res-improve{margin:6px 0 18px;font-size:15px;color:var(--dim)}
-#res-improve b{color:var(--teal)}
+#res-improve{margin:0;font-size:0;line-height:0;color:transparent}#res-improve b{color:transparent}
 #pause .card{max-width:380px;margin:25vh auto;background:var(--panel);border:3px solid #000;padding:30px;text-align:center;box-shadow:8px 8px 0 #000}
 #pause h2{display:flex;color:#fff;font-size:28px;margin-bottom:18px;justify-content:center;background:none;border:0;padding:0;transform:none}
 
