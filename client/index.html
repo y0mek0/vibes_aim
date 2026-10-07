@@ -416,37 +416,40 @@
   const baseEl = bootEl && bootEl.querySelector('[data-vibes-boot-base]');
   const retryEl = bootEl && bootEl.querySelector('[data-vibes-boot-retry]');
   const skipEl  = bootEl && bootEl.querySelector('[data-vibes-boot-skip]');
+
   // Resolve the server base URL using the same priority order as
-    // src/api.js — explicit VIBES_API_BASE wins, otherwise same-origin
-    // on the API port for local dev, otherwise same host as the page.
-    // We do not pull the helper from src/api.js directly because this
-    // boot script runs before the module graph has had a chance to
-    // register anything.
-    function resolveBase() {
-      if (typeof window !== 'undefined' && window.VIBES_API_BASE) return window.VIBES_API_BASE.replace(/\/$/, '');
-      if (typeof window === 'undefined') return 'http://127.0.0.1:4174';
-      const { protocol, hostname } = window.location;
-      if (hostname === '127.0.0.1' || hostname === 'localhost') {
-        return `${protocol}//${hostname}:4174`;
-      }
-      return `${protocol}//${window.location.host}`;
+  // src/api.js — explicit VIBES_API_BASE wins, otherwise the API port
+  // for local dev, otherwise same host as the page. We can't import
+  // from src/api.js here because this script runs before the module
+  // graph is up.
+  function resolveBase() {
+    if (typeof window !== 'undefined' && window.VIBES_API_BASE) {
+      return window.VIBES_API_BASE.replace(/\/$/, '');
     }
-    const base = resolveBase();
-    if (baseEl) baseEl.textContent = base;
-    let dismissed = false;
-    function show(msg) { if (!bootEl || dismissed) return; bootEl.hidden = false; if (subEl && msg) subEl.innerHTML = msg; }
-    function hide() { if (bootEl) bootEl.hidden = true; }
-    async function check(retries = 3, delayMs = 800) {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const r = await fetch(base + '/health', { cache: 'no-store' });
-          if (r.ok) { hide(); return true; }
-        } catch (_) { /* keep trying */ }
-        if (i < retries - 1) await new Promise((r2) => setTimeout(r2, delayMs));
-      }
-      show(`Could not reach the server at <strong>${base}</strong>. Run <code>node server/src/index.js</code> on that host, or click <em>Continue without server</em> to use the menu only.`);
-      return false;
+    if (typeof window === 'undefined') return 'http://127.0.0.1:4174';
+    const { protocol, hostname } = window.location;
+    if (hostname === '127.0.0.1' || hostname === 'localhost') {
+      return `${protocol}//${hostname}:4174`;
     }
+    return `${protocol}//${window.location.host}`;
+  }
+
+  const base = resolveBase();
+  if (baseEl) baseEl.textContent = base;
+  let dismissed = false;
+  function show(msg) { if (!bootEl || dismissed) return; bootEl.hidden = false; if (subEl && msg) subEl.innerHTML = msg; }
+  function hide() { if (bootEl) bootEl.hidden = true; }
+  async function check(retries = 3, delayMs = 800) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const r = await fetch(base + '/health', { cache: 'no-store' });
+        if (r.ok) { hide(); return true; }
+      } catch (_) { /* keep trying */ }
+      if (i < retries - 1) await new Promise((r2) => setTimeout(r2, delayMs));
+    }
+    show(`Could not reach the server at <strong>${base}</strong>. Run <code>node server/src/index.js</code> on that host, or click <em>Continue without server</em> to use the menu only.`);
+    return false;
+  }
   retryEl && retryEl.addEventListener('click', () => { show('Retrying…'); check(); });
   skipEl  && skipEl.addEventListener('click',  () => { dismissed = true; hide(); });
   check();
