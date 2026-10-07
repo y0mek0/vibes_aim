@@ -888,9 +888,9 @@ canvas#game {
 #menu .portfolio-total { margin-top: 20px; color: var(--fg); font: 600 34px var(--font-mono); letter-spacing: -.05em; }
 /* Order ticket: input row with percentage quick-buttons stacked on the right.
    Mirrors the layout used by Binance / Uniswap for fast percentage picks. */
-.vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; }
+.vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: nowrap; }
 .vt-input-row > input { flex: 1; min-width: 0; }
-.vt-pct-row { display: inline-flex; gap: 4px; }
+.vt-pct-row { display: inline-flex; gap: 4px; flex-shrink: 0; }
 .vt-pct-row button {
   padding: 6px 8px;
   background: transparent;
@@ -900,6 +900,8 @@ canvas#game {
   letter-spacing: .04em;
   border-radius: 2px;
   cursor: pointer;
+  white-space: nowrap;
+  min-width: 32px;
   transition: color .12s ease, border-color .12s ease, background .12s ease;
 }
 .vt-pct-row button:hover { color: var(--accent); border-color: var(--accent); }
