@@ -38,8 +38,7 @@
     { "source": "/aim/(.*)", "destination": "/api/index.js" },
     { "source": "/missions/(.*)", "destination": "/api/index.js" },
     { "source": "/loadout/(.*)", "destination": "/api/index.js" },
-    { "source": "/market/(.*)", "destination": "/api/index.js" },
-    { "source": "/api/(.*)", "destination": "/api/index.js" }
+    { "source": "/market/(.*)", "destination": "/api/index.js" }
   ],
   "headers": [
     {
