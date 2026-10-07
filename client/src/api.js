@@ -8,14 +8,14 @@ let playerIdCache = null;
 
 export function setPlayerId(id) {
   playerIdCache = id;
-  try { localStorage.setItem('vibes_aim.playerId.v1', id); } catch { /* ignore */ }
+  try { localStorage.setItem('aim2stock.playerId.v1', id); } catch { /* ignore */ }
 }
 
 export function getPlayerId() {
   if (playerIdCache) return playerIdCache;
   // Try localStorage first
   try {
-    const saved = localStorage.getItem('vibes_aim.playerId.v1');
+    const saved = localStorage.getItem('aim2stock.playerId.v1');
     if (saved) { playerIdCache = saved; return saved; }
   } catch { /* ignore */ }
   // Otherwise mint a guest id

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>vibes_aim</title>
+<title>aim2stock</title>
 <meta name="theme-color" content="#0b0d12">
 <meta name="description" content="Browser aim-trading game. Aim hits farm simulated units of real-market tickers; trade them in a paper terminal.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -28,7 +28,7 @@
 <body>
 <canvas id="game"></canvas>
 
-<!-- vibes_aim: trading workspace. It lives inside the shared dashboard shell. -->
+<!-- aim2stock: trading workspace. It lives inside the shared dashboard shell. -->
 <div id="vibes-terminal" hidden>
   <div class="vt-body">
     <div class="workspace-heading"><div><span class="section-kicker">Market</span><h1>Market</h1></div><div class="workspace-metrics"><span>Portfolio value <b class="num" data-vt-portfolio-total>—</b></span><span>Open P/L <b class="num" data-vt-open-pnl>—</b></span></div></div>
@@ -76,7 +76,7 @@
   </div>
 </div>
 
-<!-- vibes_aim: missions workspace inside the shared dashboard shell. -->
+<!-- aim2stock: missions workspace inside the shared dashboard shell. -->
 <div id="vibes-missions" hidden>
   <main class="vm-body">
     <section class="vm-page-intro"><div><span class="vm-kicker">Missions</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-claimed data-vm-side-claimed>0</span> / <span data-vm-total data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
@@ -119,9 +119,11 @@
 <div id="menu" class="overlay open">
   <div class="app-shell">
     <header class="app-nav">
-      <button class="brand-mark" type="button" data-dashboard-home aria-label="Go to dashboard">
-        <span class="brand-main">MARKET</span><span class="brand-accent">//AIM</span>
-      </button>
+      <a class="brand-link" href="#dashboard" data-dashboard-home aria-label="Aim2Stock — home">
+              <span class="brand-logo" aria-hidden="true">
+                <span class="brand-logo-top">AIM</span><span class="brand-logo-mid">2</span><span class="brand-logo-bot">STOCK</span>
+              </span>
+            </a>
       <nav class="primary-nav" aria-label="Primary navigation">
         <button type="button" class="nav-link active" data-dashboard-section="train">Train</button>
         <button type="button" class="nav-link" id="vibes-open-terminal" data-dashboard-section="market">Market</button>
@@ -203,6 +205,17 @@
         </div>
       </section>
     </main>
+      <footer class="app-footer">
+        <span class="app-footer-text">Aim2Stock</span>
+        <nav class="app-footer-social" aria-label="Social links">
+          <a class="social-link" href="https://x.com/SandraVeni5079" target="_blank" rel="noopener noreferrer" aria-label="X @SandraVeni5079" title="Sandra on X">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.244 2H21l-6.52 7.45L22 22h-6.84l-5.36-6.6L3.6 22H.84l7.05-8.06L2 2h6.91l4.84 6.05L18.24 2zm-1.2 18h1.86L7.04 4H5.06l11.98 16z"/></svg>
+          </a>
+          <a class="social-link" href="https://discord.com/users/yomek" target="_blank" rel="noopener noreferrer" aria-label="Discord @yomek" title="yomek on Discord">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.32 4.37A19.6 19.6 0 0 0 15.74 3l-.18.32a16.6 16.6 0 0 1 4.31 1.42c-1.81-.85-3.79-1.31-5.78-1.31-2 0-3.97.46-5.78 1.31A16.6 16.6 0 0 1 12.62 3.32L12.44 3a19.6 19.6 0 0 0-4.58 1.37C4.04 8.4 3.13 12.3 3.5 16.16a19.6 19.6 0 0 0 6 3 14.5 14.5 0 0 0 1.27-2.06c-.66-.25-1.3-.56-1.9-.93.16-.12.31-.18.46-.3 3.66 1.7 7.62 1.7 11.23 0 .16.12.31.18.46.3-.6.37-1.24.68-1.9.93.36.69.78 1.37 1.27 2.06a19.6 19.6 0 0 0 6-3c.47-4.62-.83-8.61-4.07-11.79zM9.7 14.42c-1.2 0-2.18-1.1-2.18-2.45 0-1.34.96-2.45 2.18-2.45 1.23 0 2.21 1.1 2.18 2.45 0 1.34-.96 2.45-2.18 2.45zm4.6 0c-1.2 0-2.18-1.1-2.18-2.45 0-1.34.96-2.45 2.18-2.45 1.23 0 2.21 1.1 2.18 2.45 0 1.34-.96 2.45-2.18 2.45z"/></svg>
+          </a>
+        </nav>
+      </footer>
   </div>
 
   <div id="customize" class="customize-backdrop" hidden>
@@ -277,10 +290,10 @@
 
 <div id="deskblock"><div class="card">
   <h2>Desktop only</h2>
-  <p>vibes_aim needs a mouse and pointer lock. Open it on a laptop or desktop.</p>
+  <p>aim2stock needs a mouse and pointer lock. Open it on a laptop or desktop.</p>
 </div></div>
 
-<!-- vibes_aim bootstrap: warm the client store before panels mount -->
+<!-- aim2stock bootstrap: warm the client store before panels mount -->
 <script>
   // Belt-and-braces cache purge. ESM modules are cached aggressively
   // (the static dev server may not always be running with no-cache
@@ -296,7 +309,7 @@
 </script>
 <script type="module" src="src/bootstrap.js?v=20261006-8"></script>
 <script type="module" src="js/auth.js?v=20261006-8"></script>
-<!-- vibes_aim bridge (auto-registers the aim-bridge and boots the server-availability check) -->
+<!-- aim2stock bridge (auto-registers the aim-bridge and boots the server-availability check) -->
 <script type="module" src="js/aim-bridge.js?v=20261006-8"></script>
 <!-- Google Identity Services: loads the GIS script that renders the
      Sign-in button and yields id_tokens. We use it in FedCM-style
@@ -305,9 +318,9 @@
      authorized origin. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script type="module" src="js/chart.js?v=20261006-8"></script>
-<!-- vibes_aim terminal (paper-trading UI) -->
+<!-- aim2stock terminal (paper-trading UI) -->
 <script type="module" src="js/terminal.js?v=20261006-8"></script>
-<!-- vibes_aim missions panel (AAPL -> NVDA chain) -->
+<!-- aim2stock missions panel (AAPL -> NVDA chain) -->
 <script type="module" src="js/missions.js?v=20261006-8"></script>
 <script type="module" src="js/main.js?v=20261006-8"></script>
 <script type="module">

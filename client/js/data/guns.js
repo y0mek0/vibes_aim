@@ -1,4 +1,4 @@
-// vibes_aim arsenal — CS:GO/Warface-inspired names, two-slot loadout.
+// aim2stock arsenal — CS:GO/Warface-inspired names, two-slot loadout.
 //
 // Each gun now carries:
 //   priceStable  — one-time unlock cost in USD stable (charged from

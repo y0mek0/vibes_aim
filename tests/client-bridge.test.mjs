@@ -3,7 +3,7 @@
 // client/js/aim-bridge.js produces. Asserts the response shape matches
 // what client/src/api.js expects to read back.
 //
-// Run: node tests/client-bridge.test.mjs (from vibes_aim/)
+// Run: node tests/client-bridge.test.mjs (from aim2stock/)
 
 import http from 'node:http';
 import assert from 'node:assert/strict';

@@ -1,9 +1,9 @@
 {
-  "name": "vibes_aim-server",
+  "name": "aim2stock-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "vibes_aim backend: aim verification, paper-trading state, provider-neutral market data adapter.",
+  "description": "aim2stock backend: aim verification, paper-trading state, provider-neutral market data adapter.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js"

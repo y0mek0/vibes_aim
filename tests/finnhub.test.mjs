@@ -5,7 +5,7 @@
 //   3) fake OK /stock/candle response -> getCandles maps fields correctly
 //   4) bad upstream -> HttpError(502, 'market_provider_error')
 //
-// Run: node tests/finnhub.test.mjs (from vibes_aim/)
+// Run: node tests/finnhub.test.mjs (from aim2stock/)
 
 import assert from 'node:assert/strict';
 import { createFinnhubProvider, parseFinnhubTradeMessage } from '../server/src/market/finnhub.js';

@@ -3,8 +3,8 @@
 # also handy for local "does my machine still pass?" checks.
 #
 # Usage:
-#   docker build -f server/Dockerfile.test -t vibes_aim-tests .
-#   docker run --rm vibes_aim-tests
+#   docker build -f server/Dockerfile.test -t aim2stock-tests .
+#   docker run --rm aim2stock-tests
 
 FROM node:20-alpine
 

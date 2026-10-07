@@ -1,10 +1,10 @@
-# CHANGELOG — vibes_aim (working title: MARKET//AIM)
+# CHANGELOG — aim2stock (working title: MARKET//AIM)
 
 > Append-only. Each entry must cite real test output or evidence. No "done" without a command, exit code, file path, or screenshot.
 
 ## Stage 0 — Repo skeleton + 4-doc log + log skill (2026-10-04)
 
-- Files created in `C:\Users\azi\Documents\prro_grams\vibes_aim`:
+- Files created in `C:\Users\azi\Documents\prro_grams\aim2stock`:
   - `docs/PLAN.md`
   - `docs/CHANGELOG.md`
   - `docs/MISTAKES.md`
@@ -16,10 +16,10 @@
 
 ## Stage 0b — Repo relocated (2026-10-04)
 
-- User redirected the project to `C:\Users\azi\Documents\prro_grams\vibes_aim`.
+- User redirected the project to `C:\Users\azi\Documents\prro_grams\aim2stock`.
 - The earlier skeleton at `C:\Users\azi\market-aim` is abandoned; docs were re-created in the new location with the same content plus the new repo path.
 - Files now match the canonical 4-doc layout under `docs/`.
-- Working title updated to `vibes_aim`; final game name still TBD.
+- Working title updated to `aim2stock`; final game name still TBD.
 
 ## Stage 1 — Valotrainer base imported at pinned commit (2026-10-04)
 
@@ -27,7 +27,7 @@
 - Engine files copied to `client/js/` (core, data, three, ui, fx, main, game, build).
 - CSS copied to `client/css/style.css`; will be replaced in Stage 2 (current file is valotrainer's).
 - 8 test files copied to `tests/`. `imports.test.mjs` and `css.test.mjs` re-pointed to the new `client/js/...` path; 4 other tests patched from `'../js/` to `'../client/js/`.
-- `package.json` updated: name=`vibes_aim`, start script now serves `client/`, `pwa.test.mjs` removed from `npm test` (PWA not in MVP scope).
+- `package.json` updated: name=`aim2stock`, start script now serves `client/`, `pwa.test.mjs` removed from `npm test` (PWA not in MVP scope).
 - `index.html` rewritten to a thin host page (canvas + importmap) without valotrainer brand text, hero, or mode tiles — those will be re-built in Stage 4.
 - `.gitignore` added.
 
@@ -74,7 +74,7 @@
 - Engine chrome saved verbatim to `client/css/upstream.css` (the valotrainer CSS, untouched).
 - `client/css/style.css` rewritten as our design-system layer. `:root` overrides all of valotrainer's CSS variables, so the engine's existing rules paint in our palette. We added override rules for: `body::before` (kills the halftone plate, replaces with calm dark gradient), `canvas#game`, `.btn` / `.btn.ghost`, `.num`-style ids, `.hero-kicker`, `.glitch`, `.mode.active`, plus primitive classes `.stock` (with `[data-ticker]` accents) / `.panel` / `.hr` / `.num` for future stages. `prefers-reduced-motion` honored.
 - `client/index.html` rebuilt to host the engine's DOM skeleton: every `id` the engine queries via `getElementById` is present (`#game`, `#topbar`, `#menu`, `#buy`, `#results`, `#pause`, `#deskblock`, `#scope`, `#crosshair`, `#slots`, `#banner`, `#lockhint`, `#countdown`, `#st-score`, `#st-kills`, `#st-streak`, `#st-mode`, `#st-timer`, `#st-hs`, `#st-acc`, `#st-dmg`, `#st-kps`, `#st-ammo`, `#st-gunname`, `#st-fps`, `#st-hp`, `#st-stance`, `#slot1/2/3`, `#impbreakdown`, `#overall-imp`, `#goalbar`, `#buildtag`, `#modelist`, `#lo-class`, `#lo-gun`, `#gun-card`, `#chpreview`, `#x-color-preset`, `#x-color-custom`, `#x-outline`, `#x-outline-op`, `#x-outline-th`, `#x-dot`, `#x-dot-op`, `#x-dot-size`, `#x-inner`, `#x-len`, `#x-thick`, `#x-gap`, `#x-op`, `#x-moveerr`, `#x-move-mult`, `#x-fireerr`, `#x-fire-mult`, `#x-fade`, `#x-outer`, `#x-olen`, `#x-othick`, `#x-ogap`, `#x-oop`, `#x-export`, `#x-copy`, `#x-import`, `#x-doimport`, `#x-implabel`, `#s-sens`, `#s-scope`, `#zero-ads`, `#zero-scope`, `#s-armor`, `#s-reload`, `#s-track`, `#s-dist`, `#s-theme`, `#s-orbmove`, `#s-orbsize`, `#s-vol`, `#s-scale`, `#pwa-install`, `#resetprog`, `#buy-grid`, `#buy-close`, `#res-mode`, `#res-score`, `#res-accbar`, `#res-grid`, `#res-improve`, `#res-retry`, `#res-menu`, `#p-resume`, `#p-quit`, `#cdtext`, `#magpips`, `#reloadbar`, `#killfeed`, `#hitmarker`, `#rangedist`, `#vignette`, `#startfade`, `#dmg-layer`).
-- Brand text replaced: page title `vibes_aim`, hero kicker `vibes_aim · build v0.1`, road label `ROAD TO NVDA`, hero sub `aim farms assets · chart decides value`, loadout note points to MIT attribution, crosshair import placeholder no longer says "paste VALORANT code…", crosshair implabel says "the engine format" not VALORANT, settings labels dropped VALORANT-specific phrasing, deskblock message rewritten, buy/results cards have their `COMBAT REPORT` / `BUY PHASE` headers kept because the engine uses those for its UI text (not brand-specific).
+- Brand text replaced: page title `aim2stock`, hero kicker `aim2stock · build v0.1`, road label `ROAD TO NVDA`, hero sub `aim farms assets · chart decides value`, loadout note points to MIT attribution, crosshair import placeholder no longer says "paste VALORANT code…", crosshair implabel says "the engine format" not VALORANT, settings labels dropped VALORANT-specific phrasing, deskblock message rewritten, buy/results cards have their `COMBAT REPORT` / `BUY PHASE` headers kept because the engine uses those for its UI text (not brand-specific).
 
 ### Evidence
 
@@ -162,7 +162,7 @@
 ## Stage 5 — Aim bridge + boot banner + shape tests + Supabase mocked test (2026-10-04)
 
 - `client/js/game.js` — 1-line patch inside `markHit(head)`. Emits a `vibes:hit` CustomEvent on `window` with `{ head, accuracy, streak, ts }`. The rest of the engine is untouched. The event is wrapped in a try/catch so a bridge failure can never affect aim feedback.
-- `client/js/aim-bridge.js` — listens for `vibes:hit`, generates a per-session monotonic `hitId`, POSTs to `/aim/hit`, renders a small floating HUD chip showing the last unit + running total. Maintains a set of in-flight `hitId`s so a network blip that causes a retry can never double-submit the same id within a frame. The active ticker is `vibes_aim.activeTicker.v1` in localStorage (defaults to `AAPL`). The chip uses our design tokens and the same cubic-bezier transition as the rest of the UI.
+- `client/js/aim-bridge.js` — listens for `vibes:hit`, generates a per-session monotonic `hitId`, POSTs to `/aim/hit`, renders a small floating HUD chip showing the last unit + running total. Maintains a set of in-flight `hitId`s so a network blip that causes a retry can never double-submit the same id within a frame. The active ticker is `aim2stock.activeTicker.v1` in localStorage (defaults to `AAPL`). The chip uses our design tokens and the same cubic-bezier transition as the rest of the UI.
 - `client/index.html` — boot banner overlay (`#vibes-boot`) that runs `fetch(window.VIBES_API_BASE + '/health')` with 3 retries. If the server is unreachable, the user sees a one-line explanation and a Skip button. If reachable, the banner hides before the engine menu is interactive. The banner is also wired in front of `js/main.js` so the engine's menu still renders behind it.
 - `client/css/style.css` — boot-banner styles appended. Same tokens as the rest of the system. No new colors, no new fonts.
 - `tests/client-bridge.test.mjs` — boots the server in-process and sends the exact POST shape that `client/js/aim-bridge.js` produces. 8 assertions: `/aim/hit` happy path, idempotency on duplicate `hitId`, streak bonus, `/portfolio` shape (with AAPL balance > 0), `/missions` shape (6 entries with the right fields), `/missions/claim` returns 400 before threshold, `/portfolio/preview` shape, `/portfolio/order` requires `confirmLiquidation`.
@@ -272,7 +272,7 @@
 - **No visual screenshot** in this environment. The missions panel and the unlock card exist in code and in the design system, but I have not run a real browser to confirm the unlock animation plays.
 - `precise_session` uses the server's "any winning trade" proxy. A future stage should track best accuracy from the client and POST it with each hit so the mission is honest.
 - `hold_60s` is 1 second for the MVP. The real 60-second requirement is queued behind a real session timer.
-- The unlock card's "Switch to NVDA" button is one-way: once the player switches the aim farm, they cannot return to AAPL without manually editing `localStorage.vibes_aim.activeTicker.v1`. Acceptable for MVP; a future tab can list all unlocked tickers.
+- The unlock card's "Switch to NVDA" button is one-way: once the player switches the aim farm, they cannot return to AAPL without manually editing `localStorage.aim2stock.activeTicker.v1`. Acceptable for MVP; a future tab can list all unlocked tickers.
 
 ## Stage 9 — End-to-end visual review + polish (2026-10-04)
 
@@ -350,15 +350,15 @@
 
 ## Stage 11 — Public release, GitHub Actions CI, branch protection (2026-10-04)
 
-- **Repository made public**: `gh repo edit y0mek0/vibes_aim --visibility public --accept-visibility-change-consequences`. The `mvp-v0.1` GitHub Release is now visible to anyone.
+- **Repository made public**: `gh repo edit y0mek0/aim2stock --visibility public --accept-visibility-change-consequences`. The `mvp-v0.1` GitHub Release is now visible to anyone.
 - `.github/workflows/test.yml` — CI runs `npm test` on every push to `main` and on every pull request, on a matrix of `ubuntu-latest` and `windows-latest` with Node 20. The workflow cancels in-flight runs on the same ref. After the run, `docs/screenshots/` is uploaded as an artifact (only if present).
 - **Branch protection via ruleset `main-protection`**: `non_fast_forward` (rejects force-push) and `deletion` (rejects branch deletion). Created via the GitHub Rulesets API. The `required_status_checks` rule will be added in a follow-up once the `test` workflow has registered at least one check name; until then, the protection is "no force-push, no delete".
 - **No new commits** for the ruleset — it lives in GitHub's API, not in the repo.
 
 ### Evidence
 
-- `gh repo view y0mek0/vibes_aim` returns `visibility: public`, `defaultBranch: main`, `description: Browser aim-trading game: ...`.
-- `gh api repos/y0mek0/vibes_aim/rulesets` returns the `main-protection` ruleset.
+- `gh repo view y0mek0/aim2stock` returns `visibility: public`, `defaultBranch: main`, `description: Browser aim-trading game: ...`.
+- `gh api repos/y0mek0/aim2stock/rulesets` returns the `main-protection` ruleset.
 - `gh release list` shows `mvp-v0.1` with its release notes.
 - `npm test` (local) → exit 0, 16/16 suites green.
 

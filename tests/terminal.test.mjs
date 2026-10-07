@@ -9,7 +9,7 @@
 //      open/close, full round-trip with leverage and liquidation. Uses
 //      the same api wrapper the browser uses (pointed at the test port).
 //
-// Run: node tests/terminal.test.mjs (from vibes_aim/)
+// Run: node tests/terminal.test.mjs (from aim2stock/)
 
 import http from 'node:http';
 import assert from 'node:assert/strict';

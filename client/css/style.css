@@ -1,4 +1,4 @@
-/* vibes_aim — design system stylesheet.
+/* aim2stock — design system stylesheet.
    Loaded AFTER client/css/upstream.css (the valotrainer engine CSS) so our
    tokens win. Our :root overrides paint the entire engine in our palette,
    without touching its DOM/grid logic. See design-system/MASTER.md. */
@@ -192,7 +192,7 @@ canvas#game {
   }
 }
 
-/* — vibes_aim primitives (used by future stages) — */
+/* — aim2stock primitives (used by future stages) — */
 .stock {
   display: inline-flex;
   align-items: center;
@@ -230,7 +230,7 @@ canvas#game {
 .num.neg { color: var(--loss); }
 .num.pos { color: var(--gain); }
 
-/* — vibes_aim boot banner — */
+/* — aim2stock boot banner — */
 #vibes-boot {
   position: fixed; inset: 0; z-index: 60;
   display: flex; align-items: center; justify-content: center;
@@ -288,7 +288,7 @@ canvas#game {
 }
 .vibes-boot-actions button:hover { color: var(--accent); border-color: var(--accent); }
 
-/* — vibes_aim floating chart panel — */
+/* — aim2stock floating chart panel — */
 #vibes-chart {
   position: fixed;
   right: 14px;
@@ -400,7 +400,7 @@ canvas#game {
   padding: 0;
 }
 
-/* — vibes_aim trading terminal — */
+/* — aim2stock trading terminal — */
 #vibes-terminal {
   position: fixed;
   inset: 0;
@@ -610,7 +610,7 @@ canvas#game {
 }
 #vibes-open-terminal:hover { border-color: var(--accent); color: var(--accent); }
 
-/* — vibes_aim missions panel — */
+/* — aim2stock missions panel — */
 #vibes-missions {
   position: fixed;
   inset: 0;
@@ -820,9 +820,21 @@ canvas#game {
 
 #menu.overlay.open { display: block; overflow: auto; background: radial-gradient(circle at 78% 8%, rgba(246, 212, 71, .08), transparent 28%), var(--dash-bg); }
 #menu .app-shell { min-height: 100dvh; width: min(1480px, 100%); margin: 0 auto; padding: 0 30px 34px; color: var(--fg); font-family: var(--font-ui); }
-#menu .app-nav { min-height: 70px; display: flex; align-items: center; gap: 34px; border-bottom: 1px solid var(--dash-line); }
-#menu .brand-mark { border: 0; background: none; color: var(--fg); padding: 0; display: inline-flex; gap: 5px; align-items: baseline; cursor: pointer; font-family: var(--font-mono); letter-spacing: .06em; font-weight: 700; font-size: 17px; }
-#menu .brand-accent { color: var(--dash-accent); }
+#menu /* Brand logo "AIM2STOCK" — chunky stacked wordmark in the
+   project's yellow/black palette. The middle "2" sits on a black
+   plate with a yellow accent stripe; AIM and STOCK are large
+   uppercase Inter so the mark reads at a glance even at a small
+   header size. */
+.brand-link { display: inline-flex; align-items: center; text-decoration: none; color: inherit; }
+.brand-logo { display: inline-grid; grid-template-columns: auto auto auto; align-items: center; gap: 2px; font-family: 'Inter', system-ui, sans-serif; font-weight: 900; line-height: .82; text-transform: uppercase; letter-spacing: -.02em; user-select: none; }
+.brand-logo-top, .brand-logo-bot { color: #f6d447; font-size: 22px; text-shadow: 1px 1px 0 #000, 3px 3px 0 #000; }
+.brand-logo-mid { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #000; color: #f6d447; border: 2px solid #f6d447; font-size: 18px; transform: skewX(-2deg); box-shadow: 2px 2px 0 #000; }
+.brand-link:hover .brand-logo-top, .brand-link:hover .brand-logo-bot { color: #fff; }
+.brand-link:hover .brand-logo-mid { background: #f6d447; color: #000; }
+
+.app-nav { min-height: 70px; display: flex; align-items: center; gap: 34px; border-bottom: 1px solid var(--dash-line); }
+#menu 
+#menu 
 #menu .primary-nav { display: flex; align-items: stretch; gap: 4px; height: 70px; }
 #menu .nav-link { position: relative; border: 0; background: none; color: var(--dash-muted); padding: 0 13px; font: 600 11px var(--font-mono); text-transform: uppercase; letter-spacing: .13em; cursor: pointer; transition: color 160ms ease; }
 #menu .nav-link::after { content: ''; position: absolute; left: 13px; right: 13px; bottom: -1px; height: 2px; background: transparent; }
@@ -1029,6 +1041,14 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
    and they crowded the top right corner. */
 #menu .nav-account { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
+/* Footer with social links. Single row, low-key, the icons are the
+   only interactive element. */
+.app-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px 18px; margin: 0; border-top: 1px solid var(--line); }
+.app-footer-text { font: 700 10px var(--font-mono); letter-spacing: .25em; color: var(--dim); text-transform: uppercase; }
+.app-footer-social { display: inline-flex; gap: 10px; }
+.social-link { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--line); color: var(--dash-muted); border-radius: 4px; transition: color .12s ease, border-color .12s ease, transform .09s ease; text-decoration: none; }
+.social-link:hover { color: #f6d447; border-color: #f6d447; transform: translateY(-1px); }
+
 /* Generic icon button used in the header for Customize, Sign in, and
    Profile. Single 18x18 svg, transparent until hover. */
 .nav-icon-btn {
@@ -1160,9 +1180,9 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 
 
 /* Restore the compact MARKET//AIM wordmark treatment. */
-#menu .brand-mark { gap: 6px; font-family: var(--font-mono); font-size: 16px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-#menu .brand-main { color: var(--fg); }
-#menu .brand-accent { color: var(--dash-accent); letter-spacing: .07em; }
+#menu 
+#menu 
+#menu 
 
 /* Geometry pass: keep hero, train, roadmap, portfolio and chart on one 63/37 grid. */
 #menu .dashboard-intro { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(360px, 1fr); gap: 22px; align-items: end; padding: 16px 0 12px; }

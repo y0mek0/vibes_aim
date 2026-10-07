@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Playwright visual smoke for vibes_aim.
+"""Playwright visual smoke for aim2stock.
 
 Boots the server on a fixed port, serves the client on a second port
 (set as VIBES_API_BASE for CORS), opens the page in headless Chrome,
@@ -222,7 +222,7 @@ def main():
             summary["dom"]["initial_boot_hidden"] = True  # banner was hidden at start
             summary["dom"]["initial_menu_open"] = True
             summary["dom"]["initial_chart_visible"] = True
-            bridge = page.query_selector('#vibes-aim-bridge')
+            bridge = page.query_selector('#aim2stock-bridge')
             summary["dom"]["initial_bridge_present"] = bridge is not None
             summary["dom"]["initial_bridge_text"] = bridge.text_content().strip() if bridge else ""
             summary["dom"]["initial_bridge_aria_label"] = bridge.get_attribute("aria-label") if bridge else None

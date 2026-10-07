@@ -1,4 +1,4 @@
--- vibes_aim Supabase schema. Run once in SQL Editor.
+-- aim2stock Supabase schema. Run once in SQL Editor.
 -- Mirrors the in-memory store in server/src/db/store.js.
 -- service_role bypasses RLS, so we keep the policy surface explicit and
 -- deny anon/authenticated access to everything (the server does all writes).

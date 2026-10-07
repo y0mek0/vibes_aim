@@ -10,7 +10,7 @@
 //      browser uses, and assert the response shape matches what the
 //      chart consumes.
 //
-// Run: node tests/chart.test.mjs (from vibes_aim/)
+// Run: node tests/chart.test.mjs (from aim2stock/)
 
 import http from 'node:http';
 import assert from 'node:assert/strict';

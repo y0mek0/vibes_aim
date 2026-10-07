@@ -1,4 +1,4 @@
-# PLAN — vibes_aim (working title: MARKET//AIM)
+# PLAN — aim2stock (working title: MARKET//AIM)
 
 > Forward-looking plan. Source of truth for what we are doing next.
 > Historical record of completed work lives in `CHANGELOG.md`. Failures live in `MISTAKES.md`. Active backlog lives in `TODO.md`.
@@ -9,8 +9,8 @@ Browser game where aim hits farm simulated units of real-market assets, while a 
 
 ## Repo location
 
-- `C:\Users\azi\Documents\prro_grams\vibes_aim`
-- Working title: `vibes_aim` (final game name TBD, internal codename stays)
+- `C:\Users\azi\Documents\prro_grams\aim2stock`
+- Working title: `aim2stock` (final game name TBD, internal codename stays)
 
 ## Scope (MVP v0.1)
 
@@ -31,7 +31,7 @@ Browser game where aim hits farm simulated units of real-market assets, while a 
 - Real-money execution, broker integration, KYC, withdrawals.
 - More than 3 real tickers in UI.
 - 3D arenas beyond the valotrainer flat range.
-- Custom logo / final name (placeholder `vibes_aim`).
+- Custom logo / final name (placeholder `aim2stock`).
 - Achievements, referrals, leaderboard, season reset, stop-loss (UI placeholders only).
 
 ## Stage plan
@@ -101,7 +101,7 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ### Stage 11.9 — server Docker image (DONE 2026-10-05)
 
-**Verified evidence:** `node --check server/src/index.js` exited 0; local `PORT=4174 node server/src/index.js` answered `GET /health` with `200 {"ok":true,"ts":...}`. Full `npm test` exited 0. The Docker image itself is not built locally because Docker is not installed on this machine; CI users can verify with `docker build -t vibes_aim-server ./server` and `docker run --rm -p 3000:3000 vibes_aim-server`.
+**Verified evidence:** `node --check server/src/index.js` exited 0; local `PORT=4174 node server/src/index.js` answered `GET /health` with `200 {"ok":true,"ts":...}`. Full `npm test` exited 0. The Docker image itself is not built locally because Docker is not installed on this machine; CI users can verify with `docker build -t aim2stock-server ./server` and `docker run --rm -p 3000:3000 aim2stock-server`.
 
 **Scope:** add a minimal production Docker image for the pure-Node server, plus a test image, and document both in the deploy guide. The server has no npm dependencies, so the image only copies source and runs `node src/index.js`.
 

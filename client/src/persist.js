@@ -9,7 +9,7 @@
 // unavailable (Safari private mode, sandboxed iframe), all reads return
 // null and all writes are no-ops.
 
-const KEY = 'vibes_aim.guestSnapshot.v1';
+const KEY = 'aim2stock.guestSnapshot.v1';
 
 function safeGet() {
   try { return localStorage.getItem(KEY); } catch { return null; }

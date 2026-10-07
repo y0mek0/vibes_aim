@@ -40,7 +40,7 @@ Example `client/vercel.json`:
 - Start command: `node server/src/index.js`
 - Health check path: `/health`
 - Environment:
-  - `ORIGIN=https://vibes-aim-client.vercel.app`
+  - `ORIGIN=https://aim2stock-client.vercel.app`
   - `MARKET_PROVIDER=stub` (Finnhub token is optional and off by default)
   - `SUPABASE_URL=` (leave empty to use the in-memory store)
   - `SUPABASE_SERVICE_KEY=`
@@ -60,15 +60,15 @@ Two minimal Dockerfiles are shipped. Both use `node:20-alpine` (matches `.nvmrc`
 
 ```bash
 # Production server
-docker build -t vibes_aim-server ./server
+docker build -t aim2stock-server ./server
 docker run --rm -p 3000:3000 \
     -e ORIGIN=http://127.0.0.1:4173 \
     -e MARKET_PROVIDER=stub \
-    vibes_aim-server
+    aim2stock-server
 
 # Test image (CI / local check)
-docker build -f server/Dockerfile.test -t vibes_aim-tests .
-docker run --rm vibes_aim-tests
+docker build -f server/Dockerfile.test -t aim2stock-tests .
+docker run --rm aim2stock-tests
 ```
 
 ### Supabase persistence
@@ -109,7 +109,7 @@ To support multiple origins, change `server/src/index.js`'s CORS section to read
 
 After deploy, open the client URL in a browser. You should see:
 
-1. The `vibes_aim` boot card with "Looking for the server on http://<host>:3000…" for ~1s.
+1. The `aim2stock` boot card with "Looking for the server on http://<host>:3000…" for ~1s.
 2. The boot card disappears, the engine menu is interactive, the chart shows a price.
 3. Land 10 aim hits. The aim-bridge HUD chip in the bottom-right should show `farm AAPL 0.0080 | total 0.0080` after 10 hits.
 

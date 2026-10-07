@@ -1,4 +1,4 @@
-# vibes_aim
+# aim2stock
 
 A browser aim-trading game. Aim hits in a 3D arena farm simulated units of real-market tickers; a separate paper-trading terminal uses real charts and lets you buy, sell, long, short, and run positions up to 20x leverage. Every aim hit, every order, every P/L is server-validated. All money is play money.
 
@@ -30,7 +30,7 @@ npx --yes serve -p 4173 client
 # 3. Open http://127.0.0.1:4173
 ```
 
-The first paint shows a `vibes_aim` boot card. It pings `http://127.0.0.1:3000/health`. If reachable, the menu and the chart panel appear. If not, the boot card shows a one-line explanation and a `Skip` button so the player can still look at the menu.
+The first paint shows a `aim2stock` boot card. It pings `http://127.0.0.1:3000/health`. If reachable, the menu and the chart panel appear. If not, the boot card shows a one-line explanation and a `Skip` button so the player can still look at the menu.
 
 The client reads the API base from `window.VIBES_API_BASE` or falls back to `http://127.0.0.1:3000`. To point at a different host, set it on the host page or via the boot card's `Skip` flow.
 

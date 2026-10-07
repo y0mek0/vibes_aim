@@ -6,7 +6,7 @@
 //   2) Integration tests against the live server: hit the missions
 //      endpoint, claim a few, assert NVDA unlocks after the 6th claim.
 //
-// Run: node tests/missions.test.mjs (from vibes_aim/)
+// Run: node tests/missions.test.mjs (from aim2stock/)
 
 import http from 'node:http';
 import assert from 'node:assert/strict';

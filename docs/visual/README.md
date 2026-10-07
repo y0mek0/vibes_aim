@@ -14,7 +14,7 @@ The visual smoke is what proves the page paints correctly. It is intentionally s
 - Python 3.10+
 - `playwright` (Python): `pip install playwright`
 - Chromium: `playwright install chromium` (or point to a system Chrome via `executable_path` in `tests/visual_smoke.py`).
-- The `vibes_aim` server (`server/src/index.js`) is **booted and torn down** by the smoke; no manual server needed.
+- The `aim2stock` server (`server/src/index.js`) is **booted and torn down** by the smoke; no manual server needed.
 
 ## How to run
 

@@ -1,4 +1,4 @@
-// client/js/auth.js — Google sign-in for vibes_aim.
+// client/js/auth.js — Google sign-in for aim2stock.
 //
 // Flow:
 //   1. Render the official "Sign in with Google" button via Google
@@ -17,8 +17,8 @@
 
 import { api } from '../src/api.js?v=20261006-8';
 
-const TOKEN_KEY = 'vibes_aim.sessionToken.v1';
-const PROFILE_KEY = 'vibes_aim.profile.v1';
+const TOKEN_KEY = 'aim2stock.sessionToken.v1';
+const PROFILE_KEY = 'aim2stock.profile.v1';
 
 // Same client_id used in Google Cloud OAuth. The GSI library will only
 // work if this origin is in the OAuth client's "Authorized JavaScript
@@ -198,7 +198,7 @@ function wireButton() {
         try {
           const s = window.store?.state;
           if (s && !auth.state.player) {
-            const stored = JSON.parse(localStorage.getItem('vibes_aim.guestSnapshot.v1') || 'null');
+            const stored = JSON.parse(localStorage.getItem('aim2stock.guestSnapshot.v1') || 'null');
             guestId = stored?.player?.id || null;
           }
         } catch (_) { /* noop */ }

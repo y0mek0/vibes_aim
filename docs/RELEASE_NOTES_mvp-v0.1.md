@@ -1,6 +1,6 @@
-# vibes_aim mvp-v0.1
+# aim2stock mvp-v0.1
 
-First release of vibes_aim, a browser aim-trading game.
+First release of aim2stock, a browser aim-trading game.
 
 - Aim loop on top of valotrainer (Gridshot, Flick).
 - Each hit mints a simulated unit of the active ticker (AAPL by default).

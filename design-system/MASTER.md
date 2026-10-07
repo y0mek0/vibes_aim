@@ -1,4 +1,4 @@
-# vibes_aim — Design System MASTER
+# aim2stock — Design System MASTER
 
 > Single source of truth for visual tokens, layout rules, and component primitives. Every CSS rule and every component must reference these tokens. Do not invent values outside this file.
 
@@ -62,7 +62,7 @@ Type scale (px, line-height)
 
 | Token | Size / LH | Use |
 |---|---|---|
-| `--fs-kicker` | 11 / 1.4 | Kickers (`// vibes_aim`) |
+| `--fs-kicker` | 11 / 1.4 | Kickers (`// aim2stock`) |
 | `--fs-small` | 12 / 1.4 | Notes, secondary |
 | `--fs-body` | 14 / 1.45 | Default UI |
 | `--fs-stat` | 13 / 1.3 | HUD readouts |

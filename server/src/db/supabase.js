@@ -38,6 +38,12 @@ export function createSupabaseStore({ url, serviceKey }) {
     'Authorization': `Bearer ${serviceKey}`,
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    // Without this, PostgREST returns 204 No Content for POST/UPSERT
+    // and the response body is empty — which means callers that do an
+    // INSERT expecting the inserted row back (e.g. getOrCreatePlayer)
+    // would get `null` even though the row was created. The flag asks
+    // the server to echo the affected row(s).
+    'Prefer': 'return=representation',
   };
 
   async function rpc(table, query = '', init = {}) {

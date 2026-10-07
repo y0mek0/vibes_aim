@@ -2,7 +2,7 @@
 // or via the `$('id')` shortcut must exist in the host page. This is the
 // safety net against the "silent black screen" class of bug.
 //
-// Run: node tests/dom.test.mjs (from vibes_aim/)
+// Run: node tests/dom.test.mjs (from aim2stock/)
 
 import fs from 'node:fs';
 import path from 'node:path';

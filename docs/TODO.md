@@ -1,4 +1,4 @@
-# TODO — vibes_aim (working title: MARKET//AIM)
+# TODO — aim2stock (working title: MARKET//AIM)
 
 > Active backlog. One line per item, with stage number and acceptance criterion. Move to CHANGELOG only when actually done and verified.
 
@@ -14,7 +14,7 @@
 
 - [x] Run `ui-ux-pro-max --design-system` for a trading-game aesthetic, persist to `design-system/MASTER.md`. → skipped script (not installed); used `ui-ux-pro-max` priority table + documented defaults directly per the skill's own fallback clause.
 - [x] Lock AAPL palette (gray/silver), NVDA palette (green neon), accent tokens, typography (Geist Mono for numbers, Geist Sans for UI). → recorded in `design-system/MASTER.md` and applied via `:root` overrides in `client/css/style.css`.
-- [x] Replace `client/css/style.css` with a real vibes_aim stylesheet; verify `tests/css.test.mjs` passes. → `npm test` exit 0; css suite `ALL PASS`.
+- [x] Replace `client/css/style.css` with a real aim2stock stylesheet; verify `tests/css.test.mjs` passes. → `npm test` exit 0; css suite `ALL PASS`.
 - [x] Verify tokens are referenced by at least one CSS rule and one component, paste `grep` output in CHANGELOG. → `grep -RE "#[0-9a-fA-F]{6}" client/css/style.css | grep -v ":root"` returns 0 matches; recorded in CHANGELOG.
 
 ## Stage 3 — Server

@@ -1,7 +1,7 @@
-// Node test: stylesheet sanity for vibes_aim.
+// Node test: stylesheet sanity for aim2stock.
 // Validates: braces and parens balanced, no invalid grid 'none' that silently
 // collapses layouts, viewport-locked root, no horizontal scroll on body.
-// Run: node tests/css.test.mjs (from vibes_aim/)
+// Run: node tests/css.test.mjs (from aim2stock/)
 import fs from 'node:fs';
 
 const css = fs.readFileSync(new URL('../client/css/style.css', import.meta.url), 'utf8');

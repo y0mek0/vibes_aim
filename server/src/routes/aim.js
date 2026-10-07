@@ -34,11 +34,15 @@ export function aimRoutes(r, { store, config }) {
     }
 
     // Idempotency (sessionId + hitId)
-    const dup = await store.recordHit({ playerId, sessionId, hitId, ticker, unit: config.aim.hitUnit, ts: ts || Date.now() });
-    if (dup.duplicate) {
-      // Re-grant the same unit, but do NOT double-mint. Just return the recorded entry.
-      return sendJson(res, 200, { ok: true, duplicate: true, unit: dup.entry.unit, ticker, accuracy, streak });
-    }
+        const dup = await store.recordHit({ playerId, sessionId, hitId, ticker, unit: config.aim.hitUnit, ts: ts || Date.now() });
+        if (dup && dup.duplicate) {
+          // Defensive: dup.entry may be absent if the underlying store
+          // returned only the duplicate flag without the original row.
+          // Fall back to 0 unit so the client gets a clean response
+          // instead of a 500.
+          const unit = (dup.entry && typeof dup.entry.unit === 'number') ? dup.entry.unit : 0;
+          return sendJson(res, 200, { ok: true, duplicate: true, unit, ticker, accuracy, streak });
+        }
 
     // Mint simulated units
     const acc = Number(accuracy);

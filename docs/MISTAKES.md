@@ -1,4 +1,4 @@
-# MISTAKES — vibes_aim (working title: MARKET//AIM)
+# MISTAKES — aim2stock (working title: MARKET//AIM)
 
 > Append-only. Honest record of what was tried, what actually happened, and what to do next time. Failures belong here, not in CHANGELOG.
 
@@ -27,7 +27,7 @@
 - `tests/imports.test.mjs` referenced `js/...` paths; the engine now lives under `client/js/...`. Updated the file list and the dynamic import of `guns.js`.
 - Four other tests (`ballistics`, `gunplay`, `crosshair`, `stalker`, `themes`) imported from `'../js/...`. Patched to `'../client/js/...`. None of their assertions were changed.
 - `tests/pwa.test.mjs` is excluded from `npm test` because PWA is out of MVP scope. The file remains in the tree for future use; it will be re-enabled when a real `manifest.webmanifest` and `sw.js` exist in this repo.
-- `tests/css.test.mjs` was set up in Stage 1 to validate the upcoming vibes_aim stylesheet. It was initially red against the valotrainer CSS. Stage 2 replaced `client/css/style.css` with our token-driven stylesheet; the test now passes (ALL PASS). Closed.
+- `tests/css.test.mjs` was set up in Stage 1 to validate the upcoming aim2stock stylesheet. It was initially red against the valotrainer CSS. Stage 2 replaced `client/css/style.css` with our token-driven stylesheet; the test now passes (ALL PASS). Closed.
 - `client/index.html` was first written with a custom mode selector, then rewritten as a bare canvas-only page. Reason: `game.js boot()` reads `mode` from a local variable inside its closure and does not accept an external selector. The minimal-invasion fix is to keep boot's own menu (it works, it's tested) and replace the surrounding chrome in Stage 4 once we have our own CSS and DOM. Cost: about 5 minutes lost; would have been caught earlier by reading `game.js` line 76 before writing `index.html`. Lesson: **read the engine entry point before writing the host page**; that 30-second read would have saved a write+rewrite cycle.
 
 ## Stage 2 — Host page needed more DOM than I thought (2026-10-04)

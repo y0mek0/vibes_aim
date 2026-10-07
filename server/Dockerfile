@@ -1,20 +1,20 @@
-# Minimal Docker image for the vibes_aim server.
+# Minimal Docker image for the aim2stock server.
 #
 # The server is pure Node (no `node_modules`), so this Dockerfile only
 # copies source files. Stage builds use the project's Node 20 runtime
 # (matches .nvmrc) on linux/amd64 + linux/arm64.
 #
 # Usage:
-#   docker build -t vibes_aim-server ./server
+#   docker build -t aim2stock-server ./server
 #   docker run --rm -p 3000:3000 \
 #     -e ORIGIN=http://127.0.0.1:4173 \
 #     -e MARKET_PROVIDER=stub \
-#     vibes_aim-server
+#     aim2stock-server
 
 FROM node:20-alpine
 
-LABEL org.opencontainers.image.title="vibes_aim-server" \
-      org.opencontainers.image.description="Pure-Node HTTP server for the vibes_aim paper-trading backend." \
+LABEL org.opencontainers.image.title="aim2stock-server" \
+      org.opencontainers.image.description="Pure-Node HTTP server for the aim2stock paper-trading backend." \
       org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app

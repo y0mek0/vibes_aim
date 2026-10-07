@@ -9,7 +9,7 @@
 import { api } from '../src/api.js?v=20261006-8';
 import { getSessionId } from '../src/session.js?v=20261006-8';
 
-const ACTIVE_TICKER_KEY = 'vibes_aim.activeTicker.v1';
+const ACTIVE_TICKER_KEY = 'aim2stock.activeTicker.v1';
 const DEFAULT_TICKER = 'AAPL';
 
 function readStoredTicker() {
@@ -40,7 +40,7 @@ function ensureChip() {
   // Tiny floating HUD chip showing the last minted unit. Lives in the body
   // so it cannot interfere with the engine's overlays.
   const wrap = document.createElement('div');
-  wrap.id = 'vibes-aim-bridge';
+  wrap.id = 'aim2stock-bridge';
   wrap.setAttribute('data-bridge', '1');
   wrap.setAttribute('aria-label', activeTickerLabel(activeTicker));
   wrap.style.cssText = [

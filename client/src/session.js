@@ -2,7 +2,7 @@
 // sessionStorage so a hard refresh keeps the same id (helps the
 // server's idempotency window) but a new tab starts fresh.
 
-const KEY = 'vibes_aim.sessionId.v1';
+const KEY = 'aim2stock.sessionId.v1';
 
 export function getSessionId() {
   let id = null;

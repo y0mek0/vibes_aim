@@ -46,7 +46,7 @@ export function createApp(deps = {}) {
         try { sock.end('HTTP/1.1 400 Bad Request\r\n\r\n'); } catch (_) {}
       });
       server.listen(port, () => {
-        console.log(`[server] vibes_aim on http://127.0.0.1:${port} (origin=${config.origin}, provider=${config.market.provider})`);
+        console.log(`[server] aim2stock on http://127.0.0.1:${port} (origin=${config.origin}, provider=${config.market.provider})`);
       });
       return server;
     },

@@ -1,6 +1,6 @@
 // Import/export consistency gate: every named import must resolve to a real
 // export in the target module. Catches "X is not defined" crashes at test time.
-// Run: node tests/imports.test.mjs (from vibes_aim/)
+// Run: node tests/imports.test.mjs (from aim2stock/)
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';

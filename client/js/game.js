@@ -8,7 +8,7 @@ import { BUILD } from './build.js?v=20261006-8';
 import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261006-8';
 // Inline constant for the flat 100 HP model. Imported separately so the
 // game boots even if the mechanics.js export changes name. We never use
-// shields or armor in vibes_aim.
+// shields or armor in aim2stock.
 const PLAYER_HP = 100;
 import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261006-8';
 import { createStalker } from './core/stalker.js?v=20261006-8';
@@ -563,7 +563,7 @@ export function boot() {
       // No store available (game launched before bootstrap finished):
       // fall back to the legacy HUD-chip read so the report never shows
       // just zeros if the user already had earn flow running.
-      const bridgeChip = document.querySelector('#vibes-aim-bridge');
+      const bridgeChip = document.querySelector('#aim2stock-bridge');
       const earnedAaplText = (bridgeChip?.children?.[2]?.textContent || '0.0000').trim();
       const earnedAapl = Number(earnedAaplText) || 0;
       if (earnedAaplEl) earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${getActiveTicker()}`;
@@ -711,7 +711,7 @@ export function boot() {
     const hm = $('hitmarker');
     hm.classList.toggle('head', !!head);
     replayAnim(hm, 'show');
-    // vibes_aim bridge: emit a window event the client-side aim-bridge.js
+    // aim2stock bridge: emit a window event the client-side aim-bridge.js
     // listens for. The bridge POSTs to /aim/hit. Server is authoritative.
     try {
       const acc = stats.raw.shots > 0 ? stats.raw.hits / stats.raw.shots : 0;
