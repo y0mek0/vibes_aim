@@ -86,6 +86,7 @@ html, body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding-bottom: 52px; /* leave room for the fixed app-footer */
 }
 
 body { overflow-x: hidden; }
@@ -1041,13 +1042,57 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
    and they crowded the top right corner. */
 #menu .nav-account { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-/* Footer with social links. Single row, low-key, the icons are the
-   only interactive element. */
-.app-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px 18px; margin: 0; border-top: 1px solid var(--line); }
-.app-footer-text { font: 700 10px var(--font-mono); letter-spacing: .25em; color: var(--dim); text-transform: uppercase; }
-.app-footer-social { display: inline-flex; gap: 10px; }
-.social-link { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--line); color: var(--dash-muted); border-radius: 4px; transition: color .12s ease, border-color .12s ease, transform .09s ease; text-decoration: none; }
-.social-link:hover { color: #f6d447; border-color: #f6d447; transform: translateY(-1px); }
+/* Footer with social links. Lives OUTSIDE the #menu overlay so it
+   remains visible during gameplay. The footer uses position:fixed so
+   it sits at the bottom of the viewport regardless of where the user
+   is on the page (the workspace has its own internal scroll containers).
+   z-index sits above all overlays so the handles are always tappable. */
+.app-footer {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 24px;
+  background: rgba(7, 8, 12, 0.88);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  z-index: 50;
+  pointer-events: auto;
+}
+.app-footer-text {
+  font: 700 10px var(--font-mono); letter-spacing: .25em;
+  color: var(--dim); text-transform: uppercase;
+}
+.app-footer-social {
+  display: inline-flex; gap: 10px;
+  margin: 0; padding: 0; list-style: none;
+}
+/* Each social link is a row of [icon][handle]. The handle shows
+   alongside the icon on wide enough screens, and falls back to the
+   title attribute on narrow ones. */
+.social-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 12px;
+  border: 1px solid var(--line);
+  color: var(--dash-muted);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: color .12s ease, border-color .12s ease, transform .09s ease;
+  font: 600 11px var(--font-mono); letter-spacing: .06em;
+}
+.social-link svg { flex: none; }
+.social-link .social-handle {
+  color: inherit;
+  white-space: nowrap;
+}
+.social-link:hover {
+  color: #f6d447; border-color: #f6d447; transform: translateY(-1px);
+}
+/* On narrow viewports (< 720px) the handle label disappears so the
+   footer stays compact and does not overlap the gameplay HUD. */
+@media (max-width: 720px) {
+  .app-footer-text { display: none; }
+  .social-link .social-handle { display: none; }
+  .social-link { padding: 0 10px; }
+}
 
 /* Generic icon button used in the header for Customize, Sign in, and
    Profile. Single 18x18 svg, transparent until hover. */
