@@ -889,8 +889,8 @@ canvas#game {
 #menu .portfolio-total { margin-top: 20px; color: var(--fg); font: 600 34px var(--font-mono); letter-spacing: -.05em; }
 /* Order ticket: input row with percentage quick-buttons stacked on the right.
    Mirrors the layout used by Binance / Uniswap for fast percentage picks. */
-.vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: nowrap; }
-.vt-input-row > input { flex: 1; min-width: 0; }
+.vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: wrap; }
+.vt-input-row > input { flex: 1 1 80px; min-width: 80px; }
 .vt-pct-row { display: inline-flex; gap: 4px; flex-shrink: 0; }
 .vt-pct-row button {
   padding: 6px 8px;
@@ -1641,11 +1641,10 @@ body.market-collapsed .vt-market-right { display: none; }
 #menu .app-shell > #vibes-terminal .vt-control input[type="number"] { box-sizing: border-box; width: 100%; min-height: 31px; padding: 6px 9px; background: var(--bg-3); color: var(--fg); border: 1px solid var(--line-strong); border-radius: 2px; font: 12px var(--font-mono); }
 #menu .app-shell > #vibes-terminal .vt-control .vt-field-label b { float: right; color: var(--fg); font-weight: 500; letter-spacing: 0; }
 #menu .app-shell > #vibes-terminal .vt-control input[type="range"] { display: block; width: 100%; min-width: 0; margin: 12px 0 11px; accent-color: var(--yellow); }
-#menu .app-shell > #vibes-terminal .vt-readout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; margin: 0 0 14px; border: 1px solid var(--line); }
-#menu .app-shell > #vibes-terminal .vt-readout > div { display: flex; flex-direction: column; gap: 5px; padding: 9px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--dash-muted); font: 10px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
-#menu .app-shell > #vibes-terminal .vt-readout > div:nth-child(2n) { border-right: 0; }
-#menu .app-shell > #vibes-terminal .vt-readout > div:nth-last-child(-n+2) { border-bottom: 0; }
-#menu .app-shell > #vibes-terminal .vt-readout strong { color: var(--fg); font: 12px var(--font-mono); letter-spacing: 0; }
+#menu .app-shell > #vibes-terminal .vt-readout { display: grid; grid-template-columns: 1fr; gap: 0; padding: 0; margin: 0 0 14px; border: 1px solid var(--line); }
+#menu .app-shell > #vibes-terminal .vt-readout > div { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--dash-muted); font: 10px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
+#menu .app-shell > #vibes-terminal .vt-readout > div:last-child { border-bottom: 0; }
+#menu .app-shell > #vibes-terminal .vt-readout > div .num, #menu .app-shell > #vibes-terminal .vt-readout > div strong { color: var(--fg); font: 12px var(--font-mono); letter-spacing: 0; margin: 0; }
 #menu .app-shell > #vibes-terminal .vt-readout .neg strong { color: var(--loss); }
 #menu .app-shell > #vibes-terminal .vt-confirm { align-items: flex-end; }
 #menu .app-shell > #vibes-terminal .vt-confirm label { max-width: 170px; line-height: 1.35; }
