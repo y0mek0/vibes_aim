@@ -461,9 +461,10 @@ canvas#game {
 .vt-body {
   padding: 18px;
   display: grid;
-  grid-template-columns: 280px 1fr 320px;
+  grid-template-columns: 280px 1fr;
   gap: var(--space-5);
   align-items: start;
+  position: relative;
 }
 @media (max-width: 1100px) {
   .vt-body { grid-template-columns: 1fr; }
@@ -963,6 +964,16 @@ canvas#game {
 #menu .customize-pane .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 34px; border-bottom: 1px solid rgba(160,174,194,.1); }
 #menu .customize-pane .row label { color: var(--dash-soft); font: 11px var(--font-ui); }
 #menu .customize-pane .row input[type=number], #menu .customize-pane .row select, #menu .customize-pane .row input[type=text] { width: 170px; max-width: 52%; }
+/* Pair row: a label on the left, multiple controls on the right (e.g.
+   Color preset + custom color picker, both on the same line). */
+#menu .customize-pane .row.row-pair { justify-content: flex-start; gap: 10px; }
+#menu .customize-pane .row.row-pair label { width: auto; flex: 0 0 60px; }
+#menu .customize-pane .row.row-pair select { width: auto; flex: 1; max-width: none; }
+#menu .customize-pane .row.row-pair input[type=color] { width: 36px; min-width: 36px; height: 28px; padding: 0; background: transparent; border: 1px solid var(--dash-line); }
+/* Toggle row: label on the left, single checkbox on the right (no
+   extra inputs in this row, those go into the rows that follow). */
+#menu .customize-pane .row.row-toggle { justify-content: space-between; }
+#menu .customize-pane .row.row-toggle input[type=checkbox] { width: auto; max-width: none; }
 #menu .customize-pane input[type=range] { accent-color: var(--dash-accent); }
 #menu .gun-detail-card { margin-top: 22px; padding: 14px; border: 1px solid var(--dash-line); background: rgba(0,0,0,.14); }
 #menu .gun-detail-card h3 { margin: 0 0 7px; }
@@ -1084,6 +1095,9 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
   z-index: 50;
   pointer-events: auto;
 }
+/* Hide footer while a game session is active so it doesn't cover the
+   bottom HUD (HP bar, ammo counter, score). */
+body.playing .app-footer { display: none; }
 .app-footer-text {
   font: 700 10px var(--font-mono); letter-spacing: .25em;
   color: var(--dim); text-transform: uppercase;
@@ -1380,7 +1394,21 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 .vt-watch:hover, .vt-watch.active { border-color: var(--yellow); background: rgba(246, 212, 71, .06); }
 .vt-watch.active b, .vt-watch.active strong { color: var(--yellow); }
 .vt-watch-note { margin: 24px 10px 0; color: var(--fg-mute); font-size: 11px; line-height: 1.6; }
-.vt-market-center, .vt-market-right { min-width: 0; display: grid; gap: 14px; align-content: start; }
+.vt-market-center { min-width: 0; display: grid; gap: 14px; align-content: start; }
+.vt-market-right {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 360px;
+  max-height: calc(100% - 36px);
+  overflow-y: auto;
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  z-index: 10;
+}
+body.market-collapsed .vt-market-right { display: none; }
 .vt-chart-shell {
   min-width: 0;
   min-height: 474px;
