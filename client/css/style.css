@@ -979,9 +979,9 @@ canvas#game {
 #menu .gun-detail-card h3 { margin: 0 0 7px; }
 #menu .xboard { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
 #menu .xcol { min-width: 0; }
-#menu .xprev { min-height: 245px; position: relative; border: 1px solid var(--dash-line); background: #0a0d12; margin-bottom: 14px; }
-#menu .xprev #chpreview { position: absolute; inset: 0; }
-#menu .xcolrows { position: absolute; left: 13px; right: 13px; bottom: 10px; }
+.xprev { min-height: 245px; position: relative; border: 1px solid var(--dash-line); background: #0a0d12; margin-bottom: 14px; }
+.xprev #chpreview { position: relative; display: block; height: 180px; }
+.xcolrows { position: relative; padding: 0 13px; }
 #menu .xcol h3 { margin: 0 0 12px; color: var(--dash-soft); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
 #menu .xcol h3.subhead { margin-top: 24px; }
 #menu .profile-tools { display: grid; gap: 12px; max-width: 680px; }
