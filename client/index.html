@@ -296,22 +296,22 @@
     }
   } catch (_) { /* no-op in browsers that lack these APIs */ }
 </script>
-<script type="module" src="src/bootstrap.js?v=20261006-8"></script>
-<script type="module" src="js/auth.js?v=20261006-8"></script>
+<script type="module" src="src/bootstrap.js?v=20261009-1"></script>
+<script type="module" src="js/auth.js?v=20261009-1"></script>
 <!-- aim2stock bridge (auto-registers the aim-bridge and boots the server-availability check) -->
-<script type="module" src="js/aim-bridge.js?v=20261006-8"></script>
+<script type="module" src="js/aim-bridge.js?v=20261009-1"></script>
 <!-- Google Identity Services: loads the GIS script that renders the
      Sign-in button and yields id_tokens. We use it in FedCM-style
      popup mode and disable it for any local/dev origin where the
      configured OAuth client doesn't have http://127.0.0.1 as an
      authorized origin. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module" src="js/chart.js?v=20261006-8"></script>
+<script type="module" src="js/chart.js?v=20261009-1"></script>
 <!-- aim2stock terminal (paper-trading UI) -->
-<script type="module" src="js/terminal.js?v=20261006-8"></script>
+<script type="module" src="js/terminal.js?v=20261009-1"></script>
 <!-- aim2stock missions panel (AAPL -> NVDA chain) -->
-<script type="module" src="js/missions.js?v=20261006-8"></script>
-<script type="module" src="js/main.js?v=20261006-8"></script>
+<script type="module" src="js/missions.js?v=20261009-1"></script>
+<script type="module" src="js/main.js?v=20261009-1"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');
