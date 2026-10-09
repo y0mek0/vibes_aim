@@ -2,7 +2,7 @@
 // before the UI modules mount. Each panel subscribes to the store, so
 // the first render is the real server data, not an empty placeholder.
 
-import { store } from './store.js?v=20261009-1';
+import { store } from './store.js?v=20261009-2';
 
 if (typeof window !== 'undefined') {
   // Expose the store globally so legacy game.js render hooks (e.g. the

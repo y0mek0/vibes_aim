@@ -7,10 +7,10 @@
 // the user signs in / out, so the rest of the app only has to look at
 // state.player to know who is playing.
 
-import { api } from './api.js?v=20261009-1';
-import { getPlayerId, setPlayerId } from './api.js?v=20261009-1';
-import { getSessionId } from './session.js?v=20261009-1';
-import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261009-1';
+import { api } from './api.js?v=20261009-2';
+import { getPlayerId, setPlayerId } from './api.js?v=20261009-2';
+import { getSessionId } from './session.js?v=20261009-2';
+import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261009-2';
 
 function createStore() {
   const listeners = new Set();
@@ -29,12 +29,22 @@ function createStore() {
 
   function emit() { for (const l of listeners) l(state); }
 
+  // Monotonic sequence so a stale refresh (started earlier with a stale
+  // player id) never overwrites a newer one. This matters on sign-in:
+  // bootstrap() kicks off refresh() with the guest id, then applyAuthState
+  // kicks off a second refresh() with the Google id. The guest request can
+  // resolve *later* (its player row was just deleted by the merge, so the
+  // server re-creates it via a slower INSERT) and would otherwise clobber
+  // the Google balance with a fresh 200-stable guest.
+  let refreshSeq = 0;
   async function refresh() {
+    const seq = ++refreshSeq;
     const [p, m, l] = await Promise.all([
       api.get('/portfolio'),
       api.get('/missions'),
       api.get('/loadout').catch(() => null),
     ]);
+    if (seq !== refreshSeq) return state; // a newer refresh superseded us
     state.player = p.player;
     state.balances = p.balances || {};
     state.trades = p.trades || [];

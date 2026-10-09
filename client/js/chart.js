@@ -6,13 +6,13 @@
 //
 // Public API:
 //   import { mountChart, setActiveTicker, fetchCandles, fetchQuote,
-//            buildHeader, buildStatus } from './chart.js?v=20261009-1';
+//            buildHeader, buildStatus } from './chart.js?v=20261009-2';
 //
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261009-1';
-import { store } from '../src/store.js?v=20261009-1';
+import { api } from '../src/api.js?v=20261009-2';
+import { store } from '../src/store.js?v=20261009-2';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;

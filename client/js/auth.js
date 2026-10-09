@@ -15,7 +15,7 @@
 // The class is exposed as a global singleton so the rest of the app can
 // reach auth state without an explicit dependency on this file.
 
-import { api } from '../src/api.js?v=20261009-1';
+import { api } from '../src/api.js?v=20261009-2';
 
 const TOKEN_KEY = 'aim2stock.sessionToken.v1';
 const PROFILE_KEY = 'aim2stock.profile.v1';

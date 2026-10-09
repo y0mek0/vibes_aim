@@ -6,8 +6,8 @@
 // server uses (sessionId, hitId) for idempotency, so a network blip that
 // causes a retry will not double-mint.
 
-import { api } from '../src/api.js?v=20261009-1';
-import { getSessionId } from '../src/session.js?v=20261009-1';
+import { api } from '../src/api.js?v=20261009-2';
+import { getSessionId } from '../src/session.js?v=20261009-2';
 
 const ACTIVE_TICKER_KEY = 'aim2stock.activeTicker.v1';
 const DEFAULT_TICKER = 'AAPL';
