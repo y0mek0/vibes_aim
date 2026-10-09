@@ -4,7 +4,7 @@
 // positions, and the trade history. Auto-mounts if a #vibes-terminal
 // element is in the DOM.
 
-import { store } from '../src/store.js?v=20261006-4';
+import { store } from '../src/store.js?v=20261006-8';
 import {
   MAX_LEVERAGE, clampLeverage, clampNotional, round2, round6,
   computeOrder, computeClosePreview, portfolioValue, formatPnl,
@@ -27,6 +27,7 @@ const SELECTORS = {
   convertSubmit: '[data-vt-convert-submit]',
   spotSide:      '[data-vt-spot-side]',
   spotQuoteLabel:'[data-vt-spot-quote-label]',
+  spotPct:       '[data-vt-spot-pct]',
   positionsBody: '[data-vt-positions-body]',
   historyBody:   '[data-vt-history-body]',
   marketTicker:  '[data-vt-market-ticker]',
@@ -456,6 +457,33 @@ export function mountTerminal({ root, onClose } = {}) {
   if (els.convertUnits) {
     els.convertUnits.addEventListener('input', renderConvert);
   }
+  // Spot percentage quick-buttons (25/50/75/MAX). Buy uses % of USD
+  // stable balance; sell uses % of the held ticker balance.
+  panel.querySelectorAll(SELECTORS.spotPct).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const pct = Number(btn.dataset.vtSpotPct);
+      if (!Number.isFinite(pct)) return;
+      const ticker = els.convertTicker?.value;
+      const price = Number(state.assetPrices[ticker]);
+      const buy = state.spotSide === 'buy';
+      const stable = Number(store.state.player?.stable || 0);
+      const balances = store.state.balances || {};
+      const held = Number(balances[ticker] || 0);
+      let units = 0;
+      if (buy) {
+        // units = usd_budget / price
+        const budget = stable * (pct / 100);
+        units = Number.isFinite(price) && price > 0 ? budget / price : 0;
+      } else {
+        units = held * (pct / 100);
+      }
+      if (els.convertUnits) {
+        els.convertUnits.value = Number.isFinite(units) ? String(round6(units)) : '0';
+      }
+      panel.querySelectorAll(SELECTORS.spotPct).forEach((b) => b.classList.toggle('active', b === btn));
+      renderConvert();
+    });
+  });
   if (els.convertSubmit) {
     els.convertSubmit.addEventListener('click', spotTrade);
   }

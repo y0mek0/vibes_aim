@@ -33,6 +33,7 @@ function playerView(store, playerId) {
     id: p.id,
     stable: p.stable,
     updatedAt: p.updatedAt,
+    email: p.email || null,
   }));
 }
 

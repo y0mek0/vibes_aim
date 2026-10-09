@@ -50,6 +50,7 @@
       <section class="vt-section vt-convert">
         <div class="vt-section-head"><span>Spot market</span><small>Buy or sell AAPL directly for USD</small></div>
         <div class="vt-convert-grid"><label class="vt-control"><span class="vt-field-label">Asset</span><select data-vt-convert-ticker></select></label><label class="vt-control"><span class="vt-field-label">Units</span><input type="number" min="0" step="0.000001" value="0.01" data-vt-convert-units></label></div>
+        <div class="vt-pct-row vt-spot-pct" role="group" aria-label="Spot percent"><button type="button" data-vt-spot-pct="25">25%</button><button type="button" data-vt-spot-pct="50">50%</button><button type="button" data-vt-spot-pct="75">75%</button><button type="button" data-vt-spot-pct="100">MAX</button></div>
         <div class="vt-side-toggle vt-spot-toggle" role="group" aria-label="Spot action"><button type="button" data-vt-spot-side="buy" class="active">Buy</button><button type="button" data-vt-spot-side="sell">Sell</button></div>
         <div class="vt-convert-quote"><span>Rate <b class="num" data-vt-convert-price>—</b></span><strong data-vt-spot-quote-label>Total <b class="num" data-vt-convert-usd>—</b> USD</strong></div>
         <div class="vt-convert-actions"><span class="vt-status" data-vt-convert-status>Loading AAPL spot quote…</span><button type="button" class="vt-btn vt-btn-primary" data-vt-convert-submit disabled>Buy AAPL</button></div>

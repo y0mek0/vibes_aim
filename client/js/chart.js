@@ -11,8 +11,8 @@
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261006-4';
-import { store } from '../src/store.js?v=20261006-4';
+import { api } from '../src/api.js?v=20261006-8';
+import { store } from '../src/store.js?v=20261006-8';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;

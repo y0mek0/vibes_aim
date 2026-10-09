@@ -892,6 +892,8 @@ canvas#game {
 .vt-input-row { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: wrap; }
 .vt-input-row > input { flex: 1 1 80px; min-width: 80px; }
 .vt-pct-row { display: inline-flex; gap: 4px; flex-shrink: 0; }
+.vt-spot-pct { margin: 10px 0 12px; flex-wrap: wrap; }
+.vt-spot-pct button { flex: 1 1 auto; }
 .vt-pct-row button {
   padding: 6px 8px;
   background: transparent;

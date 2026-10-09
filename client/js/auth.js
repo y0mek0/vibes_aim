@@ -248,9 +248,15 @@ if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
       wireButton();
       paintAuthUi(auth.state);
+      // Restore a persisted Google session on every page load. Without
+      // this, a reload after signing in leaves auth.state.player null,
+      // so the store never calls setPlayerId() and aim hits keep going
+      // to a fresh guest id instead of the Google-backed player.
+      auth.restore().catch(() => {});
     });
   } else {
     wireButton();
     paintAuthUi(auth.state);
+    auth.restore().catch(() => {});
   }
 }
