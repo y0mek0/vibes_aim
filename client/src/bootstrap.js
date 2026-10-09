@@ -2,7 +2,7 @@
 // before the UI modules mount. Each panel subscribes to the store, so
 // the first render is the real server data, not an empty placeholder.
 
-import { store } from './store.js?v=20261009-2';
+import { store } from './store.js?v=20261009-3';
 
 if (typeof window !== 'undefined') {
   // Expose the store globally so legacy game.js render hooks (e.g. the
@@ -20,7 +20,9 @@ if (typeof window !== 'undefined') {
     } catch (_) { /* game.js may not have booted yet; safe to ignore */ }
   });
 
-  // Kick off the first refresh. Errors are swallowed (the boot banner
-  // already shows a retry/Skip UI when the server is unreachable).
-  queueMicrotask(() => { store.refresh().catch(() => {}); });
+  // Kick off the store bootstrap: hydrate the guest snapshot for an
+  // instant first paint, subscribe applyAuthState to window.auth (so
+  // sign-in/restore re-binds the player id via setPlayerId), and start
+  // the first server refresh. Errors are swallowed internally.
+  store.bootstrap();
 }

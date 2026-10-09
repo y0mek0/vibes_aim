@@ -7,10 +7,10 @@
 // the user signs in / out, so the rest of the app only has to look at
 // state.player to know who is playing.
 
-import { api } from './api.js?v=20261009-2';
-import { getPlayerId, setPlayerId } from './api.js?v=20261009-2';
-import { getSessionId } from './session.js?v=20261009-2';
-import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261009-2';
+import { api } from './api.js?v=20261009-3';
+import { getPlayerId, setPlayerId } from './api.js?v=20261009-3';
+import { getSessionId } from './session.js?v=20261009-3';
+import { loadGuestSnapshot, saveGuestSnapshot, clearGuestSnapshot } from './persist.js?v=20261009-3';
 
 function createStore() {
   const listeners = new Set();

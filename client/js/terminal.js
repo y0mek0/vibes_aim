@@ -4,12 +4,12 @@
 // positions, and the trade history. Auto-mounts if a #vibes-terminal
 // element is in the DOM.
 
-import { store } from '../src/store.js?v=20261009-2';
+import { store } from '../src/store.js?v=20261009-3';
 import {
   MAX_LEVERAGE, clampLeverage, clampNotional, round2, round6,
   computeOrder, computeClosePreview, portfolioValue, formatPnl,
   sortTradesNewest,
-} from '../src/terminal-core.js?v=20261009-2';
+} from '../src/terminal-core.js?v=20261009-3';
 
 const SELECTORS = {
   root:          '#vibes-terminal',

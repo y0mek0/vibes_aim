@@ -149,13 +149,13 @@ export function createSupabaseStore({ url, serviceKey }) {
       ];
       for (const { table, key } of collections) {
         try {
-          const rows = await rpc(table, `?${eqFilter(key, fromPlayerId)}&select=id`);
-          for (const r of rows || []) {
-            try {
-              await rpc(table, `?id=eq.${r.id}`,
-                { method: 'PATCH', body: { [key]: toPlayerId } });
-            } catch (_) { /* skip */ }
-          }
+          // Re-point every row owned by the guest onto the target in one
+          // PATCH keyed on player_id. Do NOT round-trip through `id`:
+          // several of these tables (balances, unlocks, …) have no `id`
+          // column, so the old `select=id` + `?id=eq.X` loop matched
+          // nothing and silently dropped the guest's rows (data loss).
+          await rpc(table, `?${eqFilter(key, fromPlayerId)}`,
+            { method: 'PATCH', body: { [key]: toPlayerId } });
         } catch (_) { /* skip */ }
       }
       // Sum guest stable into target.

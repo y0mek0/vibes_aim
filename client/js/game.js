@@ -2,28 +2,28 @@
 // Conventions: rpm = rounds per SECOND. Angles: input math in radians, data in degrees.
 
 import * as THREE from 'three';
-import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261009-2';
-import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261009-2';
-import { BUILD } from './build.js?v=20261009-2';
-import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261009-2';
+import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261009-3';
+import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261009-3';
+import { BUILD } from './build.js?v=20261009-3';
+import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261009-3';
 // Inline constant for the flat 100 HP model. Imported separately so the
 // game boots even if the mechanics.js export changes name. We never use
 // shields or armor in aim2stock.
 const PLAYER_HP = 100;
-import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261009-2';
-import { createStalker } from './core/stalker.js?v=20261009-2';
+import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261009-3';
+import { createStalker } from './core/stalker.js?v=20261009-3';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
-  spawnDist, orbScale } from './core/gunplay.js?v=20261009-2';
-import { createStats, createKillfeed } from './core/stats.js?v=20261009-2';
-import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261009-2';
-import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261009-2';
-import { audio } from './fx/audio.js?v=20261009-2';
-import { buildWorld, disposeWorld } from './three/world.js?v=20261009-2';
-import { THEMES } from './data/themes.js?v=20261009-2';
-import { createTargets } from './three/targets.js?v=20261009-2';
-import { createEffects } from './three/effects.js?v=20261009-2';
-import { getActiveTicker } from './aim-bridge.js?v=20261009-2';
+  spawnDist, orbScale } from './core/gunplay.js?v=20261009-3';
+import { createStats, createKillfeed } from './core/stats.js?v=20261009-3';
+import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261009-3';
+import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261009-3';
+import { audio } from './fx/audio.js?v=20261009-3';
+import { buildWorld, disposeWorld } from './three/world.js?v=20261009-3';
+import { THEMES } from './data/themes.js?v=20261009-3';
+import { createTargets } from './three/targets.js?v=20261009-3';
+import { createEffects } from './three/effects.js?v=20261009-3';
+import { getActiveTicker } from './aim-bridge.js?v=20261009-3';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
