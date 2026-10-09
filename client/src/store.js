@@ -62,6 +62,10 @@ function createStore() {
       // Adopt the signed-in player id so /portfolio, /aim/hit, etc.
       // start using the persisted Google-backed account.
       setPlayerId(state.auth.playerId);
+      // Re-fetch the store with the newly-bound player id. Without this
+      // the UI keeps showing the stale guest snapshot (stable 200) even
+      // though setPlayerId now points at the Google account.
+      refresh().catch(() => {});
     }
     emit();
   }

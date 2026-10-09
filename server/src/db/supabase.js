@@ -91,7 +91,15 @@ export function createSupabaseStore({ url, serviceKey }) {
       if (rows && rows[0]) return toPlayer(rows[0]);
       const now = new Date().toISOString();
       const body = [{ id: playerId, stable: 200, precise_best: 0, created_at: now, updated_at: now }];
-      const inserted = await rpc(TABLE.players, `?${select()}`, { method: 'POST', body });
+      // resolution=merge-duplicates turns this into an UPSERT on the
+      // primary key, so concurrent getOrCreatePlayer calls for the same
+      // fresh id (e.g. the store's parallel /portfolio + /missions +
+      // /loadout refresh) do not race: the loser re-uses the winner's row
+      // instead of throwing a duplicate-key 500.
+      const inserted = await rpc(TABLE.players, `?${select()}`, {
+        method: 'POST', body,
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      });
       return toPlayer(inserted && inserted[0]);
     },
     async getPlayer(playerId) {
