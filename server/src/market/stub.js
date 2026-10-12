@@ -96,13 +96,15 @@ function candlesFor(symbol, range) {
     // the same flat candle shape. This keeps the offline provider useful for
     // the UI while remaining deterministic enough for tests.
     const phase = i / Math.max(1, count - 1);
-    const wave = Math.sin(i * 0.71 + symbolSeed) * 0.42 + Math.cos(i * 0.19 + symbolSeed * 0.3) * 0.24;
-    const drift = (phase - 0.5) * rangeAmplitude * 0.55 + wave * rangeAmplitude;
+    // Broad, low-frequency movement reads like a market session. The former
+    // per-candle oscillation produced a saw-tooth "accordion" on 1D/5D.
+    const wave = Math.sin(phase * Math.PI * 2 + symbolSeed * 0.11) * 0.62
+      + Math.sin(phase * Math.PI * 6 + symbolSeed * 0.07) * 0.18;
     // Keep the fixture oscillating around a baseline; compounding each candle
     // made the 1D/5D preview look like a permanently rising asset.
     const center = priceAt(symbol, t) * (1 + wave * rangeAmplitude * 0.45 + (phase - 0.5) * rangeAmplitude * 0.08);
     const c = Math.max(0, center);
-    const wick = rangeAmplitude * (0.16 + Math.abs(Math.sin(i * 0.37 + symbolSeed)) * 0.12);
+    const wick = rangeAmplitude * (0.05 + Math.abs(Math.sin(phase * Math.PI * 4 + symbolSeed)) * 0.05);
     const h = Math.max(o, c) * (1 + wick);
     const l = Math.min(o, c) * (1 - wick);
     out.push({ t, o: round(o, 4), h: round(h, 4), l: round(l, 4), c: round(c, 4) });

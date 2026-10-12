@@ -1291,7 +1291,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .market-panel { height: 193px; box-sizing: border-box; }
 #menu #vibes-chart .vc-body { height: 87px; }
 #menu .app-shell { padding-bottom: 15px; }
-#menu .mode::after { background: linear-gradient(115deg, transparent 40%, rgba(246,212,71,.34) 40.5%, rgba(246,212,71,.68) 44%, transparent 44.5%); }
+#menu .mode::after { display: none; background: none; }
 
 @media (max-width: 1400px) and (min-width: 941px) {
   #menu .mode-grid { grid-template-rows: repeat(3, minmax(0, 102px)); }
