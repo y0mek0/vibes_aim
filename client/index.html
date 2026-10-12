@@ -57,7 +57,7 @@
         <section class="vt-activity vt-section">
           <div class="vt-activity-head"><div class="vt-tabs" role="tablist" aria-label="Trading activity"><button type="button" class="active" data-vt-activity-tab="positions" role="tab" aria-selected="true">Positions</button><button type="button" data-vt-activity-tab="orders" role="tab" aria-selected="false">Open orders</button><button type="button" data-vt-activity-tab="history" role="tab" aria-selected="false">History</button><button type="button" data-vt-activity-tab="assets" role="tab" aria-selected="false">Assets</button></div><span class="vt-activity-meta" data-vt-activity-meta>Open positions</span></div>
           <div class="vt-activity-pane active" data-vt-activity-pane="positions"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Size</th><th>Lev</th><th>Entry</th><th>Mark</th><th>Liq</th><th>P/L</th><th>Action</th></tr></thead><tbody data-vt-positions-body></tbody></table></div></div>
-          <div class="vt-activity-pane" data-vt-activity-pane="orders"><div class="vt-empty">No open orders.</div></div>
+          <div class="vt-activity-pane" data-vt-activity-pane="orders"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Ticker</th><th>Mode</th><th>Side</th><th>Type</th><th>Price</th><th>Size</th><th>Filled</th><th>Status</th><th>Action</th></tr></thead><tbody data-vt-orders-body></tbody></table></div></div>
           <div class="vt-activity-pane" data-vt-activity-pane="history"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Ticker</th><th>Mode</th><th>Side</th><th>Price</th><th>Size</th><th>P/L</th><th>Status</th></tr></thead><tbody data-vt-history-body></tbody></table></div></div>
           <div class="vt-activity-pane" data-vt-activity-pane="assets"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Asset</th><th>Units</th><th>Value</th><th>Allocation</th></tr></thead><tbody data-vt-assets-body></tbody></table></div><div class="vt-assets-total-line">Total assets <b class="num" data-vt-assets-total>-</b></div></div>
         </section>
@@ -328,9 +328,9 @@
      configured OAuth client doesn't have http://127.0.0.1 as an
      authorized origin. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module" src="js/chart.js?v=20261013-4"></script>
+<script type="module" src="js/chart.js?v=20261013-6"></script>
 <!-- aim2stock terminal (paper-trading UI) -->
-<script type="module" src="js/terminal.js?v=20261013-4"></script>
+<script type="module" src="js/terminal.js?v=20261013-6"></script>
 <!-- aim2stock missions panel (AAPL -> NVDA chain) -->
 <script type="module" src="js/missions.js?v=20261013-4"></script>
 <script type="module" src="js/main.js?v=20261013-4"></script>

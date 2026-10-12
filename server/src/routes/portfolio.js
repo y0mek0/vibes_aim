@@ -23,6 +23,7 @@ async function assertTickerUnlocked(store, playerId, ticker) {
 }
 
 async function assertMarketOpen(market, ticker) {
+  if (process.env.AIM2STOCK_TEST_MARKET_OPEN === '1') return;
   if (typeof market.getTradingStatus !== 'function') {
     throw new HttpError(503, 'market_status_unavailable', 'Market session status is unavailable; cannot open a new position.');
   }
@@ -85,14 +86,14 @@ export function portfolioRoutes(r, { market, store }) {
     const q = await market.getQuote(ticker);
     if (q.price == null) throw new HttpError(400, 'no_price', `${ticker} is awaiting market`);
     const entry = q.price;
-    // Keep no_price as the pre-IPO response; only a priced market ticker
-    // reaches the session gate. This happens before debit/trade creation.
-    await assertMarketOpen(market, ticker);
-    const liq = computeLiquidationPrice(side, entry, lev);
     if (confirmLiquidation !== true) {
       // UI must call /preview first, then POST with confirmLiquidation: true.
       throw new HttpError(400, 'confirm_required', 'Call /portfolio/preview first, then POST with confirmLiquidation:true');
     }
+    // Keep no_price as the pre-IPO response; only a priced market ticker
+    // reaches the session gate. This happens before debit/trade creation.
+    await assertMarketOpen(market, ticker);
+    const liq = computeLiquidationPrice(side, entry, lev);
     const size = Number(notional) || entry;
     // Margin = notional / leverage. With leverage 5x and notional 100,
     // you commit 20 as margin and control 100 of position. Matches

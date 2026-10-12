@@ -198,6 +198,9 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
 async function integration() {
   // Boot server in-process
   const { createApp } = await import('../server/src/index.js');
+  // Keep the stub session deterministic; the dedicated market-session test
+  // lives in server.test.mjs and exercises closed/open transitions directly.
+  process.env.AIM2STOCK_TEST_MARKET_OPEN = '1';
   const { listen } = createApp();
   const server = listen(0);
   await new Promise((r) => server.once('listening', r));

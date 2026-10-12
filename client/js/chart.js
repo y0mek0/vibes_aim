@@ -11,8 +11,8 @@
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261013-4';
-import { store } from '../src/store.js?v=20261013-4';
+import { api } from '../src/api.js?v=20261013-6';
+import { store } from '../src/store.js?v=20261013-6';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
@@ -164,6 +164,8 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
 
   let chart = null;
   let series = null;
+  let markersApi = null;
+  let markers = [];
   let lastTickTs = 0;
   let pollTimer = null;
   let staleTimer = null;
@@ -211,6 +213,24 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       lastValueVisible: false,
       priceLineVisible: false,
     });
+    if (typeof LWC.createSeriesMarkers === 'function') {
+      markersApi = LWC.createSeriesMarkers(series, markers);
+    }
+  }
+
+  function addMarker({ ticker = active.ticker, kind, price, ts = Date.now(), id } = {}) {
+    if (!kind || ticker !== active.ticker || !Number.isFinite(Number(price))) return;
+    const marker = {
+      time: Math.floor(Number(ts) / 1000),
+      position: /SELL|SHORT|CLOSE/.test(kind) ? 'aboveBar' : 'belowBar',
+      color: '#f6d447',
+      shape: /SELL|SHORT|CLOSE/.test(kind) ? 'arrowDown' : 'arrowUp',
+      text: kind,
+      id: id || `${kind}-${ts}`,
+    };
+    if (markers.some((m) => m.id === marker.id)) return;
+    markers = [...markers, marker].slice(-40);
+    try { markersApi?.setMarkers(markers); } catch (_) { /* optional plugin */ }
   }
 
   function markStatus(text, stale = false) {
@@ -250,7 +270,9 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       }
       await ensureChart();
       if (!series || stopped || requestId !== loadSeq) return;
-      series.setData(buildAreaData(r.candles));
+      const areaData = buildAreaData(r.candles);
+      series.setData(areaData);
+      try { markersApi?.setMarkers(areaData.length ? markers.filter((m) => m.time >= areaData[0].time) : markers); } catch (_) { /* optional plugin */ }
       if (chart) {
         const scale = chart.timeScale();
         scale.applyOptions({ timeVisible: isIntraday(requestedRange), rightOffset: 0 });
@@ -394,7 +416,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       chart = null; series = null;
     }
 
-  return { unmount, setTicker: setActiveTicker, setRange: (r) => { active.range = r; loadCandles(); }, state: () => ({ ...active }) };
+  return { unmount, setTicker: setActiveTicker, setRange: (r) => { active.range = r; loadCandles(); }, addMarker, setMarkers: (next) => { markers = Array.isArray(next) ? next : []; try { markersApi?.setMarkers(markers); } catch (_) {} }, state: () => ({ ...active }) };
 }
 
 export function setActiveTicker(t) {
@@ -408,7 +430,7 @@ export function setActiveTicker(t) {
 if (typeof window !== 'undefined') {
   queueMicrotask(() => {
     if (document.getElementById('vibes-chart')) {
-      mountChart({ ticker: 'AAPL', range: '1D' });
+      window.__aim2stockChart = mountChart({ ticker: 'AAPL', range: '1D' });
     }
   });
 }

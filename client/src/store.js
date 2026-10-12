@@ -19,6 +19,7 @@ function createStore() {
     player: null,         // { id, stable, updatedAt }
     balances: {},         // { AAPL: 0.034, NVDA: 0 }
     trades: [],           // [ { id, ticker, side, ... } ]
+    orders: [],           // [ { id, ticker, side, type, status, ... } ]
     unlocks: [],          // [ 'AAPL', 'NVDA' ]
     missions: [],         // [ { kind, progress, done, claimed } ]
     loadout: { owned: [], catalog: [] }, // { owned: [gunId], catalog: [...] }
@@ -48,6 +49,7 @@ function createStore() {
     state.player = p.player;
     state.balances = p.balances || {};
     state.trades = p.trades || [];
+    state.orders = p.orders || [];
     state.unlocks = (p.unlocks || []).map((u) => u.ticker);
     state.missions = m.missions || [];
     if (l) {
@@ -191,6 +193,7 @@ function createStore() {
     state.player = null;
     state.balances = {};
     state.trades = [];
+    state.orders = [];
     state.unlocks = [];
     state.missions = [];
     state.lastError = null;

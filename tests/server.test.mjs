@@ -49,6 +49,9 @@ async function step(fn) {
 }
 
 async function main() {
+  // Tests use the deterministic stub market; the session-gate test below
+  // swaps in its own closed/open provider and clears this override first.
+  process.env.AIM2STOCK_TEST_MARKET_OPEN = '1';
   // Use the default config: stub provider, in-memory store. No env required.
   app = createApp();
   server = app.listen(0); // ephemeral port
@@ -421,6 +424,7 @@ async function main() {
   // trade creation, while a position opened during an open session must
   // still be closable after the session switches to closed.
   await step(async () => {
+    delete process.env.AIM2STOCK_TEST_MARKET_OPEN;
     let isOpen = false;
     const gateMarket = {
       async getQuote(symbol) { return { symbol, price: 100, ts: Date.now(), currency: 'USD' }; },

@@ -1735,7 +1735,10 @@ body.market-collapsed .vt-market-right { display: none; }
 #menu .app-shell > #vibes-terminal .vt-assets-total-line b { color: var(--fg); }
 #menu .app-shell > #vibes-terminal .vt-market-right { position: static; top: auto; right: auto; width: auto; max-height: none; display: block; grid-column: auto; grid-row: auto; align-content: normal; z-index: auto; }
 #menu .app-shell > #vibes-terminal select.vt-hidden-control { display: none !important; position: absolute !important; inset: auto !important; width: 1px !important; height: 1px !important; min-width: 0 !important; min-height: 0 !important; opacity: 0 !important; pointer-events: none !important; }
-#menu .app-shell > #vibes-terminal .combo:has(> select.vt-hidden-control) { display: none !important; }
+#menu .app-shell > #vibes-terminal .combo:has(> select.vt-hidden-control),
+#menu .app-shell > #vibes-terminal .combo:has(> select[data-vt-convert-ticker]),
+#menu .app-shell > #vibes-terminal .combo:has(> select[data-vt-ot-ticker]),
+#menu .app-shell > #vibes-terminal .combo:has(> select[data-vt-ot-side]) { display: none !important; }
 #menu .app-shell > #vibes-terminal .vt-market-right { overflow: auto; }
 #menu .app-shell > #vibes-terminal .vt-order { min-height: 100%; box-sizing: border-box; padding: 13px; overflow: auto; }
 #menu .app-shell > #vibes-terminal .vt-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: -13px -13px 14px; padding: 0 13px; background: var(--dash-line); }

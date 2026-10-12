@@ -3,7 +3,7 @@
 // progress, claim buttons, and a one-time unlock animation when the
 // AAPL chain is complete.
 
-import { store } from '../src/store.js?v=20261013-4';
+import { store } from '../src/store.js?v=20261013-6';
 import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261013-4';
 import {
   MISSIONS, missionProgress, allMissionsClaimed,
