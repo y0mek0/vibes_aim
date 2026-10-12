@@ -53,6 +53,7 @@ export function streamSymbol(market, symbol, res) {
         price: tick.price ?? null,
         ts: tick.ts || Date.now(),
         status: tick.status || null,
+        trading: tick.trading || null,
         provider: market.name || 'unknown',
       });
     } catch (_) { /* socket closed mid-write */ }

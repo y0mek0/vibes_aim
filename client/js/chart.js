@@ -6,13 +6,13 @@
 //
 // Public API:
 //   import { mountChart, setActiveTicker, fetchCandles, fetchQuote,
-//            buildHeader, buildStatus } from './chart.js?v=20261009-3';
+//            buildHeader, buildStatus } from './chart.js?v=20261013-1';
 //
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261009-3';
-import { store } from '../src/store.js?v=20261009-3';
+import { api } from '../src/api.js?v=20261013-1';
+import { store } from '../src/store.js?v=20261013-1';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
@@ -203,6 +203,11 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     els.status.classList.toggle('stale', !!stale);
   }
 
+  function marketLabel(trading) {
+    if (!trading || trading.isOpen !== false) return null;
+    return `Market closed · regular session ${trading.hours || '09:30–16:00 ET'}`;
+  }
+
   function applyHeader(quote) {
     const h = buildHeader(quote);
     setText(els.price, h.price);
@@ -227,7 +232,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       if (!series) return;
       series.setData(buildSeriesData(r.candles));
       chart && chart.timeScale().fitContent();
-      markStatus(`updated ${new Date().toLocaleTimeString()}`);
+      markStatus(marketLabel(r.trading) || `updated ${new Date().toLocaleTimeString()}`);
     } catch (e) {
       markStatus('error: ' + (e && e.message || e), true);
     }
@@ -241,7 +246,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
           if (series) series.update({ time: Math.floor(t / 1000), open: q.price, high: q.price, low: q.price, close: q.price });
           applyHeader(q);
           lastTickTs = Date.now();
-          markStatus('live');
+          markStatus(marketLabel(q.trading) || 'live');
           clearTimeout(staleTimer);
           staleTimer = setTimeout(() => { if (!stopped) markStatus('stale', true); }, STALE_AFTER_MS);
         } else if (q && q.status === 'pre_ipo') {
@@ -278,7 +283,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         if (series) series.update({ time: Math.floor(t / 1000), open: tick.price, high: tick.price, low: tick.price, close: tick.price });
         applyHeader({ price: tick.price, dp: null, status: tick.status });
         lastTickTs = Date.now();
-        markStatus('live');
+        markStatus(marketLabel(tick.trading) || 'live');
         clearTimeout(staleTimer);
         staleTimer = setTimeout(() => { if (!stopped) markStatus('stale', true); }, STALE_AFTER_MS);
       });

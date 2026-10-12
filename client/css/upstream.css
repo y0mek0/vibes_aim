@@ -247,7 +247,7 @@ body.playing .hintline{display:block}
   mask-image:linear-gradient(135deg,transparent 28%,#000 100%)}
 .mode::after{content:'';position:absolute;right:-8%;top:-20%;width:42%;height:70%;pointer-events:none;
   background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.14) 40.5%,rgba(255,255,255,.14) 44%,transparent 44.5%);
-  transform:skewX(-18deg)}
+  transform:skewX(-18deg);display:none}
 .mode:hover,.mode:focus-visible{transform:translate(-2px,-3px);box-shadow:var(--plate);z-index:2;outline:none;filter:brightness(1.04)}
 .mode:active{transform:scale(.985)}
 .mode-idx{position:absolute;top:2px;right:8px;font-family:'Anton';font-size:clamp(42px,7.2vh,88px);

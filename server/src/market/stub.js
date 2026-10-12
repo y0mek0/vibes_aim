@@ -32,6 +32,17 @@ function lastTs(range) {
   return Date.now();
 }
 
+function tradingStatus(ts = Date.now()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(ts));
+  const values = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const minutes = Number(values.hour) * 60 + Number(values.minute);
+  const isWeekday = values.weekday !== 'Sat' && values.weekday !== 'Sun';
+  const isOpen = isWeekday && minutes >= 570 && minutes < 960;
+  return { provider: 'stub', isOpen, session: isOpen ? 'regular' : 'closed', timezone: 'America/New_York', hours: '09:30–16:00 ET' };
+}
+
 function priceAt(symbol, ts) {
   const base = BASES[symbol] ?? 0;
   // Deterministic per-day drift (~+/- 0.3%) plus a per-minute micro-drift
@@ -87,7 +98,10 @@ function candlesFor(symbol, range) {
     const phase = i / Math.max(1, count - 1);
     const wave = Math.sin(i * 0.71 + symbolSeed) * 0.42 + Math.cos(i * 0.19 + symbolSeed * 0.3) * 0.24;
     const drift = (phase - 0.5) * rangeAmplitude * 0.55 + wave * rangeAmplitude;
-    const c = Math.max(0, o * (1 + drift));
+    // Keep the fixture oscillating around a baseline; compounding each candle
+    // made the 1D/5D preview look like a permanently rising asset.
+    const center = priceAt(symbol, t) * (1 + wave * rangeAmplitude * 0.45 + (phase - 0.5) * rangeAmplitude * 0.08);
+    const c = Math.max(0, center);
     const wick = rangeAmplitude * (0.16 + Math.abs(Math.sin(i * 0.37 + symbolSeed)) * 0.12);
     const h = Math.max(o, c) * (1 + wick);
     const l = Math.min(o, c) * (1 - wick);
@@ -112,10 +126,10 @@ export function createStubProvider() {
       if (BASES[symbol] === 0) {
         return { symbol, price: null, ts, currency: 'USD', status: 'pre_ipo' };
       }
-      return { symbol, price: round(priceAt(symbol, ts), 4), ts, currency: 'USD' };
+      return { symbol, price: round(priceAt(symbol, ts), 4), ts, currency: 'USD', trading: tradingStatus(ts) };
     },
     async getCandles(symbol, range) {
-      return { symbol, range, candles: candlesFor(symbol, range) };
+      return { symbol, range, candles: candlesFor(symbol, range), trading: tradingStatus() };
     },
     async getStatus() {
       return { provider: 'stub', status: 'stub', lastTickTs: Date.now() };
@@ -123,7 +137,7 @@ export function createStubProvider() {
     // The offline game provider has no exchange session. It stays tradeable
     // so local play and deterministic tests never depend on wall-clock time.
     async getTradingStatus() {
-      return { provider: 'stub', isOpen: true, session: 'simulated' };
+      return tradingStatus();
     },
     async getSymbols() {
       return Object.entries(BASES).map(([symbol, base]) => ({

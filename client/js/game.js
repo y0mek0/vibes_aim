@@ -2,28 +2,28 @@
 // Conventions: rpm = rounds per SECOND. Angles: input math in radians, data in degrees.
 
 import * as THREE from 'three';
-import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261009-3';
-import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261009-3';
-import { BUILD } from './build.js?v=20261009-3';
-import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261009-3';
+import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261013-1';
+import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261013-1';
+import { BUILD } from './build.js?v=20261013-1';
+import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261013-1';
 // Inline constant for the flat 100 HP model. Imported separately so the
 // game boots even if the mechanics.js export changes name. We never use
 // shields or armor in aim2stock.
 const PLAYER_HP = 100;
-import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261009-3';
-import { createStalker } from './core/stalker.js?v=20261009-3';
+import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHit } from './core/ballistics.js?v=20261013-1';
+import { createStalker } from './core/stalker.js?v=20261013-1';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
-  spawnDist, orbScale } from './core/gunplay.js?v=20261009-3';
-import { createStats, createKillfeed } from './core/stats.js?v=20261009-3';
-import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261009-3';
-import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261009-3';
-import { audio } from './fx/audio.js?v=20261009-3';
-import { buildWorld, disposeWorld } from './three/world.js?v=20261009-3';
-import { THEMES } from './data/themes.js?v=20261009-3';
-import { createTargets } from './three/targets.js?v=20261009-3';
-import { createEffects } from './three/effects.js?v=20261009-3';
-import { getActiveTicker } from './aim-bridge.js?v=20261009-3';
+  spawnDist, orbScale } from './core/gunplay.js?v=20261013-1';
+import { createStats, createKillfeed } from './core/stats.js?v=20261013-1';
+import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-1';
+import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-1';
+import { audio } from './fx/audio.js?v=20261013-1';
+import { buildWorld, disposeWorld } from './three/world.js?v=20261013-1';
+import { THEMES } from './data/themes.js?v=20261013-1';
+import { createTargets } from './three/targets.js?v=20261013-1';
+import { createEffects } from './three/effects.js?v=20261013-1';
+import { getActiveTicker } from './aim-bridge.js?v=20261013-1';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -407,6 +407,11 @@ export function boot() {
     else if (mode === 'flick') { r.ttks.push(ttkMs); r.score += Math.round(clamp(1200 - ttkMs, 100, 1200));
       if (r.kills >= MODE_DEFS.flick.targets) { endGame(); return; } spawnFlickOrb(); }
     else if (mode === 'bots') { r.score += 100 + (wasHead ? 50 : 0); pendingSpawn = 0.15; }
+    else if (mode === 'tracking') {
+      // Tracking is continuous, but a dead bot must be replaced immediately
+      // so one kill never leaves the mode with an empty raycast target.
+      trackBot = spawnTrackingBot();
+    }
   }
 
   // ---------- spawns (player-relative, distance band from Settings) ----------
@@ -435,7 +440,9 @@ export function boot() {
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
-    const az = (Math.random() * 2 - 1) * 16 * DEG, el = (Math.random() * 14 - 2) * DEG, d = bandDist();
+    // Flick targets stay in a tight forward cone. The old ±16° azimuth made
+    // edge targets read as side spawns on wide screens.
+    const az = (Math.random() * 2 - 1) * 8 * DEG, el = (Math.random() * 10 - 1) * DEG, d = bandDist();
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     const lx = Math.sin(az) * d, dd = Math.cos(az) * d;
     const p = new THREE.Vector3(
@@ -451,6 +458,12 @@ export function boot() {
     return T.spawnBot(new THREE.Vector3(
       clamp(pos.x - Math.sin(yaw) * d + Math.cos(yaw) * lx, -32, 32), 0,
       clamp(pos.z - Math.cos(yaw) * d - Math.sin(yaw) * lx, -63, 11)), armorHp());
+  }
+  function spawnTrackingBot() {
+    trackAnchor = clamp(pos.x, -26, 26);
+    return T.spawnBot(new THREE.Vector3(
+      clamp(pos.x - Math.sin(yaw) * 10, -32, 32), 0,
+      clamp(pos.z - Math.cos(yaw) * 10, -63, 11)), armorHp());
   }
 
   // ---------- flow ----------
@@ -485,8 +498,7 @@ export function boot() {
     if (m === 'gridshot') { pendingGrid = 3; gridT = 0; } // opening cascade, pops in as the timer starts
     else if (m === 'flick') spawnFlickOrb();
     else if (m === 'tracking') {
-      trackAnchor = clamp(pos.x, -26, 26);
-      trackBot = T.spawnBot(new THREE.Vector3(trackAnchor, 0, clamp(pos.z - 10, -63, 11)), armorHp());
+      trackBot = spawnTrackingBot();
       stalker = createStalker({ difficulty: settings.trackDiff, bounds: 6, speed: 5.4, seed: (Math.random() * 2 ** 31) | 0 });
     }
     else if (m === 'bots') spawnRangeBot();
@@ -1140,6 +1152,7 @@ export function boot() {
           const oHit = oh.length ? oh[0] : null;
           const tHit = hits.length ? hits[0] : null;
           if (tHit && (!oHit || tHit.distance <= oHit.distance)) {
+            hitFrame = true;
             stats.raw.onT += dt; stats.raw.hits++; stats.raw.damage += 1;
             trackBot.head.scale.setScalar(1.3);
             if (Math.random() < dt * 8) FX.spark(tHit.point, 0xf6d447);

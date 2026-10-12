@@ -3,12 +3,12 @@
 // progress, claim buttons, and a one-time unlock animation when the
 // AAPL chain is complete.
 
-import { store } from '../src/store.js?v=20261009-3';
-import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261009-3';
+import { store } from '../src/store.js?v=20261013-1';
+import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261013-1';
 import {
   MISSIONS, missionProgress, allMissionsClaimed,
   describeUnlocks, formatProgress, NVDA_UNLOCK,
-} from '../src/missions-core.js?v=20261009-3';
+} from '../src/missions-core.js?v=20261013-1';
 
 const SELECTORS = {
   root: '#vibes-missions',
@@ -82,7 +82,7 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     }
     // wire claim buttons
     els.body.querySelectorAll('[data-vm-claim]').forEach((btn) => {
-      btn.addEventListener('click', () => claim(btn.dataset.vmClaim));
+      btn.addEventListener('click', () => claim(btn.dataset.vmClaim, btn));
     });
 
     // top counters
@@ -126,16 +126,28 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     }
   }
 
-  async function claim(kind) {
+  async function claim(kind, button) {
+    if (button?.disabled) return;
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Claiming…';
+    }
     try {
       const r = await store.claimMission(kind);
-      if (r && r.ok) {
-        await store.refresh();
-        renderMissions();
-      }
+      if (!r || !r.ok) throw new Error(r?.reason || 'claim rejected');
+      renderMissions();
     } catch (e) {
-      // Show a soft error in the unlock card text, do not throw.
-      if (els.unlockTicker) els.unlockTicker.textContent = 'claim error: ' + (e && e.message || e);
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Claim';
+      }
+      const row = button?.closest('tr');
+      const status = row?.querySelector('.vm-status');
+      if (status) {
+        status.textContent = 'claim failed';
+        status.classList.add('error');
+      }
+      console.warn('[missions] claim failed', kind, e);
     }
   }
 

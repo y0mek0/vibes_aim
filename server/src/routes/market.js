@@ -15,6 +15,10 @@ export function marketRoutes(r, { market }) {
   r.get('/market/quote/:symbol', async (_req, res, params) => {
     try {
       const q = await market.getQuote(params.symbol);
+      const trading = typeof market.getTradingStatus === 'function'
+        ? await market.getTradingStatus(params.symbol)
+        : null;
+      if (trading) q.trading = trading;
       sendJson(res, 200, q);
     } catch (e) {
       if (e.status) return sendJson(res, e.status, { error: e.code, message: e.message });
@@ -27,6 +31,10 @@ export function marketRoutes(r, { market }) {
     if (!RANGES.includes(range)) throw new HttpError(400, 'bad_range', `range must be one of ${RANGES.join(', ')}`);
     try {
       const c = await market.getCandles(params.symbol, range);
+      const trading = typeof market.getTradingStatus === 'function'
+        ? await market.getTradingStatus(params.symbol)
+        : null;
+      if (trading) c.trading = trading;
       sendJson(res, 200, c);
     } catch (e) {
       if (e.status) return sendJson(res, e.status, { error: e.code, message: e.message });

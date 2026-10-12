@@ -370,6 +370,7 @@ export function createSupabaseStore({ url, serviceKey }) {
       // Insert if not present
       const inserted = await rpc(TABLE.missions, `?${select()}`, {
         method: 'POST', body: [{ player_id: playerId, kind, ...body }],
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
       });
       return this._rowToMission(inserted && inserted[0]);
     },
@@ -382,7 +383,8 @@ export function createSupabaseStore({ url, serviceKey }) {
         method: 'PATCH', body: { claimed_at: now },
         headers: { 'Prefer': 'return=representation' },
       });
-      return { ok: true, mission: this._rowToMission(rows && rows[0]) };
+      if (!rows || !rows[0]) return { ok: false, reason: 'mission_row_missing' };
+      return { ok: true, mission: this._rowToMission(rows[0]) };
     },
     async listMissions(playerId) {
       const rows = await rpc(TABLE.missions, `?${eqFilter('player_id', playerId)}`);

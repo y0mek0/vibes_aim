@@ -1282,7 +1282,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .training-column .panel-heading { min-height: 48px; }
 #menu .training-panel { height: 336px; box-sizing: border-box; }
 #menu .mode-grid { grid-template-rows: repeat(3, minmax(0, 102px)); }
-#menu .mode-play { min-width: 68px; padding: 8px 18px; margin: 0 16px 14px 0; }
+#menu .mode-play { min-width: 128px; min-height: 44px; padding: 14px 28px; margin: 0 16px 14px 0; font-size: 12px; }
 #menu .market-column { padding-top: 59px; gap: 14px; grid-template-rows: 129px 193px; align-content: start; }
 #menu .portfolio-panel { height: 129px; box-sizing: border-box; padding: 9px 16px 8px; }
 #menu .portfolio-panel .panel-heading.compact { margin-bottom: 6px; }
