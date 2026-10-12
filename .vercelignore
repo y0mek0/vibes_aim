@@ -1,0 +1,9 @@
+.git
+.local-installers
+node_modules
+.hermes
+.playwright-mcp
+docs/screenshots
+*.log
+.env
+.env.*
