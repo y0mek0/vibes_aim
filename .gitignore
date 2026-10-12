@@ -39,3 +39,4 @@ __pycache__/
 *.pyc
 *.pyo
 .local-installers/
+.vercel
