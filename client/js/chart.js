@@ -1,25 +1,25 @@
 // client/js/chart.js — mini chart panel for the floating corner widget.
-// Uses TradingView Lightweight Charts via the importmap entry
+// Uses TradingView Lightweight Charts 5.x via the standalone CDN build.
 // "lightweight-charts". Fetches initial candles from /market/candles,
 // updates the latest candle every 1s from /market/quote, and shows a
 // stale label if no fresh tick arrives for STALE_AFTER_MS.
 //
 // Public API:
 //   import { mountChart, setActiveTicker, fetchCandles, fetchQuote,
-//            buildHeader, buildStatus } from './chart.js?v=20261013-2';
+//            buildHeader, buildStatus } from './chart.js?v=20261013-3';
 //
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261013-2';
-import { store } from '../src/store.js?v=20261013-2';
+import { api } from '../src/api.js?v=20261013-3';
+import { store } from '../src/store.js?v=20261013-3';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
 
 let TV = null;
 let lightweightChartsPromise = null;
-const LIGHTWEIGHT_CHARTS_CDN = 'https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js';
+const LIGHTWEIGHT_CHARTS_CDN = 'https://cdn.jsdelivr.net/npm/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js';
 
 function loadLightweightCharts() {
   if (TV) return Promise.resolve(TV);
@@ -72,6 +72,10 @@ export function buildSeriesData(candles) {
     time: Math.floor((c.t || 0) / 1000),
     open: c.o, high: c.h, low: c.l, close: c.c,
   }));
+}
+
+function buildAreaData(candles) {
+  return buildSeriesData(candles).map((c) => ({ time: c.time, value: c.close }));
 }
 
 // Decide what text the status badge should show, and whether it's stale.
@@ -180,11 +184,11 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: 'rgba(255,255,255,0.04)' },
-        horzLines: { color: 'rgba(255,255,255,0.04)' },
+        vertLines: { color: 'rgba(255,255,255,0.025)' },
+        horzLines: { color: 'rgba(255,255,255,0.025)' },
       },
       timeScale: {
-        timeVisible: isIntraday(range), secondsVisible: false,
+        visible: false, timeVisible: isIntraday(range), secondsVisible: false,
         borderColor: 'rgba(255,255,255,0.06)', rightOffset: 0,
         fixLeftEdge: true, fixRightEdge: true,
         lockVisibleTimeRangeOnResize: true,
@@ -193,18 +197,20 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       },
       handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
       handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
-      rightPriceScale: { borderColor: 'rgba(255,255,255,0.06)' },
-      crosshair: { mode: 1 },
+      rightPriceScale: { visible: false },
+      crosshair: { mode: 1, vertLine: { visible: false }, horzLine: { visible: false } },
       autoSize: true,
     });
     const color = '#f6d447';
-    series = chart.addCandlestickSeries({
-          upColor: color, downColor: '#8a91a0',
-          borderUpColor: color, borderDownColor: '#8a91a0',
-          wickUpColor: color, wickDownColor: '#8a91a0',
-          priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
-          lastValueVisible: false,
-        });
+    series = chart.addSeries(LWC.AreaSeries, {
+      lineColor: color,
+      topColor: 'rgba(246,212,71,0.20)',
+      bottomColor: 'rgba(246,212,71,0.015)',
+      lineWidth: 2,
+      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
   }
 
   function markStatus(text, stale = false) {
@@ -244,7 +250,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       }
       await ensureChart();
       if (!series || stopped || requestId !== loadSeq) return;
-      series.setData(buildSeriesData(r.candles));
+      series.setData(buildAreaData(r.candles));
       if (chart) {
         const scale = chart.timeScale();
         scale.applyOptions({ timeVisible: isIntraday(requestedRange), rightOffset: 0 });
@@ -261,7 +267,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         const q = await fetchQuote(active.ticker);
         if (q && q.price != null) {
           const t = q.ts || Date.now();
-          if (series) series.update({ time: Math.floor(t / 1000), open: q.price, high: q.price, low: q.price, close: q.price });
+          if (series) series.update({ time: Math.floor(t / 1000), value: q.price });
           applyHeader(q);
           lastTickTs = Date.now();
           markStatus(marketLabel(q.trading) || 'live');
