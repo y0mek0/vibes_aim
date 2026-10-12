@@ -67,8 +67,11 @@ function candlesFor(symbol, range) {
     case '15m': step = 60_000; count = 15; break;          // 1m x 15
     case '1H': step = 60_000; count = 60; break;            // 1m x 60
     case '4H': step = 5 * 60_000; count = 48; break;        // 5m x 48
-    case '1D': step = 60_000; count = 24 * 60; break;       // 1m x 1440
-    case '5D': step = 5 * 60_000; count = 5 * 24 * 12; break; // 5m x 576
+    // The chart is a compact 500px widget: one-minute/5-minute bars turn
+    // into visual noise. Use readable 5m/30m candles while keeping the
+    // requested calendar span intact.
+    case '1D': step = 5 * 60_000; count = 24 * 12; break;   // 5m x 288
+    case '5D': step = 30 * 60_000; count = 5 * 24 * 2; break; // 30m x 240
     case '1M': step = 60 * 60_000; count = 30 * 6; break;    // 1h x 180
     case '3M': step = 86_400_000; count = 90; break;
     default: step = 86_400_000; count = 30;

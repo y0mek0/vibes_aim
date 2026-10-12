@@ -6,13 +6,13 @@
 //
 // Public API:
 //   import { mountChart, setActiveTicker, fetchCandles, fetchQuote,
-//            buildHeader, buildStatus } from './chart.js?v=20261013-1';
+//            buildHeader, buildStatus } from './chart.js?v=20261013-2';
 //
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261013-1';
-import { store } from '../src/store.js?v=20261013-1';
+import { api } from '../src/api.js?v=20261013-2';
+import { store } from '../src/store.js?v=20261013-2';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
@@ -164,6 +164,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   let pollTimer = null;
   let staleTimer = null;
   let active = { ticker, range };
+  let loadSeq = 0;
   let stopped = false;
 
   async function ensureChart() {
@@ -182,7 +183,16 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         vertLines: { color: 'rgba(255,255,255,0.04)' },
         horzLines: { color: 'rgba(255,255,255,0.04)' },
       },
-      timeScale: { timeVisible: isIntraday(range), secondsVisible: false, borderColor: 'rgba(255,255,255,0.06)' },
+      timeScale: {
+        timeVisible: isIntraday(range), secondsVisible: false,
+        borderColor: 'rgba(255,255,255,0.06)', rightOffset: 0,
+        fixLeftEdge: true, fixRightEdge: true,
+        lockVisibleTimeRangeOnResize: true,
+        rightBarStaysOnScroll: true,
+        allowShiftVisibleRangeOnWhitespace: false,
+      },
+      handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.06)' },
       crosshair: { mode: 1 },
       autoSize: true,
@@ -221,17 +231,25 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   }
 
   async function loadCandles() {
+    const requestId = ++loadSeq;
+    const requestedTicker = active.ticker;
+    const requestedRange = active.range;
     markStatus('loading…');
     try {
-      const r = await fetchCandles(active.ticker, active.range);
+      const r = await fetchCandles(requestedTicker, requestedRange);
+      if (stopped || requestId !== loadSeq || active.ticker !== requestedTicker || active.range !== requestedRange) return;
       if (!r || !Array.isArray(r.candles) || r.candles.length === 0) {
         markStatus('no data', true);
         return;
       }
       await ensureChart();
-      if (!series) return;
+      if (!series || stopped || requestId !== loadSeq) return;
       series.setData(buildSeriesData(r.candles));
-      chart && chart.timeScale().fitContent();
+      if (chart) {
+        const scale = chart.timeScale();
+        scale.applyOptions({ timeVisible: isIntraday(requestedRange), rightOffset: 0 });
+        scale.fitContent();
+      }
       markStatus(marketLabel(r.trading) || `updated ${new Date().toLocaleTimeString()}`);
     } catch (e) {
       markStatus('error: ' + (e && e.message || e), true);
