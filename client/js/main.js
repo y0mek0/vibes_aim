@@ -1,4 +1,4 @@
-import { boot } from './game.js?v=20261013-3';
+import { boot } from './game.js?v=20261013-4';
 boot();
 
 // ---- app shell: optional install prompt and desktop-only gate ----

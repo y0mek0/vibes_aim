@@ -6,13 +6,13 @@
 //
 // Public API:
 //   import { mountChart, setActiveTicker, fetchCandles, fetchQuote,
-//            buildHeader, buildStatus } from './chart.js?v=20261013-3';
+//            buildHeader, buildStatus } from './chart.js?v=20261013-4';
 //
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261013-3';
-import { store } from '../src/store.js?v=20261013-3';
+import { api } from '../src/api.js?v=20261013-4';
+import { store } from '../src/store.js?v=20261013-4';
 
 const STALE_AFTER_MS = 5000;
 const POLL_MS = 1000;
@@ -304,7 +304,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
           return;
         }
         const t = tick.ts || Date.now();
-        if (series) series.update({ time: Math.floor(t / 1000), open: tick.price, high: tick.price, low: tick.price, close: tick.price });
+        if (series) series.update({ time: Math.floor(t / 1000), value: tick.price });
         applyHeader({ price: tick.price, dp: null, status: tick.status });
         lastTickTs = Date.now();
         markStatus(marketLabel(tick.trading) || 'live');
@@ -359,9 +359,9 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         const color = accentColor(t);
         try {
           series.applyOptions({
-            upColor: color, downColor: '#f4f1ea',
-            borderUpColor: color, borderDownColor: '#f4f1ea',
-            wickUpColor: color, wickDownColor: '#f4f1ea',
+            lineColor: color,
+            topColor: 'rgba(246,212,71,0.20)',
+            bottomColor: 'rgba(246,212,71,0.015)',
           });
         } catch (_) { /* noop */ }
       }

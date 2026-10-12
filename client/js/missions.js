@@ -3,12 +3,12 @@
 // progress, claim buttons, and a one-time unlock animation when the
 // AAPL chain is complete.
 
-import { store } from '../src/store.js?v=20261013-3';
-import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261013-3';
+import { store } from '../src/store.js?v=20261013-4';
+import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261013-4';
 import {
   MISSIONS, missionProgress, allMissionsClaimed,
   describeUnlocks, formatProgress, NVDA_UNLOCK,
-} from '../src/missions-core.js?v=20261013-3';
+} from '../src/missions-core.js?v=20261013-4';
 
 const SELECTORS = {
   root: '#vibes-missions',
