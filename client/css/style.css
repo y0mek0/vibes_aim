@@ -1308,6 +1308,63 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
   #menu .road-card { width: auto; }
 }
 
+/* Vertical balance pass: preserve the dashboard's horizontal geometry while
+   giving the session cards and market chart one shared, taller row. */
+@media (min-width: 941px) {
+  #menu .dashboard-grid {
+    grid-template-rows: 489px;
+    align-items: stretch;
+  }
+  #menu .training-column {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #menu .training-panel {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+  }
+  #menu .mode-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+  #menu .market-column {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: 129px minmax(0, 1fr);
+  }
+  #menu .portfolio-panel {
+    height: 129px;
+  }
+  #menu .market-panel {
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #menu .market-panel-head {
+    flex: 0 0 auto;
+  }
+  #menu .market-panel > #vibes-chart {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #menu .market-panel > #vibes-chart .vc-head {
+    flex: 0 0 auto;
+  }
+  #menu .market-panel > #vibes-chart .vc-body {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+}
+
 /* Full Market workspace: the existing paper-trading data, arranged like a
    compact exchange terminal rather than a modal settings sheet. */
 #vibes-terminal {
