@@ -28,51 +28,73 @@
 <body>
 <canvas id="game"></canvas>
 
-<!-- aim2stock: trading workspace. It lives inside the shared dashboard shell. -->
+<!-- aim2stock: fixed-height trading workspace inside the shared dashboard shell. -->
 <div id="vibes-terminal" hidden>
-  <div class="vt-body">
-    <aside class="vt-watchlist">
-      <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
-      <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">—</strong></button>
-      <button type="button" class="vt-watch" data-vt-watch="NVDA" hidden><span><b>NVDA</b><small>NVIDIA Corp.</small></span><strong data-vt-watch-price="NVDA">—</strong></button>
-      <div class="vt-watch-note">Prices and candles come from the existing market feed.</div>
-    </aside>
+  <div class="vt-workspace">
+    <header class="vt-workspace-head">
+      <div class="vt-workspace-title"><span class="vt-kicker">Market</span><strong>Trading terminal</strong><span class="vt-live-state">Paper execution</span></div>
+      <div class="vt-portfolio-summary" aria-label="Portfolio summary">
+        <span><small>Portfolio</small><b class="num" data-vt-portfolio-total>—</b></span>
+        <span><small>Cash</small><b class="num" data-vt-balance>—</b></span>
+        <span><small>Stocks</small><b class="num" data-vt-portfolio-value>—</b></span>
+        <span><small>Open P/L</small><b class="num" data-vt-open-pnl>0.00</b></span>
+      </div>
+    </header>
 
-    <main class="vt-market-center">
-      <section class="vt-chart-shell">
-        <div class="vt-chart-head"><div><h1><span data-vt-market-ticker>AAPL</span> <em data-vt-market-price>—</em></h1></div></div>
-        <div class="vt-chart-slot" data-vt-chart-slot></div>
-      </section>
-      <section class="vt-section vt-assets">
-        <div class="vt-section-head"><span>Account assets</span><small>Total <b class="num" data-vt-assets-total>—</b></small></div>
-        <div class="vt-assets-list" data-vt-holdings></div>
-      </section>
-      <section class="vt-section vt-convert">
-        <div class="vt-section-head"><span>Spot market</span><small>Buy or sell AAPL directly for USD</small></div>
-        <div class="vt-convert-grid"><label class="vt-control"><span class="vt-field-label">Asset</span><select data-vt-convert-ticker></select></label><label class="vt-control"><span class="vt-field-label">Units</span><input type="number" min="0" step="0.000001" value="0.01" data-vt-convert-units></label></div>
-        <div class="vt-pct-row vt-spot-pct" role="group" aria-label="Spot percent"><button type="button" data-vt-spot-pct="25">25%</button><button type="button" data-vt-spot-pct="50">50%</button><button type="button" data-vt-spot-pct="75">75%</button><button type="button" data-vt-spot-pct="100">MAX</button></div>
-        <div class="vt-side-toggle vt-spot-toggle" role="group" aria-label="Spot action"><button type="button" data-vt-spot-side="buy" class="active">Buy</button><button type="button" data-vt-spot-side="sell">Sell</button></div>
-        <div class="vt-convert-quote"><span>Rate <b class="num" data-vt-convert-price>—</b></span><strong data-vt-spot-quote-label>Total <b class="num" data-vt-convert-usd>—</b> USD</strong></div>
-        <div class="vt-convert-actions"><span class="vt-status" data-vt-convert-status>Loading AAPL spot quote…</span><button type="button" class="vt-btn vt-btn-primary" data-vt-convert-submit disabled>Buy AAPL</button></div>
-      </section>
-      <section class="vt-section vt-positions">
-        <div class="vt-section-head"><span>Open positions</span><small>Manage risk</small></div>
-        <table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Liq</th><th></th></tr></thead><tbody data-vt-positions-body></tbody></table>
-      </section>
-    </main>
+    <div class="vt-body">
+      <aside class="vt-watchlist" aria-label="Markets watchlist">
+        <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
+        <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">-</strong></button>
+        <button type="button" class="vt-watch" data-vt-watch="NVDA" hidden><span><b>NVDA</b><small>NVIDIA Corp.</small></span><strong data-vt-watch-price="NVDA">-</strong></button>
+        <div class="vt-watch-note">Prices and candles use the existing market feed.</div>
+      </aside>
 
-    <aside class="vt-market-right">
-      <section class="vt-section vt-order">
-        <div class="vt-section-head"><span>Order ticket</span><small>Paper trade</small></div>
-        <div class="vt-order-market"><div><span class="vt-field-label">Ticker</span><select data-vt-ot-ticker><option value="AAPL">AAPL</option><option value="NVDA">NVDA</option></select></div><div class="vt-order-quote"><strong data-vt-ot-symbol>AAPL</strong><span data-vt-ot-price>—</span></div></div>
-        <div class="vt-order-field"><span class="vt-field-label">Side</span><div class="vt-side-toggle" role="group" aria-label="Position side"><button type="button" data-vt-side-choice="long" class="active">Long</button><button type="button" data-vt-side-choice="short">Short</button></div><select data-vt-ot-side class="vt-side-native" aria-hidden="true" tabindex="-1"><option value="long">long</option><option value="short">short</option></select></div>
-        <div class="vt-order-field-grid"><label class="vt-control"><span class="vt-field-label">Position size</span><span class="vt-input-row"><input type="number" min="10" step="10" value="100" data-vt-ot-notional><span class="vt-pct-row" role="group" aria-label="Position size percent"><button type="button" data-vt-ot-pct="25">25%</button><button type="button" data-vt-ot-pct="50">50%</button><button type="button" data-vt-ot-pct="75">75%</button><button type="button" data-vt-ot-pct="100">MAX</button></span></span></label><label class="vt-control"><span class="vt-field-label">Leverage <b class="num" data-vt-ot-leverage-num>1x</b></span><input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage></label></div>
-        <div class="vt-readout"><div><span>Entry</span><strong class="num" data-vt-ot-entry>—</strong></div><div><span>Margin</span><strong class="num" data-vt-ot-margin>—</strong></div><div><span>Notional</span><strong class="num" data-vt-ot-notional-total>—</strong></div><div class="neg"><span>Liquidation</span><strong class="num" data-vt-ot-liq>—</strong></div></div>
-        <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
-        <div class="vt-confirm"><label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label><button type="button" class="vt-btn vt-btn-primary" data-vt-ot-submit disabled>Open position</button></div>
-      </section>
-      <section class="vt-section vt-history"><div class="vt-section-head"><span>Trade history</span><small>Last 20</small></div><table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Lev</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Status</th></tr></thead><tbody data-vt-history-body></tbody></table></section>
-    </aside>
+      <main class="vt-market-center">
+        <section class="vt-chart-shell">
+          <div class="vt-chart-head"><div><span class="vt-kicker">Active asset</span><h1><span data-vt-market-ticker>AAPL</span> <em data-vt-market-price>-</em></h1></div><span class="vt-chart-note">Zoom and pan inside the chart</span></div>
+          <div class="vt-chart-slot" data-vt-chart-slot></div>
+        </section>
+        <section class="vt-activity vt-section">
+          <div class="vt-activity-head"><div class="vt-tabs" role="tablist" aria-label="Trading activity"><button type="button" class="active" data-vt-activity-tab="positions" role="tab" aria-selected="true">Positions</button><button type="button" data-vt-activity-tab="orders" role="tab" aria-selected="false">Open orders</button><button type="button" data-vt-activity-tab="history" role="tab" aria-selected="false">History</button><button type="button" data-vt-activity-tab="assets" role="tab" aria-selected="false">Assets</button></div><span class="vt-activity-meta" data-vt-activity-meta>Open positions</span></div>
+          <div class="vt-activity-pane active" data-vt-activity-pane="positions"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Ticker</th><th>Side</th><th>Size</th><th>Lev</th><th>Entry</th><th>Mark</th><th>Liq</th><th>P/L</th><th>Action</th></tr></thead><tbody data-vt-positions-body></tbody></table></div></div>
+          <div class="vt-activity-pane" data-vt-activity-pane="orders"><div class="vt-empty">No open orders.</div></div>
+          <div class="vt-activity-pane" data-vt-activity-pane="history"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Ticker</th><th>Mode</th><th>Side</th><th>Price</th><th>Size</th><th>P/L</th><th>Status</th></tr></thead><tbody data-vt-history-body></tbody></table></div></div>
+          <div class="vt-activity-pane" data-vt-activity-pane="assets"><div class="vt-table-scroll"><table class="vt-table"><thead><tr><th>Asset</th><th>Units</th><th>Value</th><th>Allocation</th></tr></thead><tbody data-vt-assets-body></tbody></table></div><div class="vt-assets-total-line">Total assets <b class="num" data-vt-assets-total>-</b></div></div>
+        </section>
+      </main>
+
+      <aside class="vt-market-right" aria-label="Order panel">
+        <section class="vt-section vt-order">
+          <div class="vt-mode-tabs" role="tablist" aria-label="Trading mode"><button type="button" class="active" data-vt-mode="dex" role="tab" aria-selected="true">DEX</button><button type="button" data-vt-mode="perp" role="tab" aria-selected="false">PERP</button></div>
+          <div class="vt-order-context"><div><span class="vt-field-label">Selected asset</span><strong data-vt-ot-symbol>AAPL</strong></div><span class="vt-order-price num" data-vt-ot-price>-</span></div>
+
+          <div class="vt-form-pane active" data-vt-form="dex">
+            <div class="vt-form-tabs"><button type="button" class="active" data-vt-spot-side="buy">Buy</button><button type="button" data-vt-spot-side="sell">Sell</button></div>
+            <div class="vt-order-type"><button type="button" class="active">Market</button><button type="button" disabled>Limit</button></div>
+            <div class="vt-convert-grid"><label class="vt-control vt-control-wide"><span class="vt-field-label" data-vt-convert-input-label>You pay</span><span class="vt-input-row"><input type="number" min="0" step="0.01" value="100" data-vt-convert-units><select data-vt-convert-ticker aria-label="Asset"><option value="AAPL">USDC</option></select></span></label></div>
+            <div class="vt-pct-row vt-spot-pct" role="group" aria-label="DEX amount percent"><button type="button" data-vt-spot-pct="25">25%</button><button type="button" data-vt-spot-pct="50">50%</button><button type="button" data-vt-spot-pct="75">75%</button><button type="button" data-vt-spot-pct="100">MAX</button></div>
+            <div class="vt-convert-quote"><span><small data-vt-spot-receive-label>You receive</small><b class="num" data-vt-convert-usd>-</b> <span data-vt-spot-receive-ticker>AAPL</span></span><span><small>Price</small><b class="num" data-vt-convert-price>-</b></span></div>
+            <div class="vt-available"><span>Available</span><b class="num" data-vt-available>-</b></div>
+            <div class="vt-status" data-vt-convert-status>Loading spot quote...</div>
+            <button type="button" class="vt-btn vt-btn-primary vt-submit-wide" data-vt-convert-submit disabled>Buy AAPL</button>
+          </div>
+
+          <div class="vt-form-pane" data-vt-form="perp" hidden>
+            <div class="vt-form-tabs"><button type="button" class="active" data-vt-side-choice="long">Long</button><button type="button" data-vt-side-choice="short">Short</button></div>
+            <div class="vt-order-type"><button type="button" class="active">Market</button><button type="button" disabled>Limit</button></div>
+            <label class="vt-control vt-control-wide"><span class="vt-field-label">Position size</span><span class="vt-input-row"><input type="number" min="1" step="1" value="100" data-vt-ot-notional><span class="vt-pct-row" role="group" aria-label="Perp size percent"><button type="button" data-vt-ot-pct="25">25%</button><button type="button" data-vt-ot-pct="50">50%</button><button type="button" data-vt-ot-pct="75">75%</button><button type="button" data-vt-ot-pct="100">MAX</button></span></span></label>
+            <label class="vt-control vt-control-wide"><span class="vt-field-label">Leverage <b class="num" data-vt-ot-leverage-num>1x</b></span><input type="range" min="1" max="20" step="1" value="1" data-vt-ot-leverage></label>
+            <div class="vt-readout"><div><span>Entry</span><strong class="num" data-vt-ot-entry>-</strong></div><div><span>Margin</span><strong class="num" data-vt-ot-margin>-</strong></div><div><span>Notional</span><strong class="num" data-vt-ot-notional-total>-</strong></div><div class="neg"><span>Liquidation</span><strong class="num" data-vt-ot-liq>-</strong></div></div>
+            <div class="vt-available"><span>Available margin</span><b class="num" data-vt-perp-available>-</b></div>
+            <div class="vt-status" data-vt-ot-status>Pick a ticker to load the live price.</div>
+            <div class="vt-confirm"><label><input type="checkbox" data-vt-ot-confirm-chk> I understand the liquidation price</label><button type="button" class="vt-btn vt-btn-primary vt-submit-wide" data-vt-ot-submit disabled>Open long</button></div>
+          </div>
+          <select data-vt-ot-ticker class="vt-hidden-control" aria-hidden="true" tabindex="-1"><option value="AAPL">AAPL</option><option value="NVDA">NVDA</option></select>
+          <select data-vt-ot-side class="vt-hidden-control" aria-hidden="true" tabindex="-1"><option value="long">long</option><option value="short">short</option></select>
+          <span data-vt-spot-quote-label hidden></span><span data-vt-ot-cancel hidden></span><span data-vt-ot-preview hidden></span><span data-vt-ot-confirm hidden></span>
+        </section>
+      </aside>
+    </div>
   </div>
 </div>
 
