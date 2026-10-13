@@ -5,6 +5,7 @@ import { effectiveRpm } from '../client/js/core/ballistics.js';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, timeToDeadzone,
   jumpAirTime, minGap, burstTiming, bloomDecay, shotReady,
   slotForClass, cycleSlot, spawnDist, SPAWN_BANDS, orbScale, ORB_SIZES,
+  gridConeHalfWidth,
   spawnIntro, easeOutBack } from '../client/js/core/gunplay.js';
 
 let fails = 0;
@@ -84,6 +85,9 @@ eq('close band viable', SPAWN_BANDS.close[1] <= 9, true);
 eq('spawnDist deterministic', spawnDist('long', 0.5), 27.5);
 eq('spawnDist in band', spawnDist('close', 0.999) < 9 && spawnDist('close', 0) >= 4, true);
 eq('spawnDist fallback', spawnDist('nope', 0), 10);
+
+eq('grid cone stays centered', gridConeHalfWidth(10) < 3, true);
+eq('grid cone zero distance', gridConeHalfWidth(0), 0);
 
 // --- orb sizes: XS matches a real head radius (0.26 * 0.6 = 0.156) ---
 near('xs head-size', ORB_SIZES.xs * 0.26, 0.156, 1e-9);

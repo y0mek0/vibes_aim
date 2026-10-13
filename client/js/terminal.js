@@ -20,10 +20,10 @@ export function mountTerminal({ root } = {}) {
   if (!panel) return { unmount() {}, state: null };
   const els = {};
   for (const [key, selector] of Object.entries(SELECTORS)) els[key] = panel.querySelector(selector);
-  const state = { ticker: 'AAPL', mode: 'dex', spotSide: 'buy', perpSide: 'long', leverage: 1, notional: 100, entryPrice: 0, assetPrices: {}, lastPreview: null, activity: 'positions', refreshingPrices: false };
+  const state = { ticker: 'AAPL', mode: 'dex', spotSide: 'buy', perpSide: 'long', leverage: 1, notional: 100, entryPrice: 0, assetPrices: {}, lastPreview: null, activity: 'positions', refreshingPrices: false, marketOpen: true, marketSession: 'paper' };
 
   function priceFor(ticker) { const price = Number(state.assetPrices[ticker]); return Number.isFinite(price) && price > 0 ? price : null; }
-  function visibleTickers() { const unlocks = new Set(store.state.unlocks || []); const tickers = new Set(['AAPL', state.ticker]); for (const ticker of Object.keys(store.state.balances || {})) tickers.add(ticker); return [...tickers].filter((ticker) => ticker === 'AAPL' || unlocks.has(ticker) || ticker === state.ticker).sort(); }
+  function visibleTickers() { const unlocks = new Set(store.state.unlocks || []); const tickers = new Set(['AAPL', 'NVDA', state.ticker]); for (const ticker of Object.keys(store.state.balances || {})) tickers.add(ticker); return [...tickers].filter((ticker) => ticker === 'AAPL' || ticker === 'NVDA' || unlocks.has(ticker)).sort(); }
 
   function renderPortfolio() {
     const player = store.state.player; if (!player) return;
@@ -47,7 +47,7 @@ export function mountTerminal({ root } = {}) {
 
   function renderWatchlist() {
     const unlocked = new Set(store.state.unlocks || []);
-    for (const button of panel.querySelectorAll('[data-vt-watch]')) { const ticker = button.dataset.vtWatch; button.hidden = !(ticker === 'AAPL' || unlocked.has(ticker) || ticker === state.ticker); toggle(button, ticker === state.ticker); const price = priceFor(ticker); setText(button.querySelector('[data-vt-watch-price]'), price == null ? '-' : fmtMoney(price)); }
+    for (const button of panel.querySelectorAll('[data-vt-watch]')) { const ticker = button.dataset.vtWatch; button.hidden = !(ticker === 'AAPL' || ticker === 'NVDA' || unlocked.has(ticker) || ticker === state.ticker); toggle(button, ticker === state.ticker); const price = priceFor(ticker); setText(button.querySelector('[data-vt-watch-price]'), price == null ? '-' : fmtMoney(price)); }
   }
 
   function renderTickerContext() {
@@ -59,7 +59,7 @@ export function mountTerminal({ root } = {}) {
   function renderSpot() {
     if (!els.convertUnits) return; const ticker = els.convertTicker?.value || state.ticker; const price = priceFor(ticker); const buy = state.spotSide === 'buy'; const stable = Number(store.state.player?.stable || 0); const held = Number(store.state.balances?.[ticker] || 0); const amount = Number(els.convertUnits.value || 0); const units = buy && price ? amount / price : amount; const usd = buy ? amount : (price ? units * price : NaN);
     setText(els.convertInputLabel, buy ? 'You pay' : 'You sell'); setText(els.spotReceiveLabel, 'You receive'); setText(els.spotReceiveTicker, buy ? ticker : 'USD'); setText(els.convertPrice, price == null ? '-' : fmtMoney(price)); setText(els.convertUsd, buy ? (Number.isFinite(units) ? fmtUnits(units) : '-') : (Number.isFinite(usd) ? '$' + fmtMoney(usd) : '-')); setText(els.available, buy ? `${fmtMoney(stable)} USD` : `${fmtUnits(held)} ${ticker}`);
-    const valid = price != null && amount > 0 && (buy ? amount <= stable + 1e-9 : units <= held + 1e-9); setText(els.convertStatus, valid ? `${buy ? 'Market buy' : 'Market sell'} ready at ${fmtMoney(price)}.` : (price == null ? 'Price feed unavailable.' : buy ? `Insufficient USD. Available ${fmtMoney(stable)}.` : `Insufficient ${ticker}. Available ${fmtUnits(held)}.`));
+    const valid = state.marketOpen && price != null && amount > 0 && (buy ? amount <= stable + 1e-9 : units <= held + 1e-9); const status = !state.marketOpen ? `Market ${state.marketSession || 'closed'}; spot trading is unavailable.` : price == null ? 'Price feed unavailable.' : buy ? (amount <= stable + 1e-9 ? `Market buy ready at ${fmtMoney(price)}.` : `Insufficient USD. Available ${fmtMoney(stable)}.`) : (units <= held + 1e-9 ? `Market sell ready at ${fmtMoney(price)}.` : `Insufficient ${ticker}. Available ${fmtUnits(held)}.`); setText(els.convertStatus, status);
     if (els.convertSubmit) { els.convertSubmit.disabled = !valid; els.convertSubmit.textContent = `${buy ? 'Buy' : 'Sell'} ${ticker}`; }
     panel.querySelectorAll(SELECTORS.spotSide).forEach((button) => toggle(button, button.dataset.vtSpotSide === state.spotSide));
   }
@@ -67,8 +67,8 @@ export function mountTerminal({ root } = {}) {
   function renderPerpPreview() {
     const player = store.state.player || { stable: 0 }; const preview = computeOrder({ side: state.perpSide, leverage: state.leverage, notional: state.notional, entryPrice: state.entryPrice, balance: player.stable }); state.lastPreview = preview;
     if (!preview.ok) { ['otEntry', 'otLiq', 'otMargin', 'otNotionalTotal'].forEach((key) => setText(els[key], '-')); setText(els.otStatus, preview.error === 'no_price' ? 'Price feed unavailable.' : 'Enter a valid position size.'); if (els.otSubmit) els.otSubmit.disabled = true; return; }
-    setText(els.otEntry, fmtMoney(preview.entry)); setText(els.otLiq, fmtMoney(preview.liquidationPrice)); setText(els.otMargin, fmtMoney(preview.margin)); setText(els.otNotionalTotal, fmtMoney(preview.notional)); setText(els.perpAvailable, `${fmtMoney(Number(player.stable || 0))} USD`); setText(els.otStatus, preview.marginOk ? `Ready. Liquidation at ${fmtMoney(preview.liquidationPrice)}.` : `Insufficient USD. Need ${fmtMoney(preview.margin)}.`); toggle(els.otStatus, !preview.marginOk, 'neg');
-    if (els.otSubmit) { els.otSubmit.disabled = !preview.marginOk || !state.entryPrice || !els.otConfirmChk?.checked; els.otSubmit.textContent = `Open ${state.perpSide}`; } if (els.otLeverageNum) els.otLeverageNum.textContent = `${state.leverage}x`; panel.querySelectorAll('[data-vt-side-choice]').forEach((button) => toggle(button, button.dataset.vtSideChoice === state.perpSide));
+    setText(els.otEntry, fmtMoney(preview.entry)); setText(els.otLiq, fmtMoney(preview.liquidationPrice)); setText(els.otMargin, fmtMoney(preview.margin)); setText(els.otNotionalTotal, fmtMoney(preview.notional)); setText(els.perpAvailable, `${fmtMoney(Number(player.stable || 0))} USD`); setText(els.otStatus, !state.marketOpen ? `Market ${state.marketSession || 'closed'}; new positions are unavailable.` : preview.marginOk ? `Ready. Liquidation at ${fmtMoney(preview.liquidationPrice)}.` : `Insufficient USD. Need ${fmtMoney(preview.margin)}.`); toggle(els.otStatus, !preview.marginOk || !state.marketOpen, 'neg');
+    if (els.otSubmit) { els.otSubmit.disabled = !state.marketOpen || !preview.marginOk || !state.entryPrice || !els.otConfirmChk?.checked; els.otSubmit.textContent = `Open ${state.perpSide}`; } if (els.otLeverageNum) els.otLeverageNum.textContent = `${state.leverage}x`; panel.querySelectorAll('[data-vt-side-choice]').forEach((button) => toggle(button, button.dataset.vtSideChoice === state.perpSide));
   }
 
   function renderMode() {
@@ -100,7 +100,7 @@ export function mountTerminal({ root } = {}) {
     if (state.refreshingPrices) return; const missing = [...new Set([...Object.keys(store.state.balances || {}), ...(store.state.trades || []).map((trade) => trade.ticker), state.ticker])].filter((ticker) => !priceFor(ticker)); if (!missing.length) return; state.refreshingPrices = true;
     try { await Promise.all(missing.map(async (ticker) => { try { const quote = await store.fetchQuote(ticker); if (quote?.price != null) state.assetPrices[ticker] = Number(quote.price); } catch (_) { /* keep unavailable */ } })); } finally { state.refreshingPrices = false; renderAll(false); }
   }
-  async function refreshQuote() { try { const quote = await store.fetchQuote(state.ticker); if (quote?.price != null) { state.entryPrice = Number(quote.price); state.assetPrices[state.ticker] = Number(quote.price); } else if (quote?.status === 'pre_ipo') state.entryPrice = 0; } catch (_) { /* keep last price */ } renderAll(false); }
+  async function refreshQuote() { try { const quote = await store.fetchQuote(state.ticker); if (quote?.price != null) { state.entryPrice = Number(quote.price); state.assetPrices[state.ticker] = Number(quote.price); } else if (quote?.status === 'pre_ipo') state.entryPrice = 0; if (quote?.trading) { state.marketOpen = quote.trading.isOpen !== false; state.marketSession = quote.trading.session || (state.marketOpen ? 'open' : 'closed'); } } catch (_) { /* keep last price */ } renderAll(false); }
   function renderAll(fetchPrices = true) { renderTickerContext(); renderPortfolio(); renderAssets(); renderWatchlist(); renderPositions(); renderOrders(); renderHistory(); renderMode(); renderActivity(); if (fetchPrices) void ensureAssetPrices(); }
 
   async function spotTrade() { const ticker = els.convertTicker?.value || state.ticker; const price = priceFor(ticker); const amount = Number(els.convertUnits?.value || 0); const units = state.spotSide === 'buy' && price ? amount / price : amount; if (!price || !Number.isFinite(units) || units <= 0) return; if (els.convertSubmit) els.convertSubmit.disabled = true; setText(els.convertStatus, 'Submitting...'); try { const result = await store.tradeSpot({ ticker, side: state.spotSide, units }); window.__aim2stockChart?.addMarker?.({ ticker, kind: state.spotSide === 'buy' ? 'BUY' : 'SELL', price, ts: Date.now(), id: `spot-${state.spotSide}-${Date.now()}` }); setText(els.convertStatus, `${state.spotSide === 'buy' ? 'Bought' : 'Sold'} ${fmtUnits(result.units ?? units)} ${ticker}.`); els.convertUnits.value = state.spotSide === 'buy' ? '100' : '0'; renderAll(); } catch (error) { setText(els.convertStatus, `Trade failed: ${error?.message || error}`); renderSpot(); } }

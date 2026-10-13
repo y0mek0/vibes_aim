@@ -7,7 +7,7 @@
 const BASES = {
   AAPL: 187.50,
   MSFT: 412.20,
-  NVDA: 118.40,
+  NVDA: 118.58,
   TSLA: 244.10,
   AMZN: 178.90,
   SPY: 524.30,
@@ -41,6 +41,10 @@ function tradingStatus(ts = Date.now()) {
   const isWeekday = values.weekday !== 'Sat' && values.weekday !== 'Sun';
   const isOpen = isWeekday && minutes >= 570 && minutes < 960;
   return { provider: 'stub', isOpen, session: isOpen ? 'regular' : 'closed', timezone: 'America/New_York', hours: '09:30–16:00 ET' };
+}
+
+function paperTradingStatus() {
+  return { provider: 'stub', isOpen: true, session: 'paper', timezone: 'UTC', hours: '24/7 paper market' };
 }
 
 function priceAt(symbol, ts) {
@@ -131,10 +135,10 @@ export function createStubProvider() {
       if (BASES[symbol] === 0) {
         return { symbol, price: null, ts, currency: 'USD', status: 'pre_ipo' };
       }
-      return { symbol, price: round(priceAt(symbol, ts), 4), ts, currency: 'USD', trading: tradingStatus(ts) };
+      return { symbol, price: round(priceAt(symbol, ts), 4), ts, currency: 'USD', trading: paperTradingStatus() };
     },
     async getCandles(symbol, range) {
-      return { symbol, range, candles: candlesFor(symbol, range), trading: tradingStatus() };
+      return { symbol, range, candles: candlesFor(symbol, range), trading: paperTradingStatus() };
     },
     async getStatus() {
       return { provider: 'stub', status: 'stub', lastTickTs: Date.now() };
@@ -142,7 +146,7 @@ export function createStubProvider() {
     // The offline game provider has no exchange session. It stays tradeable
     // so local play and deterministic tests never depend on wall-clock time.
     async getTradingStatus() {
-      return tradingStatus();
+      return paperTradingStatus();
     },
     async getSymbols() {
       return Object.entries(BASES).map(([symbol, base]) => ({

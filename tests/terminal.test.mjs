@@ -294,6 +294,25 @@ async function integration() {
   assert.equal(spotBadSell.body.error, 'insufficient_asset');
   ok('POST /portfolio/spot BUY/SELL moves USD and AAPL without leveraged trades');
 
+  const nvdaPlayer = 'term-nvda-player';
+  const nvdaBefore = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': nvdaPlayer } });
+  const nvdaBuy = await req({ method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': nvdaPlayer }, body: { ticker: 'NVDA', side: 'buy', units: 0.5 } });
+  assert.equal(nvdaBuy.status, 200);
+  assert.equal(nvdaBuy.body.ticker, 'NVDA');
+  assert.equal(nvdaBuy.body.balance, 0.5);
+  assert.ok(nvdaBuy.body.player.stable < nvdaBefore.body.player.stable);
+  const nvdaSell = await req({ method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': nvdaPlayer }, body: { ticker: 'NVDA', side: 'sell', units: 0.5 } });
+  assert.equal(nvdaSell.status, 200);
+  assert.equal(nvdaSell.body.ticker, 'NVDA');
+  assert.equal(nvdaSell.body.balance, 0);
+  const nvdaPreview = await req({ method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': nvdaPlayer }, body: { ticker: 'NVDA', side: 'long', leverage: 2, notional: 100 } });
+  assert.equal(nvdaPreview.status, 200);
+  const nvdaOrder = await req({ method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': nvdaPlayer }, body: { ticker: 'NVDA', side: 'long', leverage: 2, notional: 100, confirmLiquidation: true } });
+  assert.equal(nvdaOrder.status, 200);
+  const nvdaClose = await req({ method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': nvdaPlayer }, body: { tradeId: nvdaOrder.body.trade.id } });
+  assert.equal(nvdaClose.status, 200);
+  ok('NVDA spot BUY/SELL and PERP LONG/CLOSE execute');
+
   // 4. /portfolio/preview: long 5x AAPL
   const prev = await req({
     method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': playerId },

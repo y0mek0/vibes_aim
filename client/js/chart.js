@@ -487,7 +487,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     const unlocked = store.state.unlocks;
     for (const btn of els.tickerBtns) {
       const t = btn.dataset.vcTickerBtn;
-      const visible = (t === 'AAPL') || (Array.isArray(unlocked) && unlocked.includes(t));
+      const visible = (t === 'AAPL' || t === 'NVDA') || (Array.isArray(unlocked) && unlocked.includes(t));
       btn.hidden = !visible;
     }
   }

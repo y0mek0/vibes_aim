@@ -95,6 +95,15 @@ async function main() {
   });
 
   await step(async () => {
+    const r = await client.request({ method: 'GET', path: '/market/quote/NVDA' });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.symbol, 'NVDA');
+    assert.ok(Math.abs(r.body.price - 118.58) < 1);
+    assert.equal(r.body.trading.session, 'paper');
+    ok('market/quote NVDA uses 118.58 paper baseline and stays tradeable');
+  });
+
+  await step(async () => {
     const r = await client.request({ method: 'GET', path: '/market/quote/OPENAI' });
     assert.equal(r.status, 200);
     assert.equal(r.body.status, 'pre_ipo');

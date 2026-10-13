@@ -14,7 +14,7 @@ import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHi
 import { createStalker } from './core/stalker.js?v=20261013-4';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
-  spawnDist, orbScale } from './core/gunplay.js?v=20261013-4';
+  spawnDist, orbScale, gridConeHalfWidth } from './core/gunplay.js?v=20261013-5';
 import { createStats, createKillfeed } from './core/stats.js?v=20261013-4';
 import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-4';
 import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-4';
@@ -424,7 +424,7 @@ export function boot() {
       // Keep targets in a narrow forward cone. The old 0.45d spread put
       // gridshot orbs far into the side vision, which looked like off-screen
       // spawns when the player turned.
-      const lx = (Math.random() * 2 - 1) * Math.min(4.5, d * 0.24);
+      const lx = (Math.random() * 2 - 1) * gridConeHalfWidth(d);
       const p = new THREE.Vector3(
         clamp(pos.x + fx * d + rx * lx, -32, 32),
         1.0 + Math.random() * 2.6,

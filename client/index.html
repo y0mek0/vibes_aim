@@ -45,7 +45,7 @@
       <aside class="vt-watchlist" aria-label="Markets watchlist">
         <div class="vt-section-head"><span>Markets</span><small>Watchlist</small></div>
         <button type="button" class="vt-watch active" data-vt-watch="AAPL"><span><b>AAPL</b><small>Apple Inc.</small></span><strong data-vt-watch-price="AAPL">-</strong></button>
-        <button type="button" class="vt-watch" data-vt-watch="NVDA" hidden><span><b>NVDA</b><small>NVIDIA Corp.</small></span><strong data-vt-watch-price="NVDA">-</strong></button>
+        <button type="button" class="vt-watch" data-vt-watch="NVDA"><span><b>NVDA</b><small>NVIDIA Corp.</small></span><strong data-vt-watch-price="NVDA">-</strong></button>
         <div class="vt-watch-note">Prices and candles use the existing market feed.</div>
       </aside>
 
@@ -328,12 +328,12 @@
      configured OAuth client doesn't have http://127.0.0.1 as an
      authorized origin. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module" src="js/chart.js?v=20261013-8"></script>
+<script type="module" src="js/chart.js?v=20261013-9"></script>
 <!-- aim2stock terminal (paper-trading UI) -->
-<script type="module" src="js/terminal.js?v=20261013-6"></script>
+<script type="module" src="js/terminal.js?v=20261013-7"></script>
 <!-- aim2stock missions panel (AAPL -> NVDA chain) -->
 <script type="module" src="js/missions.js?v=20261013-4"></script>
-<script type="module" src="js/main.js?v=20261013-4"></script>
+<script type="module" src="js/main.js?v=20261013-5"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

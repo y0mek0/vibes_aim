@@ -11,10 +11,12 @@ const MAX_LEVERAGE = 20;
 // ANTHROPIC) are checked separately by the market layer (returns price:
 // null), so we skip them here. Any other ticker must be unlocked by the
 // player (default unlocks are empty, so a fresh player cannot preview
-// or open a position on TSLA / NVDA / etc.).
+// or open a position on TSLA / etc.). NVDA is a supported market instrument
+// and is available for paper trading alongside AAPL.
 const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
+const FREE_TRADE_TICKERS = new Set(['AAPL', 'NVDA']);
 async function assertTickerUnlocked(store, playerId, ticker) {
-  if (ticker === 'AAPL') return;
+  if (FREE_TRADE_TICKERS.has(ticker)) return;
   if (PRE_IPO.has(ticker)) return; // pre-IPO tickers are checked via price
   const unlocks = await store.listUnlocks(playerId);
   if (!unlocks.some((u) => u.ticker === ticker)) {
