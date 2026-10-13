@@ -97,7 +97,7 @@ export function mountTerminal({ root } = {}) {
   }
 
   async function ensureAssetPrices() {
-    if (state.refreshingPrices) return; const missing = [...new Set([...Object.keys(store.state.balances || {}), ...(store.state.trades || []).map((trade) => trade.ticker), state.ticker])].filter((ticker) => !priceFor(ticker)); if (!missing.length) return; state.refreshingPrices = true;
+    if (state.refreshingPrices) return; const missing = [...new Set([...visibleTickers(), ...Object.keys(store.state.balances || {}), ...(store.state.trades || []).map((trade) => trade.ticker), state.ticker])].filter((ticker) => !priceFor(ticker)); state.refreshingPrices = true;
     try { await Promise.all(missing.map(async (ticker) => { try { const quote = await store.fetchQuote(ticker); if (quote?.price != null) state.assetPrices[ticker] = Number(quote.price); } catch (_) { /* keep unavailable */ } })); } finally { state.refreshingPrices = false; renderAll(false); }
   }
   async function refreshQuote() { try { const quote = await store.fetchQuote(state.ticker); if (quote?.price != null) { state.entryPrice = Number(quote.price); state.assetPrices[state.ticker] = Number(quote.price); } else if (quote?.status === 'pre_ipo') state.entryPrice = 0; if (quote?.trading) { state.marketOpen = quote.trading.isOpen !== false; state.marketSession = quote.trading.session || (state.marketOpen ? 'open' : 'closed'); } } catch (_) { /* keep last price */ } renderAll(false); }
