@@ -17,6 +17,7 @@ import assert from 'node:assert/strict';
 import {
   accentColor, fmtPrice, fmtChange,
   buildSeriesData, buildStatus, buildHeader,
+  rangeSeconds, bucketTime, mergeLiveCandle,
 } from '../client/js/chart.js';
 
 let fails = 0;
@@ -68,6 +69,27 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   assert.deepEqual(buildSeriesData(undefined), []);
   assert.deepEqual(buildSeriesData([]), []);
   ok('buildSeriesData handles empty input');
+}
+{
+  assert.equal(rangeSeconds('1D'), 300);
+  assert.equal(bucketTime(1700000123456, '1D'), 1700000100);
+  const first = mergeLiveCandle(null, 100, 1700000123456, '1D');
+  assert.deepEqual(first, { time: 1700000100, open: 100, high: 100, low: 100, close: 100 });
+  const next = mergeLiveCandle(first, 102, 1700000223456, '1D');
+  assert.equal(next.time, first.time);
+  assert.equal(next.high, 102);
+  assert.equal(next.close, 102);
+  ok('live quotes merge into one range-aligned candle instead of adding bars per tick');
+}
+{
+  const out = buildSeriesData([
+    { t: 1700000060000, o: 2, h: 3, l: 1, c: 2.5 },
+    { t: 1700000000000, o: 1, h: 2, l: 0.5, c: 1.5 },
+    { t: 1700000000000, o: 99, h: 99, l: 99, c: 99 },
+  ]);
+  assert.equal(out.length, 2);
+  assert.equal(out[0].close, 1.5);
+  ok('buildSeriesData sorts candles and removes duplicate timestamps');
 }
 {
   // buildStatus

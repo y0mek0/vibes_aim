@@ -14,8 +14,18 @@
 import { api } from '../src/api.js?v=20261013-6';
 import { store } from '../src/store.js?v=20261013-6';
 
-const STALE_AFTER_MS = 5000;
-const POLL_MS = 1000;
+const STALE_AFTER_MS = 15_000;
+const POLL_MS = 5_000;
+const RANGE_SECONDS = {
+  '5m': 60,
+  '15m': 60,
+  '1H': 60,
+  '4H': 5 * 60,
+  '1D': 5 * 60,
+  '5D': 30 * 60,
+  '1M': 60 * 60,
+  '3M': 24 * 60 * 60,
+};
 
 let TV = null;
 let lightweightChartsPromise = null;
@@ -68,14 +78,55 @@ export function fmtChange(pct) {
 
 // Build the candle series data the chart expects.
 export function buildSeriesData(candles) {
-  return (candles || []).map((c) => ({
-    time: Math.floor((c.t || 0) / 1000),
-    open: c.o, high: c.h, low: c.l, close: c.c,
-  }));
+  const seen = new Set();
+  return (candles || [])
+    .map((c) => ({
+      time: Math.floor((c.t || 0) / 1000),
+      open: Number(c.o), high: Number(c.h), low: Number(c.l), close: Number(c.c),
+    }))
+    .filter((c) => c.time > 0 && [c.open, c.high, c.low, c.close].every(Number.isFinite))
+    .sort((a, b) => a.time - b.time)
+    .filter((c) => {
+      if (seen.has(c.time)) return false;
+      seen.add(c.time);
+      return true;
+    });
 }
 
-function buildAreaData(candles) {
-  return buildSeriesData(candles).map((c) => ({ time: c.time, value: c.close }));
+export function rangeSeconds(range) {
+  return RANGE_SECONDS[range] || RANGE_SECONDS['1D'];
+}
+
+export function bucketTime(ts, range) {
+  const seconds = Math.floor(Number(ts) / 1000);
+  const step = rangeSeconds(range);
+  return Math.floor(seconds / step) * step;
+}
+
+export function mergeLiveCandle(last, price, ts, range) {
+  const value = Number(price);
+  if (!Number.isFinite(value)) return last || null;
+  const time = bucketTime(ts, range);
+  if (!last || time > last.time) {
+    return { time, open: value, high: value, low: value, close: value };
+  }
+  if (time < last.time) return last;
+  return {
+    time: last.time,
+    open: last.open,
+    high: Math.max(last.high, value),
+    low: Math.min(last.low, value),
+    close: value,
+  };
+}
+
+function formatTooltipTime(time, range) {
+  if (!Number.isFinite(Number(time))) return '—';
+  const date = new Date(Number(time) * 1000);
+  const options = isIntraday(range)
+    ? { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+    : { month: 'short', day: 'numeric', year: 'numeric' };
+  return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
 // Decide what text the status badge should show, and whether it's stale.
@@ -172,6 +223,8 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
   let active = { ticker, range };
   let loadSeq = 0;
   let stopped = false;
+  let candleData = [];
+  let lastLiveCandle = null;
 
   async function ensureChart() {
     if (chart || stopped) return;
@@ -186,42 +239,92 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: 'rgba(255,255,255,0.025)' },
-        horzLines: { color: 'rgba(255,255,255,0.025)' },
+        vertLines: { color: 'rgba(255,255,255,0.08)' },
+        horzLines: { color: 'rgba(255,255,255,0.08)' },
       },
       timeScale: {
-        visible: false, timeVisible: isIntraday(range), secondsVisible: false,
-        borderColor: 'rgba(255,255,255,0.06)', rightOffset: 0,
-        fixLeftEdge: true, fixRightEdge: true,
+        visible: true,
+        timeVisible: isIntraday(range),
+        secondsVisible: false,
+        borderColor: 'rgba(255,255,255,0.18)',
+        rightOffset: 2,
+        fixLeftEdge: true,
+        fixRightEdge: true,
         lockVisibleTimeRangeOnResize: true,
         rightBarStaysOnScroll: true,
         allowShiftVisibleRangeOnWhitespace: false,
       },
+      rightPriceScale: {
+        visible: true,
+        borderColor: 'rgba(255,255,255,0.18)',
+        entireTextOnly: true,
+        scaleMargins: { top: 0.12, bottom: 0.18 },
+      },
       handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
       handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
-      rightPriceScale: { visible: false },
-      crosshair: { mode: 1, vertLine: { visible: false }, horzLine: { visible: false } },
+      crosshair: {
+        mode: 0,
+        vertLine: {
+          visible: true,
+          width: 1,
+          color: 'rgba(246,212,71,0.55)',
+          style: 2,
+          labelVisible: true,
+          labelBackgroundColor: '#f6d447',
+        },
+        horzLine: {
+          visible: true,
+          width: 1,
+          color: 'rgba(246,212,71,0.55)',
+          style: 2,
+          labelVisible: true,
+          labelBackgroundColor: '#f6d447',
+        },
+      },
       autoSize: true,
     });
     const color = '#f6d447';
-    series = chart.addSeries(LWC.AreaSeries, {
-      lineColor: color,
-      topColor: 'rgba(246,212,71,0.20)',
-      bottomColor: 'rgba(246,212,71,0.015)',
-      lineWidth: 2,
+    series = chart.addSeries(LWC.CandlestickSeries, {
+      upColor: color,
+      downColor: '#9aa3b2',
+      borderUpColor: color,
+      borderDownColor: '#9aa3b2',
+      wickUpColor: color,
+      wickDownColor: '#9aa3b2',
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
-      lastValueVisible: false,
-      priceLineVisible: false,
+      lastValueVisible: true,
+      priceLineVisible: true,
+      priceLineColor: 'rgba(246,212,71,0.75)',
+      priceLineWidth: 1,
     });
     if (typeof LWC.createSeriesMarkers === 'function') {
       markersApi = LWC.createSeriesMarkers(series, markers);
     }
+    const tooltip = document.createElement('div');
+    tooltip.className = 'vc-tooltip';
+    tooltip.hidden = true;
+    els.body.appendChild(tooltip);
+    const renderTooltip = (param) => {
+      if (!param || !param.time || !param.point || !param.seriesData) {
+        tooltip.hidden = true;
+        return;
+      }
+      const candle = param.seriesData.get(series);
+      if (!candle) { tooltip.hidden = true; return; }
+      tooltip.innerHTML = `<b>${formatTooltipTime(param.time, active.range)}</b><span>O ${fmtPrice(candle.open)}</span><span>H ${fmtPrice(candle.high)}</span><span>L ${fmtPrice(candle.low)}</span><span>C ${fmtPrice(candle.close)}</span>`;
+      tooltip.hidden = false;
+      const left = Math.max(6, Math.min(els.body.clientWidth - tooltip.offsetWidth - 6, param.point.x + 12));
+      const top = Math.max(6, Math.min(els.body.clientHeight - tooltip.offsetHeight - 6, param.point.y + 12));
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    };
+    chart.subscribeCrosshairMove(renderTooltip);
   }
 
   function addMarker({ ticker = active.ticker, kind, price, ts = Date.now(), id } = {}) {
     if (!kind || ticker !== active.ticker || !Number.isFinite(Number(price))) return;
     const marker = {
-      time: Math.floor(Number(ts) / 1000),
+      time: bucketTime(ts, active.range),
       position: /SELL|SHORT|CLOSE/.test(kind) ? 'aboveBar' : 'belowBar',
       color: '#f6d447',
       shape: /SELL|SHORT|CLOSE/.test(kind) ? 'arrowDown' : 'arrowUp',
@@ -270,12 +373,13 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       }
       await ensureChart();
       if (!series || stopped || requestId !== loadSeq) return;
-      const areaData = buildAreaData(r.candles);
-      series.setData(areaData);
-      try { markersApi?.setMarkers(areaData.length ? markers.filter((m) => m.time >= areaData[0].time) : markers); } catch (_) { /* optional plugin */ }
+      candleData = buildSeriesData(r.candles);
+      lastLiveCandle = candleData[candleData.length - 1] || null;
+      series.setData(candleData);
+      try { markersApi?.setMarkers(candleData.length ? markers.filter((m) => m.time >= candleData[0].time) : markers); } catch (_) { /* optional plugin */ }
       if (chart) {
         const scale = chart.timeScale();
-        scale.applyOptions({ timeVisible: isIntraday(requestedRange), rightOffset: 0 });
+        scale.applyOptions({ timeVisible: isIntraday(requestedRange), rightOffset: 2 });
         scale.fitContent();
       }
       markStatus(marketLabel(r.trading) || `updated ${new Date().toLocaleTimeString()}`);
@@ -284,12 +388,24 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     }
   }
 
+  function applyLiveQuote(quote) {
+    if (!quote || quote.price == null || !series) return;
+    const next = mergeLiveCandle(lastLiveCandle, quote.price, quote.ts || Date.now(), active.range);
+    if (!next || next === lastLiveCandle) return;
+    lastLiveCandle = next;
+    if (candleData.length && candleData[candleData.length - 1].time === next.time) {
+      candleData[candleData.length - 1] = next;
+    } else {
+      candleData = [...candleData, next].slice(-600);
+    }
+    series.update(next);
+  }
+
   async function pollOnce() {
       try {
         const q = await fetchQuote(active.ticker);
         if (q && q.price != null) {
-          const t = q.ts || Date.now();
-          if (series) series.update({ time: Math.floor(t / 1000), value: q.price });
+          applyLiveQuote(q);
           applyHeader(q);
           lastTickTs = Date.now();
           markStatus(marketLabel(q.trading) || 'live');
@@ -326,7 +442,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
           return;
         }
         const t = tick.ts || Date.now();
-        if (series) series.update({ time: Math.floor(t / 1000), value: tick.price });
+        applyLiveQuote({ price: tick.price, ts: t });
         applyHeader({ price: tick.price, dp: null, status: tick.status });
         lastTickTs = Date.now();
         markStatus(marketLabel(tick.trading) || 'live');
@@ -381,9 +497,9 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
         const color = accentColor(t);
         try {
           series.applyOptions({
-            lineColor: color,
-            topColor: 'rgba(246,212,71,0.20)',
-            bottomColor: 'rgba(246,212,71,0.015)',
+            upColor: color,
+            borderUpColor: color,
+            wickUpColor: color,
           });
         } catch (_) { /* noop */ }
       }
