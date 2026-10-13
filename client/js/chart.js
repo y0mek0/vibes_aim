@@ -170,6 +170,11 @@ function setText(el, value) { if (el) el.textContent = value; }
 // fresh, so SSE is a strict upgrade — never a regression.
 export function openQuoteStream(ticker, onTick) {
   if (typeof EventSource === 'undefined') return () => {};
+  // Vercel serverless responses cannot keep this connection alive reliably.
+  // Use the 5-second quote poll there; SSE stays opt-in for deployed hosts.
+  const host = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isLocal = host === '127.0.0.1' || host === 'localhost';
+  if (!isLocal && window.VIBES_SSE_ENABLED !== true) return () => {};
   let closed = false;
   // SSE must hit the API origin, not the static-host origin. EventSource
   // can not set cross-origin mode (it is always same-origin), so we
