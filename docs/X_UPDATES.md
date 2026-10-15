@@ -1,109 +1,109 @@
-# AIM2STOCK X Updates
+# AIM2STOCK / PUBLIC UPDATES
 
-This file is the memory and archive for public product updates. It is intentionally separate from the engineering changelog: `docs/CHANGELOG.md` records implementation history; this file stores the concise, user-facing posts and the exact coverage boundary used to prevent repetition.
+A working archive for copy-ready product news. It tracks what has already been reported so new updates cover only verified changes and do not repeat old ones.
 
-## How to write the next update
+## Writing rules
 
-1. Read this entire file before drafting.
-2. Start from `Last covered commit` and inspect only newer commits, verified browser work, deploys, and user-visible fixes.
-3. Do not repeat a feature, fix, or limitation already stated in an earlier post unless the new update changes its status or adds new evidence.
-4. Keep one complete post, not a thread.
-5. Use this order:
-   - `NEW FEATURES`
-   - `IMPROVEMENTS`
-   - `BUG FIXES`
-   - `VERIFIED`
-   - `KNOWN LIMITATIONS` only when still relevant
-6. Write public copy in natural English. Chat explanations remain Russian.
-7. Never include credentials, tokens, private paths, internal IDs, or unverified claims.
-8. After publishing or approving a post, update the coverage ledger below with the newest commit and date.
+- Read this file before drafting.
+- Start at `Last covered commit` and inspect only newer commits, verified browser flows, test runs, deploy results, and user-visible changes.
+- Report shipped behavior, not intentions, stubs, or plans.
+- Keep one complete post. Do not split it into a thread unless explicitly requested.
+- Use this order when a section has content: `NEW FEATURES`, `IMPROVEMENTS`, `BUG FIXES`, `VERIFIED`, `KNOWN LIMITATIONS`.
+- Remove a section when it has nothing useful to say.
+- Do not repeat an older item unless its status changed or new evidence materially changes the story.
+- Public copy is English. Explanations in chat are Russian.
+- Never include credentials, tokens, private paths, internal IDs, or unsupported claims.
+- Apply the `marketing-copy` and `stop-slop` review passes before delivery.
 
 ## Coverage ledger
 
-- Current product: `AIM2STOCK`
-- Next public update: `UPDATE 002`
-- Last covered commit: `10f7f5905f1f6fe94301c11ad994ebd6c094befb`
-- Last covered date: `2026-10-14`
-- Covered commit range for Update 001: `b1b60eb..10f7f59`
-- Last report: `UPDATE 001 — MARKET TERMINAL`
+| Field | Value |
+|---|---|
+| Product | `AIM2STOCK` |
+| Next public update | `UPDATE 002` |
+| Last covered commit | `10f7f5905f1f6fe94301c11ad994ebd6c094befb` |
+| Last covered date | `2026-10-14` |
+| Update 001 range | `b1b60eb..10f7f59` |
+| Last published update | `UPDATE 001 / MARKET TERMINAL` |
 
 ---
 
-## AIM2STOCK UPDATE 001 — MARKET TERMINAL
+## UPDATE 001 / MARKET TERMINAL
 
-AIM2STOCK's market layer received its first complete trading-terminal pass: usable candles, NVDA support, real paper execution flows, and a tighter Gridshot spawn field.
-
-### NEW FEATURES
-
-» Added NVDA as a visible paper-trading asset with the label `NVIDIA Corp.` and a dedicated quote/candle series.
-
-» Added full NVDA terminal coverage for DEX spot trading and PERP positions, including Long, leverage, open, close, balance updates, and trade history.
-
-» Replaced the decorative market area chart with an OHLC candlestick chart with price scale, time scale, range controls, crosshair, tooltip, zoom, pan, and live candle updates.
-
-» Added a visible NVDA watchlist price that loads during terminal startup instead of waiting for the user to select NVDA first.
-
-### IMPROVEMENTS
-
-» Paper market execution now has an explicit 24/7 paper session, so the UI and API agree about when paper trades are available.
-
-» Production quote transport now uses bounded REST polling instead of an unstable long-lived SSE connection on serverless hosting.
-
-» DEX input semantics are now explicit: BUY accepts a USD amount, while SELL accepts asset units.
-
-» Gridshot target spawning now uses a centered forward cone instead of the previous wide side-to-side range.
-
-### BUG FIXES
-
-» Fixed an issue where the terminal showed `Market sell ready` but the SELL request did not execute with the intended asset quantity.
-
-» Fixed NVDA being present in market data but hidden or blocked in the watchlist and terminal selectors.
-
-» Fixed the watchlist showing `-` for NVDA until manual selection.
-
-» Fixed production chart streaming repeatedly reconnecting and producing serverless connection errors.
-
-» Fixed Gridshot targets appearing too far to the sides on the first level.
-
-### VERIFIED
-
-» Full `npm run test` passed, including chart, server, terminal, NVDA BUY/SELL/PERP, and Gridshot geometry coverage.
-
-» Production browser flow verified: NVDA BUY → read balance → SELL exact units → zero NVDA balance.
-
-» Production browser flow verified: NVDA Long at 2x leverage → open position → close position → closed trade in history.
-
-» Production browser flow verified: NVDA quote and candles return successfully, the chart switches to NVDA, and the watchlist displays a live price.
-
-» Production Gridshot verified with three active targets inside the centered forward area rather than at the side edges.
-
-### KNOWN LIMITATIONS
-
-» Production currently uses the existing synthetic paper-market provider. Finnhub integration is implemented but requires a configured `FINNHUB_TOKEN` before switching to live market data.
-
-» Limit-order execution and cancellation are not enabled yet.
-
----
-
-## Future post template
+**Published copy**
 
 ```text
-AIM2STOCK UPDATE NNN — CODENAME
+AIM2STOCK UPDATE 001 / MARKET TERMINAL
 
-One short sentence describing the user-visible result.
+The market terminal now has a usable paper-trading loop: NVDA, real BUY/SELL flows, leveraged PERPs, readable candles, and a tighter Gridshot field.
 
 NEW FEATURES
-» ...
+- Added NVDA with its own quote and candle series.
+- Added NVDA coverage across DEX spot trading and PERP Long positions, including leverage, open, close, balances, and trade history.
+- Replaced the decorative area chart with an OHLC candlestick chart with scales, range controls, crosshair, tooltip, zoom, pan, and live candle updates.
 
 IMPROVEMENTS
-» ...
+- Paper trading now runs as an explicit 24/7 paper session, keeping the UI and API in sync.
+- Production quote updates use bounded polling instead of unstable serverless SSE reconnects.
+- DEX inputs are explicit: BUY takes a USD amount; SELL takes asset units.
+- Gridshot targets now spawn inside a centered forward cone instead of the old wide side range.
 
 BUG FIXES
-» Fixed an issue where...
+- Fixed SELL requests that showed as ready but did not execute the intended asset quantity.
+- Fixed NVDA being hidden or blocked in watchlist and terminal selectors.
+- Fixed the NVDA watchlist price staying empty until manual selection.
+- Fixed production chart reconnect errors.
+- Fixed first-level Gridshot targets appearing too far to the sides.
 
 VERIFIED
-» ...
+- Full test suite passed.
+- Production NVDA BUY → exact-unit SELL returned the asset balance to zero.
+- Production NVDA 2x Long opened, closed, and appeared as a closed trade in history.
+- Production quote, candles, watchlist price, chart switching, and first-level Gridshot geometry were browser-verified.
 
 KNOWN LIMITATIONS
-» ...
+- Production still uses synthetic paper-market data. Finnhub integration exists but is not enabled without the required configuration.
+- Limit-order execution and cancellation are not enabled yet.
 ```
+
+### Evidence boundary
+
+Update 001 covers commits `b1b60eb` through `10f7f59`. Its claims were based on the repository test suite, production browser flows, chart checks, Gridshot screenshots, and deploy verification available at the time of writing.
+
+---
+
+## Next-update workflow
+
+1. Read the coverage ledger.
+2. Inspect `git log` and diffs after the last covered commit.
+3. Check relevant tests and browser or production evidence.
+4. Build a short list of genuinely new user-visible changes.
+5. Remove anything already covered above.
+6. Draft one copy-ready post using the structure below.
+7. Run the `marketing-copy` and `stop-slop` passes.
+8. After the post is approved or published, update the ledger and add the new report below it.
+
+## Copy-ready template
+
+```text
+AIM2STOCK UPDATE NNN / CODENAME
+
+One sentence explaining the user-visible result.
+
+NEW FEATURES
+- ...
+
+IMPROVEMENTS
+- ...
+
+BUG FIXES
+- Fixed an issue where...
+
+VERIFIED
+- ...
+
+KNOWN LIMITATIONS
+- ...
+```
+
+The template is a starting point, not a requirement to fill every section.
