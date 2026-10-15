@@ -1,0 +1,69 @@
+AIM2STOCK: MARKET TERMINAL UPDATE 001
+
+The first major market-terminal pass is live.
+
+Quick summary: NVDA is now part of the trading loop, the market screen uses OHLC candles, paper orders pass the correct units, and Gridshot targets stay inside the intended play area.
+
+Hey players,
+
+This update connects more of the aim-training loop to the paper-trading terminal. You can earn simulated ticker units, follow the market through a proper chart, trade spot assets, and manage leveraged positions without leaving the game.
+
+MARKET TERMINAL
+
+NVDA
+
+NVDA is now available throughout the terminal with its own quote and candle data. The ticker can be used for spot trading and PERP positions, with balances, open positions, and trade history updating through the same flow as AAPL.
+
+The watchlist also loads visible ticker prices during startup, so NVDA no longer appears empty until you select it manually.
+
+CHART UPDATES
+
+The market screen now uses an OHLC candlestick chart instead of the previous decorative area chart.
+
+The new chart includes:
+
+- price and time scales;
+- selectable time ranges;
+- crosshair and tooltip;
+- zoom and pan;
+- live candle updates;
+- ticker switching between AAPL and NVDA.
+
+PAPER-TRADING UPDATES
+
+The paper market now runs as an explicit 24/7 session during testing.
+
+BUY and SELL also use their actual input units:
+
+- BUY uses a USD amount;
+- SELL uses asset units.
+
+This resolves the issue where the terminal could show a sell-ready state but send the wrong quantity to the trading flow.
+
+PRODUCTION CLIENT
+
+Deployed builds now refresh market data through bounded polling instead of relying on the unstable serverless SSE connection.
+
+The chart continues updating without repeated reconnect errors.
+
+GRIDSHOT
+
+First-level target placement has been tightened.
+
+Targets now spawn inside a centered forward cone instead of reaching too far toward the outer edges of the arena. The first level should now keep the action in front of the player instead of scattering targets across the sides.
+
+BUG FIXES
+
+- SELL requests now execute the intended asset quantity.
+- NVDA is available in the watchlist and terminal selectors.
+- NVDA prices load during terminal startup.
+- Production chart reconnect loops no longer interrupt market updates.
+- First-level Gridshot targets no longer spawn too far to the sides.
+
+KNOWN LIMITATIONS
+
+Production still uses synthetic paper-market data.
+
+The Finnhub adapter is available but has not been enabled.
+
+Limit-order execution and cancellation are still in development.

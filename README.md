@@ -2,7 +2,7 @@
 
 A browser aim-trading game. Aim hits in a 3D arena farm simulated units of real-market tickers; a separate paper-trading terminal uses real charts and lets you buy, sell, long, short, and run positions up to 20x leverage. Every aim hit, every order, every P/L is server-validated. All money is play money.
 
-This is the `mvp-v0.1` release. It is a fully playable single-player loop on top of a valotrainer aim engine. No real money, no broker, no debt, no withdrawals.
+This is the `v0.2.1` release. It is a fully playable single-player loop on top of a valotrainer aim engine. No real money, no broker, no debt, no withdrawals.
 
 ![initial menu](docs/screenshots/01-initial-menu.png)
 

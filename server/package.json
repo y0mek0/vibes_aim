@@ -1,6 +1,6 @@
 {
   "name": "aim2stock-server",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "aim2stock backend: aim verification, paper-trading state, provider-neutral market data adapter.",

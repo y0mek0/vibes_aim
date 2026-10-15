@@ -1,5 +1,6 @@
 {
   "name": "aim2stock",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Browser aim-trading game: aim farms simulated units of real-market assets, paper-trading terminal uses real charts.",
