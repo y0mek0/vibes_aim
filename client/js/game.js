@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261021-1';
 import { getNvdaBoostGunIds } from './data/nvda-boost.js?v=20261021-1';
 import { FARM_TICKERS } from './data/farm-tickers.js?v=20261021-1';
-import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261013-4';
+import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261021-6';
 import { BUILD } from './build.js?v=20261013-4';
 import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261013-4';
 // Inline constant for the flat 100 HP model. Imported separately so the
@@ -16,7 +16,7 @@ import { damageAtRange, spreadDeg, movePenalty, effectiveRpm, zoomOf, lethalOnHi
 import { createStalker } from './core/stalker.js?v=20261013-4';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
-  spawnDist, orbScale, gridConeHalfWidth } from './core/gunplay.js?v=20261013-5';
+  spawnDist, orbScale, gridConeHalfWidth, FORWARD_CONE_HALF_ANGLE_DEG } from './core/gunplay.js?v=20261021-6';
 import { createStats, createKillfeed } from './core/stats.js?v=20261013-4';
 import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-4';
 import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-4';
@@ -423,9 +423,8 @@ export function boot() {
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     for (let i = 0; i < 40; i++) {
       const d = bandDist() * (0.85 + Math.random() * 0.3);
-      // Keep targets in a narrow forward cone. The old 0.45d spread put
-      // gridshot orbs far into the side vision, which looked like off-screen
-      // spawns when the player turned.
+      // Keep every target inside a strict 6° forward corridor so the player
+      // never gets targets appearing in the side vision.
       const lx = (Math.random() * 2 - 1) * gridConeHalfWidth(d);
       const p = new THREE.Vector3(
         clamp(pos.x + fx * d + rx * lx, -32, 32),
@@ -442,9 +441,8 @@ export function boot() {
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
-    // Flick targets stay in a tight forward cone. The old ±16° azimuth made
-    // edge targets read as side spawns on wide screens.
-    const az = (Math.random() * 2 - 1) * 8 * DEG, el = (Math.random() * 10 - 1) * DEG, d = bandDist();
+    // Flick targets stay in the same strict forward corridor as Gridshot.
+    const az = (Math.random() * 2 - 1) * FORWARD_CONE_HALF_ANGLE_DEG * DEG, el = (Math.random() * 10 - 1) * DEG, d = bandDist();
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     const lx = Math.sin(az) * d, dd = Math.cos(az) * d;
     const p = new THREE.Vector3(
@@ -456,7 +454,7 @@ export function boot() {
   }
   function spawnRangeBot() {
     const d = bandDist();
-    const lx = (Math.random() * 2 - 1) * Math.min(4.5, d * 0.24);
+    const lx = (Math.random() * 2 - 1) * gridConeHalfWidth(d);
     return T.spawnBot(new THREE.Vector3(
       clamp(pos.x - Math.sin(yaw) * d + Math.cos(yaw) * lx, -32, 32), 0,
       clamp(pos.z - Math.cos(yaw) * d - Math.sin(yaw) * lx, -63, 11)), armorHp());

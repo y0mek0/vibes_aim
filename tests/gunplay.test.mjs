@@ -6,6 +6,7 @@ import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, timeToDeadzone,
   jumpAirTime, minGap, burstTiming, bloomDecay, shotReady,
   slotForClass, cycleSlot, spawnDist, SPAWN_BANDS, orbScale, ORB_SIZES,
   gridConeHalfWidth,
+  FORWARD_CONE_HALF_ANGLE_DEG,
   spawnIntro, easeOutBack } from '../client/js/core/gunplay.js';
 
 let fails = 0;
@@ -86,7 +87,8 @@ eq('spawnDist deterministic', spawnDist('long', 0.5), 27.5);
 eq('spawnDist in band', spawnDist('close', 0.999) < 9 && spawnDist('close', 0) >= 4, true);
 eq('spawnDist fallback', spawnDist('nope', 0), 10);
 
-eq('grid cone stays centered', gridConeHalfWidth(10) < 3, true);
+eq('forward cone is strict', FORWARD_CONE_HALF_ANGLE_DEG, 6);
+eq('grid cone stays centered', gridConeHalfWidth(10) < 1.1, true);
 eq('grid cone zero distance', gridConeHalfWidth(0), 0);
 
 // --- orb sizes: XS matches a real head radius (0.26 * 0.6 = 0.156) ---
