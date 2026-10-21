@@ -39,4 +39,13 @@ export const config = {
     hitUnit: readNumber('AIM_HIT_UNIT', 0.0008),
     priceImpactMax: readNumber('AIM_PRICE_IMPACT_MAX', 0.018),
   },
+  a2s: {
+    rpcUrl: readString('A2S_RPC_URL', 'https://rpc.testnet.chain.robinhood.com'),
+    chainId: readNumber('A2S_CHAIN_ID', 46630),
+    contract: readString('A2S_CONTRACT', '0xcE413504CD82FcF32b290366D57443C6B3213DC9'),
+    decimals: readNumber('A2S_DECIMALS', 18),
+    authSecret: readString('A2S_AUTH_SECRET', process.env.SUPABASE_SERVICE_KEY || (process.env.NODE_ENV === 'production' ? '' : 'aim2stock-dev-a2s-secret')),
+    cacheMs: readNumber('A2S_CACHE_MS', 60_000),
+    historyWindowBlocks: readNumber('A2S_HISTORY_BLOCKS', 30_000_000),
+  },
 };

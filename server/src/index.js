@@ -14,13 +14,13 @@ import { sendJson, HttpError } from './util/json.js';
 export function createApp(deps = {}) {
   const market = deps.market ?? createMarketProvider(config.market);
   const store = deps.store ?? pickStore(config.supabase);
-  const router = mountRoutes({ market, store, config });
+  const router = mountRoutes({ market, store, config, holding: deps.holding });
 
   // CORS preflight and headers for the configured origin.
   function setCors(res) {
     res.setHeader('Access-Control-Allow-Origin', config.origin);
     res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Player-Id, X-Session-Id');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Player-Id, X-Session-Id, X-Wallet-Proof');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   }
 

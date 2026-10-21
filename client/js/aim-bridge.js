@@ -6,7 +6,7 @@
 // server uses (sessionId, hitId) for idempotency, so a network blip that
 // causes a retry will not double-mint.
 
-import { api } from '../src/api.js?v=20261013-4';
+import { api } from '../src/api.js?v=20261021-2';
 import { getSessionId } from '../src/session.js?v=20261013-4';
 
 const ACTIVE_TICKER_KEY = 'aim2stock.activeTicker.v1';
@@ -73,15 +73,17 @@ function ensureChip() {
 
 let lastUnit = 0;
 let total = 0;
-function flashChip(unit) {
+let lastRewardTicker = activeTicker;
+function flashChip(unit, ticker = activeTicker) {
   lastUnit = unit;
   total += unit;
+  lastRewardTicker = ticker || activeTicker;
   if (typeof document !== 'undefined') {
     document.querySelectorAll('[data-game-earned]').forEach((el) => { el.textContent = total.toFixed(4); });
-    document.querySelectorAll('[data-game-earned-ticker]').forEach((el) => { el.textContent = activeTicker; });
-    document.querySelectorAll('[data-dashboard-session-units], [data-recent-earned]').forEach((el) => { el.textContent = `+${total.toFixed(4)} ${activeTicker}`; });
+    document.querySelectorAll('[data-game-earned-ticker]').forEach((el) => { el.textContent = lastRewardTicker; });
+    document.querySelectorAll('[data-dashboard-session-units], [data-recent-earned]').forEach((el) => { el.textContent = `+${total.toFixed(4)} ${lastRewardTicker}`; });
     document.querySelectorAll('[data-dashboard-today]').forEach((el) => { el.textContent = `+${total.toFixed(4)}`; });
-    document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = activeTicker; });
+    document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = lastRewardTicker; });
   }
 }
 
@@ -105,7 +107,7 @@ function onHit(ev) {
     // (e.g. legacy pre-rename) fall back to 1.0x on the server.
     gunId: typeof d.gunId === 'string' ? d.gunId : null,
   }).then((r) => {
-    if (r && typeof r.unit === 'number') flashChip(r.unit);
+    if (r && typeof r.unit === 'number') flashChip(r.unit, r.ticker);
   }).catch(() => { /* swallow; engine visuals still play. */ })
     .finally(() => { inFlight.delete(hitId); });
 }

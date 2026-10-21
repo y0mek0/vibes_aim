@@ -49,6 +49,19 @@ function baseUrl() {
   return defaultBaseUrl();
 }
 
+function getWalletProof() {
+  try { return localStorage.getItem('aim2stock.a2s.walletProof.v1') || ''; } catch { return ''; }
+}
+
+export function setWalletProof(proof) {
+  try {
+    if (proof) localStorage.setItem('aim2stock.a2s.walletProof.v1', proof);
+    else localStorage.removeItem('aim2stock.a2s.walletProof.v1');
+  } catch { /* ignore */ }
+}
+
+export function getWalletProofValue() { return getWalletProof(); }
+
 export class ApiError extends Error {
   constructor(status, code, message) {
     super(message || code);
@@ -69,6 +82,7 @@ async function request(method, path, { body, query, headers } = {}) {
     'Content-Type': 'application/json',
     'X-Player-Id': getPlayerId(),
     'X-Session-Id': getSessionId(),
+    ...(getWalletProof() ? { 'X-Wallet-Proof': getWalletProof() } : {}),
     ...(headers || {}),
   };
   const res = await fetch(url, {

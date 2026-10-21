@@ -2,9 +2,10 @@
 // Server is the ONLY place that mints simulated ticker units.
 
 import { sendJson, HttpError, round } from '../util/json.js';
-import { getEarnMult } from '../data/loadout.js';
+import { getEarnMult, GUNS_CATALOG } from '../data/loadout.js';
+import { getNvdaBoostGunIds } from '../../../client/js/data/nvda-boost.js';
 
-export function aimRoutes(r, { store, config }) {
+export function aimRoutes(r, { store, config, holding }) {
   r.post('/aim/hit', async (req, res, _params, _query, body) => {
     const playerId = req.headers['x-player-id'];
     const sessionId = req.headers['x-session-id'];
@@ -13,6 +14,7 @@ export function aimRoutes(r, { store, config }) {
     const { hitId, ticker, accuracy, streak, ts } = body || {};
     if (!hitId || typeof hitId !== 'string') throw new HttpError(400, 'missing_hit_id', 'hitId is required');
     if (!ticker || typeof ticker !== 'string') throw new HttpError(400, 'missing_ticker', 'ticker is required');
+    const nvdaBoostCandidate = getNvdaBoostGunIds(GUNS_CATALOG).includes(body?.gunId);
 
     // Unlock check: AAPL is always farmable. Pre-IPO tickers (OPENAI,
     // ANTHROPIC) are valid hit targets — the server mints their unit but
@@ -23,9 +25,14 @@ export function aimRoutes(r, { store, config }) {
     // here before they reach the rate limiter.
     const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
     const unlocks = await store.listUnlocks(playerId);
-    if (ticker !== 'AAPL' && !PRE_IPO.has(ticker) && !unlocks.some((u) => u.ticker === ticker)) {
-      throw new HttpError(400, 'ticker_locked', `Ticker ${ticker} is not unlocked. Complete the AAPL chain to unlock NVDA.`);
+    const nvdaBoosted = nvdaBoostCandidate && unlocks.some((unlock) => unlock.ticker === 'NVDA');
+    const effectiveTicker = nvdaBoosted ? 'NVDA' : ticker;
+    if (effectiveTicker !== 'AAPL' && !PRE_IPO.has(effectiveTicker) && !unlocks.some((u) => u.ticker === effectiveTicker)) {
+      throw new HttpError(400, 'ticker_locked', `Ticker ${effectiveTicker} is not unlocked. Complete the AAPL chain to unlock NVDA.`);
     }
+
+    const holdingStatus = holding ? await holding.getVerifiedStatus(req.headers['x-wallet-proof']) : null;
+    const holdingMultiplier = holdingStatus?.multiplier || 1;
 
     // Rate limit (per session, sliding window)
     const rate = await store.hitRateCheck({ sessionId, windowMs: 1000, maxInWindow: config.aim.hitRps });
@@ -34,14 +41,14 @@ export function aimRoutes(r, { store, config }) {
     }
 
     // Idempotency (sessionId + hitId)
-        const dup = await store.recordHit({ playerId, sessionId, hitId, ticker, unit: config.aim.hitUnit, ts: ts || Date.now() });
+        const dup = await store.recordHit({ playerId, sessionId, hitId, ticker: effectiveTicker, unit: config.aim.hitUnit, ts: ts || Date.now() });
         if (dup && dup.duplicate) {
           // Defensive: dup.entry may be absent if the underlying store
           // returned only the duplicate flag without the original row.
           // Fall back to 0 unit so the client gets a clean response
           // instead of a 500.
           const unit = (dup.entry && typeof dup.entry.unit === 'number') ? dup.entry.unit : 0;
-          return sendJson(res, 200, { ok: true, duplicate: true, unit, ticker, accuracy, streak });
+          return sendJson(res, 200, { ok: true, duplicate: true, unit, ticker: effectiveTicker, accuracy, streak, nvdaBoosted, holdingMultiplier, holdingVerified: !!holdingStatus });
         }
 
     // Mint simulated units
@@ -50,7 +57,7 @@ export function aimRoutes(r, { store, config }) {
     // gunId drives the earn multiplier: shotguns and snipers pay more
     // per hit, full-auto mags pay less. Unknown / null gunId -> 1.0x.
     const earnMult = getEarnMult(body?.gunId);
-    let unit = config.aim.hitUnit * earnMult;
+    let unit = config.aim.hitUnit * earnMult * holdingMultiplier;
     // Slight streak bonus: +20% per 5 in streak, capped at +50% (x1.5)
     if (Number.isFinite(streakN) && streakN > 0) {
       const bonus = Math.min(0.5, Math.floor(streakN / 5) * 0.2);
@@ -62,13 +69,16 @@ export function aimRoutes(r, { store, config }) {
 
     await store.getOrCreatePlayer(playerId);
     if (Number.isFinite(acc)) await store.recordAccuracy(playerId, acc);
-    const bal = await store.addTickerUnits(playerId, ticker, unit);
+    const bal = await store.addTickerUnits(playerId, effectiveTicker, unit);
 
     sendJson(res, 200, {
       ok: true,
       duplicate: false,
       unit,
-      ticker,
+      ticker: effectiveTicker,
+      nvdaBoosted,
+      holdingMultiplier,
+      holdingVerified: !!holdingStatus,
       balance: round(bal.qty, 8),
     });
   });

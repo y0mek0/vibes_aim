@@ -11,7 +11,7 @@
 // The module is import-safe in environments where lightweight-charts is
 // not present (tests). In that case, mountChart returns a no-op handle.
 
-import { api } from '../src/api.js?v=20261013-6';
+import { api } from '../src/api.js?v=20261021-2';
 import { store } from '../src/store.js?v=20261013-6';
 
 const STALE_AFTER_MS = 15_000;
@@ -487,7 +487,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     const unlocked = store.state.unlocks;
     for (const btn of els.tickerBtns) {
       const t = btn.dataset.vcTickerBtn;
-      const visible = (t === 'AAPL' || t === 'NVDA') || (Array.isArray(unlocked) && unlocked.includes(t));
+      const visible = t === 'AAPL' || (Array.isArray(unlocked) && unlocked.includes(t));
       btn.hidden = !visible;
     }
   }
