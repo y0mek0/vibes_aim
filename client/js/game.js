@@ -24,7 +24,7 @@ import { buildWorld, disposeWorld } from './three/world.js?v=20261013-4';
 import { THEMES } from './data/themes.js?v=20261013-4';
 import { createTargets } from './three/targets.js?v=20261013-4';
 import { createEffects } from './three/effects.js?v=20261013-4';
-import { getActiveTicker } from './aim-bridge.js?v=20261013-4';
+import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261021-4';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -740,6 +740,25 @@ export function boot() {
 
   // ---------- menu / settings UI ----------
   function renderMenuStats() {
+    const farmPicker = document.querySelector('[data-farm-picker]');
+    if (farmPicker) {
+      const available = ['AAPL'];
+      const unlocked = window.store?.state?.unlocks || [];
+      if (unlocked.includes('NVDA')) available.push('NVDA');
+      const stored = getActiveTicker();
+      const active = available.includes(stored) ? stored : 'AAPL';
+      if (active !== stored) setActiveTicker(active);
+      const current = farmPicker.querySelector('[data-farm-current]');
+      const options = farmPicker.querySelector('.farm-picker-options');
+      if (current) current.textContent = active;
+      if (options) {
+        options.innerHTML = available.map((ticker) => `<button type="button" class="farm-picker-btn${ticker === active ? ' active' : ''}" data-farm-ticker="${ticker}">${ticker}</button>`).join('');
+        options.querySelectorAll('[data-farm-ticker]').forEach((button) => button.addEventListener('click', () => {
+          setActiveTicker(button.dataset.farmTicker);
+          renderMenuStats();
+        }));
+      }
+    }
     const list = $('modelist'); list.innerHTML = '';
     let mi = 0;
     for (const id of Object.keys(MODE_DEFS)) {

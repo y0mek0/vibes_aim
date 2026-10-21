@@ -1954,3 +1954,14 @@ body.market-collapsed .vt-market-right { display: none; }
   .nvda-boost-badge { display: inline-flex; align-items: center; margin-left: 5px; padding: 2px 5px; border: 1px solid var(--yellow); color: #17140a; background: var(--yellow); font: 600 9px/1 var(--font-mono); letter-spacing: .08em; vertical-align: middle; white-space: nowrap; }
   .buy-meta .nvda-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
   #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
+
+/* Keep yellow surfaces readable: yellow always carries dark text. */
+#menu .farm-picker { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; padding: 11px 13px; border: 1px solid rgba(246,212,71,.55); background: rgba(246,212,71,.08); }
+#menu .farm-picker-kicker { display: block; color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+#menu .farm-picker strong { display: block; margin-top: 4px; color: #f6d447; font: 600 17px/1 var(--font-mono); letter-spacing: .08em; }
+#menu .farm-picker-options { display: inline-flex; gap: 6px; }
+#menu .farm-picker-btn { min-width: 52px; border: 1px solid var(--dash-line-strong); background: transparent; color: var(--dash-muted); padding: 6px 9px; cursor: pointer; font: 600 10px var(--font-mono); letter-spacing: .12em; }
+#menu .farm-picker-btn:hover { border-color: #f6d447; color: #f6d447; }
+#menu .farm-picker-btn.active { border-color: #f6d447; background: #f6d447; color: #17140a; }
+.ah-next-level { display: block; max-width: 220px; color: var(--fg-dim) !important; font: 500 13px/1.35 var(--font-ui) !important; letter-spacing: 0 !important; }
+.ah-table td.is-current, .ah-table td.is-current * { color: #17140a !important; }

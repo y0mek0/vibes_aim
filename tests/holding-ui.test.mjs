@@ -10,9 +10,14 @@ const aim = fs.readFileSync(new URL('../server/src/routes/aim.js', import.meta.u
 assert.match(index, /data-dashboard-section="holding">A2S Holding/);
 assert.match(index, /id="vibes-holding"/);
 assert.match(index, /data-holding-matrix-body/);
+assert.match(index, /data-farm-picker/);
+assert.match(index, /data-farm-current>AAPL/);
+assert.match(index, /farm-picker-options/);
 assert.match(index, /js\/holding\.js\?v=/);
 assert.match(holding, /getHoldingMatrix/);
 assert.match(css, /\.ah-table td\.is-current/);
+assert.match(css, /\.farm-picker-btn\.active[^\n]*color: #17140a/);
 assert.match(game, /BOOST NVDA/);
+assert.match(game, /setActiveTicker/);
 assert.match(aim, /effectiveTicker = nvdaBoosted \? 'NVDA' : ticker/);
 console.log('holding UI and NVDA boost wiring: ALL PASS');

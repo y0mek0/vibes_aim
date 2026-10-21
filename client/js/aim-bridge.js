@@ -31,7 +31,9 @@ export function setActiveTicker(t) {
   activeTicker = t;
   try { localStorage.setItem(ACTIVE_TICKER_KEY, t); } catch { /* ignore */ }
   if (tickerEl) tickerEl.textContent = t;
-  if (typeof document !== 'undefined') document.querySelectorAll('[data-dashboard-ticker]').forEach((el) => { el.textContent = t; });
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('[data-dashboard-ticker], [data-game-earned-ticker]').forEach((el) => { el.textContent = t; });
+  }
   if (chipEl) chipEl.wrap.setAttribute('aria-label', activeTickerLabel(t));
 }
 

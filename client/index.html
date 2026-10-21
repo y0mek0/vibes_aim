@@ -113,13 +113,13 @@
 <div id="vibes-holding" hidden>
   <main class="vm-body ah-body">
     <section class="vm-page-intro ah-intro">
-      <div><span class="vm-kicker">A2S Holding</span><h1>Hold longer. Earn more.</h1><p>Your A2S balance and uninterrupted holding time set the multiplier applied to game earnings and Holding XP.</p></div>
+      <div><h1>Hold longer. Earn more.</h1><p>Your A2S balance and uninterrupted holding time set the multiplier applied to game earnings and Holding XP.</p></div>
       <div class="ah-cap"><strong>x10</strong><span>maximum multiplier</span></div>
     </section>
     <section class="ah-status-grid" aria-label="Current A2S holding status">
       <article class="ah-status-card"><span class="vm-kicker">Current balance</span><strong data-holding-current-balance>—</strong><span data-holding-current-days>—</span></article>
       <article class="ah-status-card ah-status-card-accent"><span class="vm-kicker">Current multiplier</span><strong data-holding-current-multiplier>—</strong><span data-holding-wallet-status>Wallet not connected</span></article>
-      <article class="ah-status-card"><span class="vm-kicker">Next level</span><strong data-holding-next>Connect a wallet to verify your A2S holding.</strong></article>
+      <article class="ah-status-card"><span class="vm-kicker">Next level</span><strong class="ah-next-level" data-holding-next>Connect a wallet to verify your A2S holding.</strong></article>
     </section>
     <section class="ah-wallet-bar" data-holding-wallet-bar>
       <div><span class="vm-kicker">On-chain verification</span><p data-holding-wallet-copy>Connect your Robinhood Chain wallet to read the A2S balance and holding timer.</p></div>
@@ -129,11 +129,6 @@
       <div class="ah-panel-head"><div><span class="vm-kicker">Multiplier matrix</span><h2>A2S balance × holding time</h2></div><span class="ah-formula">min(10, amount × time)</span></div>
       <div class="ah-table-scroll"><table class="ah-table"><thead><tr><th scope="col">A2S balance</th><th scope="col">Now</th><th scope="col">3 days</th><th scope="col">7 days</th><th scope="col">14 days</th><th scope="col">30 days</th></tr></thead><tbody data-holding-matrix-body></tbody></table></div>
       <p class="ah-table-note">The two factors multiply together. The final reward multiplier is capped at x10. Selling down your A2S balance can move you into a lower tier.</p>
-    </section>
-    <section class="ah-rules-grid">
-      <article><span class="vm-kicker">01 / Amount</span><h3>Balance tier</h3><p>More A2S unlocks a stronger amount factor. The first active tier starts at 1M A2S.</p></article>
-      <article><span class="vm-kicker">02 / Time</span><h3>Uninterrupted hold</h3><p>Holding time advances at 3, 7, 14, and 30 days. A full sell resets the timer.</p></article>
-      <article><span class="vm-kicker">03 / Reward</span><h3>One multiplier</h3><p>The holding multiplier applies to earned units and Holding XP. It does not change market prices.</p></article>
     </section>
   </main>
 </div>
@@ -224,7 +219,13 @@
       <section class="dashboard-grid" data-dashboard-section-target="train">
         <div class="training-column">
           <div class="panel-heading"><div><h2>Choose a session</h2></div></div>
-          <section class="training-panel"><div id="modelist" class="mode-grid"></div></section>
+          <section class="training-panel">
+            <div class="farm-picker" data-farm-picker aria-label="Farm ticker">
+              <div><span class="farm-picker-kicker">Farm ticker</span><strong data-farm-current>AAPL</strong></div>
+              <div class="farm-picker-options" role="group" aria-label="Farm ticker options"></div>
+            </div>
+            <div id="modelist" class="mode-grid"></div>
+          </section>
         </div>
 
         <aside class="market-column" data-dashboard-section-target="market">
@@ -351,7 +352,7 @@
 <script type="module" src="src/bootstrap.js?v=20261013-4"></script>
 <script type="module" src="js/auth.js?v=20261013-4"></script>
 <!-- aim2stock bridge (auto-registers the aim-bridge and boots the server-availability check) -->
-<script type="module" src="js/aim-bridge.js?v=20261013-4"></script>
+<script type="module" src="js/aim-bridge.js?v=20261021-4"></script>
 <!-- Google Identity Services: loads the GIS script that renders the
      Sign-in button and yields id_tokens. We use it in FedCM-style
      popup mode and disable it for any local/dev origin where the
@@ -365,7 +366,7 @@
 <script type="module" src="js/missions.js?v=20261013-4"></script>
 <!-- aim2stock A2S holding matrix -->
 <script type="module" src="js/holding.js?v=20261021-2"></script>
-<script type="module" src="js/main.js?v=20261013-5"></script>
+<script type="module" src="js/main.js?v=20261021-4"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

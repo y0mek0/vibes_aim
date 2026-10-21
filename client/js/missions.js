@@ -4,7 +4,7 @@
 // AAPL chain is complete.
 
 import { store } from '../src/store.js?v=20261013-6';
-import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261013-4';
+import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261021-4';
 import {
   MISSIONS, missionProgress, allMissionsClaimed,
   describeUnlocks, formatProgress, NVDA_UNLOCK,
