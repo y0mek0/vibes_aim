@@ -2023,3 +2023,11 @@ body.market-collapsed .vt-market-right { display: none; }
 }
 .ah-next-level { display: block; max-width: 220px; color: var(--fg-dim) !important; font: 500 13px/1.35 var(--font-ui) !important; letter-spacing: 0 !important; }
 .ah-table td.is-current, .ah-table td.is-current * { color: #17140a !important; }
+
+/* Taller session row: give every mode enough room for its full description and
+   keep Active market aligned with the training surface. */
+@media (min-width: 941px) {
+  #menu .dashboard-grid { grid-template-rows: 590px; }
+  #menu .mode { padding: 16px 15px; }
+  #menu .mode-play { min-height: 52px; padding: 16px 30px; margin: 0 18px 16px 0; }
+}
