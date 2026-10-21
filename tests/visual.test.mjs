@@ -84,12 +84,11 @@ assert.equal(summary.dom.missions_total, '6', '6 missions exist');
 assert.equal(summary.dom.mission_rows, 6, 'mission table has 6 rows');
 assert.equal(summary.dom.unlock_card_hidden, true, 'unlock card hidden until all 6 are claimed');
 ok('missions fresh state: 0/6, unlock card hidden, 6 rows');
-// At boot, AAPL is always visible (default ticker) and NVDA is hidden
-// (unlocks is empty until the player completes the AAPL chain).
+// At boot, both free farm tickers are visible immediately.
 assert.equal(summary.dom.chart_aapl_button_visible, true, 'AAPL ticker button visible');
 ok('AAPL ticker button is visible at boot');
-assert.equal(summary.dom.chart_nvda_button_visible, false, 'NVDA ticker button hidden at boot');
-ok('NVDA ticker button is hidden at boot (unlocks empty)');
+assert.equal(summary.dom.chart_nvda_button_visible, true, 'NVDA ticker button visible');
+ok('NVDA ticker button is visible at boot (free farm ticker)');
 assert.equal(summary.dom.pre_ipo_control_count, 0, 'pre-IPO tickers must not have chart or terminal controls');
 ok('pre-IPO tickers have no selectable chart or terminal control');
 if (/^[0-9]+\./.test(summary.dom.chart_price_at_boot)) {

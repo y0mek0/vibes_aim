@@ -1955,15 +1955,67 @@ body.market-collapsed .vt-market-right { display: none; }
   .buy-meta .nvda-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
   #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
 
-/* Keep yellow surfaces readable: yellow always carries dark text. */
-#menu .farm-picker { display: flex; flex-direction: column; align-items: stretch; gap: 9px; margin-bottom: 14px; padding: 11px 13px; border: 1px solid rgba(246,212,71,.55); background: rgba(246,212,71,.08); }
-#menu .farm-picker-kicker { display: inline; margin-right: 7px; color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
-#menu .farm-picker strong { display: inline; margin-top: 0; color: #f6d447; font: 600 15px/1 var(--font-mono); letter-spacing: .08em; }
-#menu .farm-picker-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; width: 100%; }
-#menu .farm-picker-btn { min-width: 0; border: 1px solid var(--dash-line-strong); background: transparent; color: var(--dash-muted); padding: 7px 5px; cursor: pointer; font: 600 10px var(--font-mono); letter-spacing: .06em; white-space: nowrap; }
-#menu .farm-picker-btn:hover { border-color: #f6d447; color: #f6d447; }
-#menu .farm-picker-btn.active { border-color: #f6d447; background: #f6d447; color: #17140a; }
-#menu .farm-picker-btn:disabled { border-style: dashed; color: var(--dash-muted); cursor: not-allowed; opacity: .48; }
-#menu .farm-picker-btn:disabled:hover { border-color: var(--dash-line-strong); color: var(--dash-muted); }
+/* Keep the picker above the session grid on desktop. */
+#menu .training-panel { flex-direction: column; }
+#menu .farm-picker {
+  display: grid;
+  grid-template-columns: minmax(176px, .72fr) minmax(0, 1.8fr);
+  align-items: stretch;
+  gap: 18px;
+  margin-bottom: 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(246,212,71,.38);
+  background: linear-gradient(110deg, rgba(246,212,71,.09), rgba(246,212,71,.025) 42%, rgba(255,255,255,.018));
+}
+#menu .farm-picker-summary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255,255,255,.13);
+}
+#menu .farm-picker-kicker { color: var(--dash-muted); font: 600 9px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
+#menu .farm-picker strong { color: #f6d447; font: 700 24px/1 var(--font-mono); letter-spacing: .04em; }
+#menu .farm-picker-hint { max-width: 150px; color: var(--dash-muted); font: 10px/1.4 var(--font-ui); }
+#menu .farm-picker-options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 14px; min-width: 0; }
+#menu .farm-picker-group { min-width: 0; }
+#menu .farm-picker-group-label { display: block; margin-bottom: 7px; color: var(--dash-muted); font: 600 8px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
+#menu .farm-picker-group-options { display: grid; gap: 6px; min-width: 0; }
+#menu .farm-picker-group-active .farm-picker-group-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#menu .farm-picker-group-future .farm-picker-group-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#menu .farm-picker-btn {
+  display: flex;
+  min-width: 0;
+  min-height: 47px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid var(--dash-line-strong);
+  background: rgba(255,255,255,.025);
+  color: var(--dash-soft);
+  padding: 7px 9px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+#menu .farm-picker-symbol { color: inherit; font: 700 13px/1 var(--font-mono); letter-spacing: .06em; }
+#menu .farm-picker-state { color: var(--dash-muted); font: 8px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+#menu .farm-picker-btn:hover { border-color: #f6d447; background: rgba(246,212,71,.08); transform: translateY(-1px); }
+#menu .farm-picker-btn:focus-visible { outline: 1px solid #f6d447; outline-offset: 2px; }
+#menu .farm-picker-btn.active { border-color: #f6d447; background: #f6d447; color: #17140a; box-shadow: inset 0 -3px 0 rgba(23,20,10,.2); }
+#menu .farm-picker-btn.active .farm-picker-state { color: #17140a; opacity: .72; }
+#menu .farm-picker-btn.future { min-height: 39px; border-style: dashed; background: transparent; color: var(--dash-muted); opacity: .5; }
+#menu .farm-picker-btn.future .farm-picker-symbol { font-size: 11px; }
+#menu .farm-picker-btn:disabled { cursor: not-allowed; }
+#menu .farm-picker-btn.future:hover { border-color: var(--dash-line-strong); background: transparent; color: var(--dash-muted); transform: none; }
+@media (max-width: 680px) {
+  #menu .farm-picker { grid-template-columns: 1fr; gap: 12px; }
+  #menu .farm-picker-summary { padding-right: 0; padding-bottom: 11px; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.13); }
+  #menu .farm-picker-hint { max-width: none; }
+  #menu .farm-picker-options { grid-template-columns: 1fr; gap: 11px; }
+  #menu .farm-picker-group-future .farm-picker-group-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .ah-next-level { display: block; max-width: 220px; color: var(--fg-dim) !important; font: 500 13px/1.35 var(--font-ui) !important; letter-spacing: 0 !important; }
 .ah-table td.is-current, .ah-table td.is-current * { color: #17140a !important; }

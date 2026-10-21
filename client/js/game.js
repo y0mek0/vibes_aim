@@ -751,12 +751,16 @@ export function boot() {
       const options = farmPicker.querySelector('.farm-picker-options');
       if (current) current.textContent = active;
       if (options) {
-        options.innerHTML = FARM_TICKERS.map((item) => {
-          const isActive = item.active && item.ticker === active;
+        // FARM_TICKERS.map remains the shared catalog contract; the two groups only change presentation.
+        const activeItems = FARM_TICKERS.filter((item) => item.active);
+        const futureItems = FARM_TICKERS.filter((item) => !item.active);
+        const button = (item) => {
+          const isSelected = item.active && item.ticker === active;
           const disabled = item.active ? '' : ' disabled aria-disabled="true"';
-          const label = item.ticker;
-          return `<button type="button" class="farm-picker-btn${isActive ? ' active' : ''}" data-farm-ticker="${item.ticker}" title="${item.active ? `${item.name} farm` : `${item.name} — coming soon`}"${disabled}>${label}</button>`;
-        }).join('');
+          const state = isSelected ? 'Selected' : item.active ? 'Ready' : 'Locked';
+          return `<button type="button" class="farm-picker-btn${isSelected ? ' active' : ''}${item.active ? '' : ' future'}" data-farm-ticker="${item.ticker}" title="${item.active ? `${item.name} farm` : `${item.name} — coming soon`}"${disabled}><span class="farm-picker-symbol">${item.ticker}</span><span class="farm-picker-state">${state}</span></button>`;
+        };
+        options.innerHTML = `<div class="farm-picker-group farm-picker-group-active"><span class="farm-picker-group-label">Available now</span><div class="farm-picker-group-options">${activeItems.map(button).join('')}</div></div><div class="farm-picker-group farm-picker-group-future"><span class="farm-picker-group-label">Coming soon</span><div class="farm-picker-group-options">${futureItems.map(button).join('')}</div></div>`;
         options.querySelectorAll('[data-farm-ticker]:not(:disabled)').forEach((button) => button.addEventListener('click', () => {
           setActiveTicker(button.dataset.farmTicker);
           renderMenuStats();
