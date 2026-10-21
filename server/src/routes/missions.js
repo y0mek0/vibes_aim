@@ -1,4 +1,4 @@
-// server/src/routes/missions.js — 6 missions to unlock NVDA from AAPL.
+// server/src/routes/missions.js — 6 Stable bonus missions.
 //
 // Missions are computed from store state at claim time (no hidden state).
 // Each mission has a `check(state)` that returns { done, progress }.
@@ -48,12 +48,6 @@ export function missionsRoutes(r, { store }) {
     const claim = await store.claimMission(playerId, def.kind);
     if (!claim.ok) throw new HttpError(400, 'already_claimed');
     const player = await store.addStable(playerId, def.reward);
-    // milestone: if all six are claimed, unlock NVDA
-    const all = await store.listMissions(playerId);
-    const claimedKinds = new Set(all.filter((m) => m.claimedAt).map((m) => m.kind));
-    if (MISSION_DEFS.every((d) => claimedKinds.has(d.kind))) {
-      await store.unlock(playerId, 'NVDA');
-    }
     sendJson(res, 200, { ok: true, kind, reward: def.reward, stable: player.stable });
   });
 }

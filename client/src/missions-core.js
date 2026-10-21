@@ -1,8 +1,6 @@
-// client/src/missions-core.js — pure helpers for the missions panel and
-// the AAPL → NVDA unlock chain. The mission definitions here match the
-// server's MISSION_DEFS in server/src/routes/missions.js. The client
-// also computes its own progress to show an instant UI; the server is
-// the authority for claim and unlock.
+// client/src/missions-core.js — pure helpers for the Stable reward missions.
+// The client computes progress for instant UI feedback; the server remains
+// the authority for claim and reward balances.
 
 export const MISSIONS = [
   { kind: 'first_10_hits',   label: 'Land 10 aim hits',                target: 10,  reward: 50  },
@@ -12,9 +10,6 @@ export const MISSIONS = [
   { kind: 'hold_60s',        label: 'Hold a long position 60 seconds', target: 60,  reward: 200 },
   { kind: 'precise_session', label: 'Reach 70% accuracy in a session', target: 0.7, reward: 350 },
 ];
-
-export const NVDA_UNLOCK = 'NVDA';
-export const NVDA_UNLOCK_REWARD_LABEL = 'NVDA market unlocked';
 
 // Resolve progress for one mission from the player's current state.
 // `state` shape: { hits, earnedAapl, trades, preciseBest }.
@@ -66,24 +61,6 @@ function hasHeldLong(trades, ms) {
   if (!Array.isArray(trades)) return false;
   return trades.some((t) => t.side === 'long' && t.status === 'closed'
     && (Number(t.closedAt) - Number(t.createdAt)) >= ms);
-}
-
-// Total claims: returns true if every mission is claimed.
-export function allMissionsClaimed(missions) {
-  if (!Array.isArray(missions)) return false;
-  if (missions.length < MISSIONS.length) return false;
-  for (const m of missions) {
-    if (!m.claimed) return false;
-  }
-  return true;
-}
-
-// What unlocks when all 6 are claimed.
-export function describeUnlocks(missions) {
-  return {
-    unlockedTickers: allMissionsClaimed(missions) ? [NVDA_UNLOCK] : [],
-    label: NVDA_UNLOCK_REWARD_LABEL,
-  };
 }
 
 // Format a mission progress value for display. The target may be

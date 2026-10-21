@@ -16,19 +16,16 @@ export function aimRoutes(r, { store, config, holding }) {
     if (!ticker || typeof ticker !== 'string') throw new HttpError(400, 'missing_ticker', 'ticker is required');
     const nvdaBoostCandidate = getNvdaBoostGunIds(GUNS_CATALOG).includes(body?.gunId);
 
-    // Unlock check: AAPL is always farmable. Pre-IPO tickers (OPENAI,
-    // ANTHROPIC) are valid hit targets — the server mints their unit but
-    // the chart shows no price. Any other ticker requires an unlock
-    // record. This makes the AAPL -> NVDA chain real: you cannot bypass
-    // the missions by POSTing directly to /aim/hit with a different
-    // ticker. Tickers the player has never heard of (typo) are caught
-    // here before they reach the rate limiter.
+    // AAPL and NVDA are active farm tickers from the start. Future entries
+    // stay visible in the client selector but are not accepted by the game
+    // until their own activation rule is added.
+    const FREE_FARM_TICKERS = new Set(['AAPL', 'NVDA']);
     const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
     const unlocks = await store.listUnlocks(playerId);
-    const nvdaBoosted = nvdaBoostCandidate && unlocks.some((unlock) => unlock.ticker === 'NVDA');
+    const nvdaBoosted = nvdaBoostCandidate && (FREE_FARM_TICKERS.has('NVDA') || unlocks.some((unlock) => unlock.ticker === 'NVDA'));
     const effectiveTicker = nvdaBoosted ? 'NVDA' : ticker;
-    if (effectiveTicker !== 'AAPL' && !PRE_IPO.has(effectiveTicker) && !unlocks.some((u) => u.ticker === effectiveTicker)) {
-      throw new HttpError(400, 'ticker_locked', `Ticker ${effectiveTicker} is not unlocked. Complete the AAPL chain to unlock NVDA.`);
+    if (!FREE_FARM_TICKERS.has(effectiveTicker) && !PRE_IPO.has(effectiveTicker) && !unlocks.some((u) => u.ticker === effectiveTicker)) {
+      throw new HttpError(400, 'ticker_locked', `Ticker ${effectiveTicker} is not active for farming yet.`);
     }
 
     const holdingStatus = holding ? await holding.getVerifiedStatus(req.headers['x-wallet-proof']) : null;

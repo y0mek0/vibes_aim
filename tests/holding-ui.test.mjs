@@ -6,6 +6,9 @@ const css = fs.readFileSync(new URL('../client/css/style.css', import.meta.url),
 const holding = fs.readFileSync(new URL('../client/js/holding.js', import.meta.url), 'utf8');
 const game = fs.readFileSync(new URL('../client/js/game.js', import.meta.url), 'utf8');
 const aim = fs.readFileSync(new URL('../server/src/routes/aim.js', import.meta.url), 'utf8');
+const farm = fs.readFileSync(new URL('../client/js/data/farm-tickers.js', import.meta.url), 'utf8');
+const portfolio = fs.readFileSync(new URL('../server/src/routes/portfolio.js', import.meta.url), 'utf8');
+const missions = fs.readFileSync(new URL('../server/src/routes/missions.js', import.meta.url), 'utf8');
 
 assert.match(index, /data-dashboard-section="holding">A2S Holding/);
 assert.match(index, /id="vibes-holding"/);
@@ -19,5 +22,13 @@ assert.match(css, /\.ah-table td\.is-current/);
 assert.match(css, /\.farm-picker-btn\.active[^\n]*color: #17140a/);
 assert.match(game, /BOOST NVDA/);
 assert.match(game, /setActiveTicker/);
-assert.match(aim, /effectiveTicker = nvdaBoosted \? 'NVDA' : ticker/);
+assert.match(game, /FARM_TICKERS\.map/);
+assert.match(farm, /AAPL.*active: true/);
+assert.match(farm, /NVDA.*active: true/);
+assert.equal((farm.match(/active: true/g) || []).length, 2);
+assert.equal((farm.match(/ticker: '/g) || []).length, 6);
+assert.match(aim, /FREE_FARM_TICKERS = new Set\(\['AAPL', 'NVDA'\]\)/);
+assert.match(portfolio, /FREE_TRADE_TICKERS = new Set\(\['AAPL', 'NVDA'\]\)/);
+assert.match(portfolio, /ensureDefaultFarmUnlocks/);
+assert.doesNotMatch(missions, /unlock\(playerId, 'NVDA'\)/);
 console.log('holding UI and NVDA boost wiring: ALL PASS');

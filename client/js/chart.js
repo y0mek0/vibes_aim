@@ -478,16 +478,13 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
       loadCandles();
     }));
 
-  // The ticker buttons live in the markup (AAPL, NVDA). This re-renders
-  // them based on the player's unlocks. AAPL is always visible (it's the
-  // default ticker). NVDA (and any future ticker) is visible only after
-  // the unlock chain grants it. If the store has not loaded yet
-  // (unlocks is undefined), show AAPL only.
+  // AAPL and NVDA are active from the start. Future buttons can be added
+  // here later without changing the chart's existing selection flow.
   function refreshUnlockedTickers() {
     const unlocked = store.state.unlocks;
     for (const btn of els.tickerBtns) {
       const t = btn.dataset.vcTickerBtn;
-      const visible = t === 'AAPL' || (Array.isArray(unlocked) && unlocked.includes(t));
+      const visible = t === 'AAPL' || t === 'NVDA' || (Array.isArray(unlocked) && unlocked.includes(t));
       btn.hidden = !visible;
     }
   }

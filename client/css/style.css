@@ -1956,12 +1956,14 @@ body.market-collapsed .vt-market-right { display: none; }
   #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
 
 /* Keep yellow surfaces readable: yellow always carries dark text. */
-#menu .farm-picker { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; padding: 11px 13px; border: 1px solid rgba(246,212,71,.55); background: rgba(246,212,71,.08); }
-#menu .farm-picker-kicker { display: block; color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
-#menu .farm-picker strong { display: block; margin-top: 4px; color: #f6d447; font: 600 17px/1 var(--font-mono); letter-spacing: .08em; }
-#menu .farm-picker-options { display: inline-flex; gap: 6px; }
-#menu .farm-picker-btn { min-width: 52px; border: 1px solid var(--dash-line-strong); background: transparent; color: var(--dash-muted); padding: 6px 9px; cursor: pointer; font: 600 10px var(--font-mono); letter-spacing: .12em; }
+#menu .farm-picker { display: flex; flex-direction: column; align-items: stretch; gap: 9px; margin-bottom: 14px; padding: 11px 13px; border: 1px solid rgba(246,212,71,.55); background: rgba(246,212,71,.08); }
+#menu .farm-picker-kicker { display: inline; margin-right: 7px; color: var(--dash-muted); font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+#menu .farm-picker strong { display: inline; margin-top: 0; color: #f6d447; font: 600 15px/1 var(--font-mono); letter-spacing: .08em; }
+#menu .farm-picker-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; width: 100%; }
+#menu .farm-picker-btn { min-width: 0; border: 1px solid var(--dash-line-strong); background: transparent; color: var(--dash-muted); padding: 7px 5px; cursor: pointer; font: 600 10px var(--font-mono); letter-spacing: .06em; white-space: nowrap; }
 #menu .farm-picker-btn:hover { border-color: #f6d447; color: #f6d447; }
 #menu .farm-picker-btn.active { border-color: #f6d447; background: #f6d447; color: #17140a; }
+#menu .farm-picker-btn:disabled { border-style: dashed; color: var(--dash-muted); cursor: not-allowed; opacity: .48; }
+#menu .farm-picker-btn:disabled:hover { border-color: var(--dash-line-strong); color: var(--dash-muted); }
 .ah-next-level { display: block; max-width: 220px; color: var(--fg-dim) !important; font: 500 13px/1.35 var(--font-ui) !important; letter-spacing: 0 !important; }
 .ah-table td.is-current, .ah-table td.is-current * { color: #17140a !important; }

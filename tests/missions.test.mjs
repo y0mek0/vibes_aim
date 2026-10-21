@@ -1,18 +1,16 @@
-// tests/missions.test.mjs — missions panel + AAPL -> NVDA unlock tests.
+// tests/missions.test.mjs — missions panel + Stable reward tests.
 //
-// Two layers:
 //   1) Pure-function tests on client/src/missions-core.js: each mission's
-//      progress math, allMissionsClaimed, describeUnlocks, formatProgress.
+//      progress math and formatProgress.
 //   2) Integration tests against the live server: hit the missions
-//      endpoint, claim a few, assert NVDA unlocks after the 6th claim.
+//      endpoint and claim Stable rewards.
 //
 // Run: node tests/missions.test.mjs (from aim2stock/)
 
 import http from 'node:http';
 import assert from 'node:assert/strict';
 import {
-  MISSIONS, missionProgress, allMissionsClaimed,
-  describeUnlocks, formatProgress, NVDA_UNLOCK,
+  MISSIONS, missionProgress, formatProgress,
 } from '../client/src/missions-core.js';
 
 // Set env BEFORE importing the server so config.js reads the new value.
@@ -110,25 +108,6 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
   assert.equal(r.done, true);
   assert.equal(r.progress, 0.7);
   ok('precise_session requires 0.7 accuracy');
-}
-{
-  // allMissionsClaimed
-  assert.equal(allMissionsClaimed([]), false);
-  assert.equal(allMissionsClaimed(MISSIONS.map((m) => ({ kind: m.kind, claimed: true }))), true);
-  assert.equal(allMissionsClaimed(MISSIONS.map((m) => ({ kind: m.kind, claimed: false }))), false);
-  // one missing
-  const five = MISSIONS.slice(0, 5).map((m) => ({ kind: m.kind, claimed: true }));
-  assert.equal(allMissionsClaimed(five), false);
-  ok('allMissionsClaimed requires every mission claimed');
-}
-{
-  // describeUnlocks
-  assert.deepEqual(describeUnlocks([]).unlockedTickers, []);
-  assert.deepEqual(
-    describeUnlocks(MISSIONS.map((m) => ({ kind: m.kind, claimed: true }))).unlockedTickers,
-    [NVDA_UNLOCK],
-  );
-  ok('describeUnlocks returns [NVDA] when all claimed, [] otherwise');
 }
 {
   // formatProgress
@@ -272,13 +251,14 @@ async function integration() {
   ok('precise_session claimed after a real accuracy >= 0.7 aim hit');
 
   // 7. Fast suite deliberately does not wait 60 seconds for hold_60s,
-  // so only five of the six missions are claimed and NVDA must remain
-  // locked. The real hold threshold is covered by test:slow.
+  // so one mission remains pending. NVDA is active independently; the
+  // real hold threshold is covered by test:slow.
   const p = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': playerId } });
   assert.equal(p.status, 200);
   const unlocks = (p.body.unlocks || []).map((u) => u.ticker);
-  assert.equal(unlocks.includes('NVDA'), false, `NVDA must remain locked before hold_60s, got ${JSON.stringify(unlocks)}`);
-  ok('NVDA remains locked until the real hold_60s mission is also claimed');
+  assert.ok(unlocks.includes('AAPL'));
+  assert.ok(unlocks.includes('NVDA'));
+  ok('AAPL and NVDA remain active while hold_60s is pending');
 
   // 8. /missions/claim already-claimed mission -> 400 already_claimed
   const dup = await req({

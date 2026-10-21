@@ -365,33 +365,48 @@ async function main() {
     ok(`missions claim path runs (unlocks count=${port_.body.unlocks.length}, hasNVDA=${hasNvda})`);
   });
 
-  // ---- Unlock check (Stage 11.3) -------------------------------------
-  // AAPL is always farmable. NVDA / TSLA / etc. are refused with 400
-  // ticker_locked for a fresh player. Pre-IPO tickers (OPENAI/ANTHROPIC)
-  // are valid hit targets — the chart shows no price, the server still
-  // mints their unit. The check runs BEFORE the rate limiter and BEFORE
-  // the mint, so a flood of locked-ticker requests cannot burn the
-  // player's rate budget.
+  // ---- Farm ticker access (Stage 11.3) -------------------------------
+  // AAPL and NVDA are active immediately. Future tickers remain gated.
   await step(async () => {
     const r = await client.request({
       method: 'POST', path: '/aim/hit',
-      headers: { 'X-Player-Id': 'locked-player', 'X-Session-Id': 's-locked' },
-      body: { hitId: 'lk-1', ticker: 'NVDA', accuracy: 0.8, streak: 0, ts: Date.now() },
+      headers: { 'X-Player-Id': 'active-farm-player', 'X-Session-Id': 's-active' },
+      body: { hitId: 'nvda-1', ticker: 'NVDA', accuracy: 0.8, streak: 0, ts: Date.now() },
     });
-    assert.equal(r.status, 400);
-    assert.equal(r.body.error, 'ticker_locked');
-    ok('POST /aim/hit with locked ticker -> 400 ticker_locked');
+    assert.equal(r.status, 200);
+    assert.equal(r.body.ticker, 'NVDA');
+    assert.ok(r.body.balance > 0);
+    const portfolio = await client.request({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': 'active-farm-player' } });
+    assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'AAPL'));
+    assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'NVDA'));
+    assert.ok((portfolio.body.balances.NVDA || 0) > 0);
+    ok('POST /aim/hit with NVDA works immediately and persists NVDA balance/unlock');
   });
 
   // AAPL still works for the same player.
   await step(async () => {
     const r = await client.request({
       method: 'POST', path: '/aim/hit',
-      headers: { 'X-Player-Id': 'locked-player', 'X-Session-Id': 's-locked' },
-      body: { hitId: 'lk-2', ticker: 'AAPL', accuracy: 0.8, streak: 0, ts: Date.now() },
+      headers: { 'X-Player-Id': 'active-farm-player', 'X-Session-Id': 's-active' },
+      body: { hitId: 'aapl-1', ticker: 'AAPL', accuracy: 0.8, streak: 0, ts: Date.now() },
     });
     assert.equal(r.status, 200);
-    ok('POST /aim/hit with AAPL works for the same locked player');
+    assert.equal(r.body.ticker, 'AAPL');
+    ok('POST /aim/hit switches back to AAPL for the same player');
+  });
+
+  // NVDA supports the same trading flow as AAPL: preview, spot buy, spot sell.
+  await step(async () => {
+    const headers = { 'X-Player-Id': 'active-farm-player' };
+    const preview = await client.request({ method: 'POST', path: '/portfolio/preview', headers, body: { ticker: 'NVDA', side: 'long', leverage: 2, notional: 100 } });
+    assert.equal(preview.status, 200);
+    const bought = await client.request({ method: 'POST', path: '/portfolio/spot', headers, body: { ticker: 'NVDA', side: 'buy', units: 0.1 } });
+    assert.equal(bought.status, 200, JSON.stringify(bought.body));
+    assert.equal(bought.body.ticker, 'NVDA');
+    const sold = await client.request({ method: 'POST', path: '/portfolio/spot', headers, body: { ticker: 'NVDA', side: 'sell', units: 0.1 } });
+    assert.equal(sold.status, 200, JSON.stringify(sold.body));
+    assert.equal(sold.body.ticker, 'NVDA');
+    ok('NVDA supports preview, BUY and SELL through the existing paper-trading flow');
   });
 
   // /portfolio/preview and /portfolio/order also gate on unlocks.

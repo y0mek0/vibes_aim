@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261021-1';
 import { getNvdaBoostGunIds } from './data/nvda-boost.js?v=20261021-1';
+import { FARM_TICKERS } from './data/farm-tickers.js?v=20261021-1';
 import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261013-4';
 import { BUILD } from './build.js?v=20261013-4';
 import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261013-4';
@@ -742,18 +743,21 @@ export function boot() {
   function renderMenuStats() {
     const farmPicker = document.querySelector('[data-farm-picker]');
     if (farmPicker) {
-      const available = ['AAPL'];
-      const unlocked = window.store?.state?.unlocks || [];
-      if (unlocked.includes('NVDA')) available.push('NVDA');
+      const available = FARM_TICKERS.filter((item) => item.active).map((item) => item.ticker);
       const stored = getActiveTicker();
-      const active = available.includes(stored) ? stored : 'AAPL';
+      const active = available.includes(stored) ? stored : available[0];
       if (active !== stored) setActiveTicker(active);
       const current = farmPicker.querySelector('[data-farm-current]');
       const options = farmPicker.querySelector('.farm-picker-options');
       if (current) current.textContent = active;
       if (options) {
-        options.innerHTML = available.map((ticker) => `<button type="button" class="farm-picker-btn${ticker === active ? ' active' : ''}" data-farm-ticker="${ticker}">${ticker}</button>`).join('');
-        options.querySelectorAll('[data-farm-ticker]').forEach((button) => button.addEventListener('click', () => {
+        options.innerHTML = FARM_TICKERS.map((item) => {
+          const isActive = item.active && item.ticker === active;
+          const disabled = item.active ? '' : ' disabled aria-disabled="true"';
+          const label = item.ticker;
+          return `<button type="button" class="farm-picker-btn${isActive ? ' active' : ''}" data-farm-ticker="${item.ticker}" title="${item.active ? `${item.name} farm` : `${item.name} — coming soon`}"${disabled}>${label}</button>`;
+        }).join('');
+        options.querySelectorAll('[data-farm-ticker]:not(:disabled)').forEach((button) => button.addEventListener('click', () => {
           setActiveTicker(button.dataset.farmTicker);
           renderMenuStats();
         }));

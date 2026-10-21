@@ -1,14 +1,10 @@
-// client/js/missions.js — missions panel and NVDA unlock flow.
+// client/js/missions.js — missions panel and Stable reward flow.
 // Reads missions from the server (via client/src/store.js), shows
-// progress, claim buttons, and a one-time unlock animation when the
-// AAPL chain is complete.
+// progress and claim buttons. Ticker access is handled by the farm picker;
+// missions only award extra Stable.
 
 import { store } from '../src/store.js?v=20261013-6';
-import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261021-4';
-import {
-  MISSIONS, missionProgress, allMissionsClaimed,
-  describeUnlocks, formatProgress, NVDA_UNLOCK,
-} from '../src/missions-core.js?v=20261013-4';
+import { MISSIONS, formatProgress } from '../src/missions-core.js?v=20261021-5';
 
 const SELECTORS = {
   root: '#vibes-missions',
@@ -43,8 +39,6 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
   const els = {};
   for (const [k, sel] of Object.entries(SELECTORS)) els[k] = panel.querySelector(sel);
 
-  let unlockedThisSession = false;
-  let lastUnlocks = new Set();
   let activeFilter = 'all';
 
   function renderMissions() {
@@ -110,20 +104,8 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
       }).join('');
     }
 
-    // unlock card: visible if every mission is claimed
-    if (allMissionsClaimed(missions)) {
-      if (els.unlockCard) {
-        els.unlockCard.hidden = false;
-        if (els.unlockTicker) els.unlockTicker.textContent = NVDA_UNLOCK;
-        const alreadyUnlocked = (store.state.unlocks || []).includes(NVDA_UNLOCK);
-        if (els.unlockBtn) {
-          els.unlockBtn.disabled = alreadyUnlocked;
-          els.unlockBtn.textContent = alreadyUnlocked ? 'NVDA unlocked' : 'Switch to NVDA';
-        }
-      }
-    } else if (els.unlockCard) {
-      els.unlockCard.hidden = true;
-    }
+    // Completion is a Stable milestone only; it never changes ticker access.
+    if (els.unlockCard) els.unlockCard.hidden = !missions.length || claimed < MISSIONS.length;
   }
 
   async function claim(kind, button) {
@@ -151,30 +133,6 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     }
   }
 
-  async function switchToNvda() {
-    // Mark locally so the chart and aim-bridge pick it up.
-    setActiveTicker(NVDA_UNLOCK);
-    if (typeof onTickerUnlocked === 'function') onTickerUnlocked(NVDA_UNLOCK);
-    // The active ticker is now NVDA on the bridge; the next chart quote
-    // request and the next aim-bridge POST will use it. Re-render the
-    // chart panel if it is on screen.
-    if (els.unlockBtn) {
-      els.unlockBtn.disabled = true;
-      els.unlockBtn.textContent = 'NVDA active';
-    }
-  }
-
-  function checkUnlocks() {
-    const unlocks = new Set(store.state.unlocks || []);
-    // If NVDA just appeared in unlocks, treat it as a session unlock.
-    if (unlocks.has(NVDA_UNLOCK) && !lastUnlocks.has(NVDA_UNLOCK) && !unlockedThisSession) {
-      unlockedThisSession = true;
-      // Do NOT auto-switch — let the player choose. But show the unlock
-      // card with the "Switch to NVDA" button enabled.
-    }
-    lastUnlocks = unlocks;
-  }
-
   panel.querySelectorAll('[data-vm-filter]').forEach((filter) => filter.addEventListener('click', () => {
     activeFilter = filter.dataset.vmFilter || 'all';
     panel.querySelectorAll('[data-vm-filter]').forEach((item) => item.classList.toggle('active', item === filter));
@@ -182,20 +140,13 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
   }));
 
   const unsub = store.subscribe(() => {
-    checkUnlocks();
     renderMissions();
   });
 
-  // Wire the unlock button
-  if (els.unlockBtn) {
-    els.unlockBtn.addEventListener('click', switchToNvda);
-  }
-
   renderMissions();
-  checkUnlocks();
 
   function unmount() { unsub(); }
-  return { unmount, state: () => ({ unlockedThisSession, lastUnlocks: [...lastUnlocks] }) };
+  return { unmount, state: () => ({ activeFilter }) };
 }
 
 // Auto-mount after the panel markup is definitely available. Module scripts

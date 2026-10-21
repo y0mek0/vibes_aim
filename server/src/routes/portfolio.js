@@ -7,14 +7,13 @@ import { sendJson, HttpError, round, clamp } from '../util/json.js';
 
 const MAX_LEVERAGE = 20;
 
-// Unlock check: AAPL is always farmable. Pre-IPO tickers (OPENAI,
-// ANTHROPIC) are checked separately by the market layer (returns price:
-// null), so we skip them here. Any other ticker must be unlocked by the
-// player (default unlocks are empty, so a fresh player cannot preview
-// or open a position on TSLA / etc.). NVDA is a supported market instrument
-// and is available for paper trading alongside AAPL.
+// AAPL and NVDA are active from the start. Future market entries stay
+// visible in the farm selector but remain unavailable until activated.
 const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
 const FREE_TRADE_TICKERS = new Set(['AAPL', 'NVDA']);
+async function ensureDefaultFarmUnlocks(store, playerId) {
+  await Promise.all([...FREE_TRADE_TICKERS].map((ticker) => store.unlock(playerId, ticker)));
+}
 async function assertTickerUnlocked(store, playerId, ticker) {
   if (FREE_TRADE_TICKERS.has(ticker)) return;
   if (PRE_IPO.has(ticker)) return; // pre-IPO tickers are checked via price
@@ -42,6 +41,7 @@ export function portfolioRoutes(r, { market, store }) {
     const playerId = query.playerId || req.headers['x-player-id'];
     if (!playerId) throw new HttpError(400, 'missing_player_id');
     const player = await store.getOrCreatePlayer(playerId);
+    await ensureDefaultFarmUnlocks(store, playerId);
     const balances = await store.getAllBalances(playerId);
     const trades = await store.listTrades(playerId);
     const unlocks = await store.listUnlocks(playerId);

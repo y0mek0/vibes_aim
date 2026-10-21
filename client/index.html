@@ -101,10 +101,10 @@
 <!-- aim2stock: missions workspace inside the shared dashboard shell. -->
 <div id="vibes-missions" hidden>
   <main class="vm-body">
-    <section class="vm-page-intro"><div><span class="vm-kicker">Missions</span><h1>Finish the AAPL chain.</h1><p>Complete the six existing missions, claim the rewards, and unlock the next market.</p></div><div class="vm-intro-count"><strong><span data-vm-claimed data-vm-side-claimed>0</span> / <span data-vm-total data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
+    <section class="vm-page-intro"><div><span class="vm-kicker">Missions</span><h1>Build your stable balance.</h1><p>Complete the six objectives and claim extra Stable rewards. Farm tickers are available from the start.</p></div><div class="vm-intro-count"><strong><span data-vm-claimed data-vm-side-claimed>0</span> / <span data-vm-total data-vm-side-total>6</span></strong><span>missions claimed</span></div></section>
     <div class="vm-layout">
       <section class="vm-board"><div class="vm-board-head"><div><div class="vm-board-title">Active objectives</div></div><span class="vm-board-note">Progress updates from training and trades</span></div><nav class="vm-filters" aria-label="Mission filters"><button type="button" class="vm-filter active" data-vm-filter="all">All</button><button type="button" class="vm-filter" data-vm-filter="aim">Aim</button><button type="button" class="vm-filter" data-vm-filter="trading">Trading</button><button type="button" class="vm-filter" data-vm-filter="completed">Completed</button></nav><table class="vm-table"><tbody data-vm-body></tbody></table></section>
-      <aside class="vm-side"><section class="vm-progress-card"><div class="vm-kicker">AAPL chain</div><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><div class="vm-side-bar"><i data-vm-side-bar></i></div><p>Every mission is tied to the existing aim, trade, and accuracy systems.</p></section><div class="vm-unlock" data-vm-unlock-card hidden><div class="vm-unlock-kicker">// chain complete</div><div class="vm-unlock-title">AAPL chain complete</div><div class="vm-unlock-text">All six missions claimed. <strong>NVDA market</strong> is now available in the chart and the aim farm.</div><div class="vm-unlock-actions"><span class="vm-unlock-ticker" data-vm-unlock-ticker>NVDA</span><button type="button" class="vm-unlock-btn" data-vm-unlock-btn>Switch to NVDA</button></div></div></aside>
+      <aside class="vm-side"><section class="vm-progress-card"><div class="vm-kicker">Stable rewards</div><strong><span data-vm-side-claimed>0</span> / <span data-vm-side-total>6</span></strong><div class="vm-side-bar"><i data-vm-side-bar></i></div><p>Every mission adds extra Stable. Farm ticker access is not locked behind missions.</p></section><div class="vm-unlock" data-vm-unlock-card hidden><div class="vm-unlock-kicker">// objectives complete</div><div class="vm-unlock-title">Stable bonus claimed</div><div class="vm-unlock-text">All six missions are complete. Keep farming either active ticker and use Stable for trading.</div></div></aside>
     </div>
   </main>
 </div>
@@ -208,11 +208,11 @@
         </div>
         <details class="road-card">
           <summary class="road-summary">
-            <div class="road-card-head"><div><span>ROAD TO NVDA</span><small>Unlock requirement</small></div><b id="overall-imp">0 / 6</b></div>
+            <div class="road-card-head"><div><span>STABLE OBJECTIVES</span><small>Bonus rewards</small></div><b id="overall-imp">0 / 6</b></div>
             <div class="progress-outer road-bar"><i id="goalbar" style="width:0%"></i></div>
-            <div class="road-foot"><span>Complete all six AAPL missions to unlock NVDA.</span><span class="road-toggle">View missions</span></div>
+            <div class="road-foot"><span>Complete missions to claim extra Stable. Both farm tickers are open.</span><span class="road-toggle">View missions</span></div>
           </summary>
-          <div class="road-missions" data-road-missions aria-label="AAPL missions"></div>
+          <div class="road-missions" data-road-missions aria-label="Stable missions"></div>
         </details>
       </section>
 
@@ -359,14 +359,14 @@
      configured OAuth client doesn't have http://127.0.0.1 as an
      authorized origin. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module" src="js/chart.js?v=20261013-9"></script>
+<script type="module" src="js/chart.js?v=20261013-10"></script>
 <!-- aim2stock terminal (paper-trading UI) -->
 <script type="module" src="js/terminal.js?v=20261013-8"></script>
-<!-- aim2stock missions panel (AAPL -> NVDA chain) -->
-<script type="module" src="js/missions.js?v=20261013-4"></script>
+<!-- aim2stock missions panel (Stable bonus objectives) -->
+<script type="module" src="js/missions.js?v=20261021-5"></script>
 <!-- aim2stock A2S holding matrix -->
 <script type="module" src="js/holding.js?v=20261021-2"></script>
-<script type="module" src="js/main.js?v=20261021-4"></script>
+<script type="module" src="js/main.js?v=20261021-5"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');
