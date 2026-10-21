@@ -2017,5 +2017,9 @@ body.market-collapsed .vt-market-right { display: none; }
   #menu .farm-picker-options { grid-template-columns: 1fr; gap: 11px; }
   #menu .farm-picker-group-future .farm-picker-group-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+@media (max-width: 940px) {
+  /* This late guard wins over the desktop geometry pass above. */
+  #menu .dashboard-grid { grid-template-columns: 1fr; }
+}
 .ah-next-level { display: block; max-width: 220px; color: var(--fg-dim) !important; font: 500 13px/1.35 var(--font-ui) !important; letter-spacing: 0 !important; }
 .ah-table td.is-current, .ah-table td.is-current * { color: #17140a !important; }
