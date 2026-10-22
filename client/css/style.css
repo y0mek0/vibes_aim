@@ -2123,3 +2123,67 @@ body.market-collapsed .vt-market-right { display: none; }
 @media (max-width: 680px) {
   #menu .mode-grid > .mode:not(.mode-gridshot) .mode-play { min-height: 32px; padding: 8px 12px; }
 }
+
+/* Pause actions share one measured control system. */
+#pause .card {
+  width: min(330px, calc(100vw - 32px));
+  max-width: none;
+  margin: 24vh auto;
+  padding: 28px 28px 26px;
+}
+#pause h2 { margin-bottom: 22px; }
+#pause .pause-actions {
+  display: grid;
+  gap: 10px;
+  width: min(220px, 100%);
+  margin: 0 auto;
+}
+#pause .pause-action {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255,255,255,.02);
+  color: var(--fg);
+  cursor: pointer;
+  font: 700 10px var(--font-mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  transition: border-color .12s ease, background .12s ease, color .12s ease, transform .12s ease;
+}
+#pause .pause-action:hover { border-color: var(--dash-accent); color: var(--dash-accent); background: rgba(246,212,71,.08); transform: translateY(-1px); }
+#pause .pause-action:active { transform: translateY(0); }
+#pause .pause-action.primary { border-color: var(--dash-accent); background: var(--dash-accent); color: #17140a; }
+#pause .pause-action.primary:hover { background: #fff0a0; color: #17140a; }
+
+/* Loadout selects keep one edge and a readable option rhythm. */
+#menu .customize-pane .row .combo { width: min(320px, 58%); }
+#menu .customize-pane .row .combo-btn {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--dash-line-strong);
+  background: #0d1118;
+  font: 600 10px var(--font-mono);
+  letter-spacing: .04em;
+}
+#menu .customize-pane .row .combo-panel {
+  left: auto;
+  right: 0;
+  width: max(100%, 280px);
+  min-width: 0;
+  max-width: min(360px, calc(100vw - 48px));
+  max-height: 240px;
+  border: 1px solid var(--dash-line-strong);
+  outline: 0;
+  box-shadow: 0 12px 28px rgba(0,0,0,.38);
+}
+#menu .customize-pane .combo-search { margin: 8px; padding: 7px 9px; border: 1px solid var(--dash-line-strong); font: 10px var(--font-mono); }
+#menu .customize-pane .combo-list { padding: 5px; }
+#menu .customize-pane .combo-opt { min-height: 34px; padding: 8px 10px; font: 600 10px var(--font-mono); letter-spacing: .025em; }
+#menu .customize-pane .combo-opt:hover { background: rgba(246,212,71,.12); color: var(--fg); }
+#menu .customize-pane .combo-opt.on { border-left-color: var(--dash-accent); background: rgba(246,212,71,.09); }
+@media (max-width: 680px) {
+  #menu .customize-pane .row .combo { width: min(320px, 100%); }
+  #menu .customize-pane .row { flex-wrap: wrap; }
+}

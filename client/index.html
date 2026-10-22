@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261013-7">
-<link rel="stylesheet" href="css/style.css?v=20261022-15">
+<link rel="stylesheet" href="css/style.css?v=20261023-16">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -313,9 +313,11 @@
 
 <div id="pause" class="overlay"><div class="card">
   <h2>Paused</h2>
-  <button class="btn" id="p-resume">Resume</button>
-  <button class="btn ghost" id="p-crosshair">Crosshair settings</button>
-  <button class="btn ghost" id="p-quit">Quit</button>
+  <div class="pause-actions">
+    <button type="button" class="pause-action primary" id="p-resume">Resume</button>
+    <button type="button" class="pause-action" id="p-crosshair">Settings</button>
+    <button type="button" class="pause-action" id="p-quit">Quit</button>
+  </div>
 </div></div>
 
 <div id="deskblock"><div class="card">
@@ -350,7 +352,7 @@
 <div id="privy-wallet-root" hidden></div>
 <script src="js/privy-wallet.bundle.js?v=20261022-4"></script>
 <script type="module" src="js/holding.js?v=20261022-4"></script>
-<script type="module" src="js/main.js?v=20261022-9"></script>
+<script type="module" src="js/main.js?v=20261023-10"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

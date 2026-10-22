@@ -871,9 +871,13 @@ export function boot() {
     }
     if (![...clsSel.options].some(o => o.value === gun.cls)) clsSel.value = gun.cls;
     else if (clsSel.value !== gun.cls && document.activeElement !== clsSel) clsSel.value = gun.cls;
+    const priceLabel = (item) => {
+      const price = Number(item.priceStable) || 0;
+      return price > 0 ? `$${price.toLocaleString()} Stable` : 'Free';
+    };
     gunSel.innerHTML = '';
     GUNS.filter(g => g.cls === clsSel.value).forEach(g => {
-      const o = document.createElement('option'); o.value = g.id; o.textContent = `${g.name} — ${g.price} cr`;
+      const o = document.createElement('option'); o.value = g.id; o.textContent = `${g.name} - ${priceLabel(g)}`;
       o.dataset.ic = '#sil-' + g.cls.toLowerCase(); gunSel.appendChild(o);
     });
     gunSel.value = GUNS.some(g => g.id === gun.id && g.cls === clsSel.value) ? gun.id : gunSel.options[0].value;
@@ -881,7 +885,7 @@ export function boot() {
     const isNvdaBoost = getNvdaBoostGunIds(GUNS).includes(g.id);
     const conf = v => v === 'data' ? '<i class="tag ok">game data</i>' : '<i class="tag est">estimate</i>';
     $('gun-card').innerHTML =
-      `<h3>${g.name} ${isNvdaBoost ? '<span class="nvda-boost-badge">BOOST NVDA</span>' : ''} <span class="price">${g.price} credits</span></h3><p>${g.desc}</p>
+      `<h3>${g.name} ${isNvdaBoost ? '<span class="nvda-boost-badge">BOOST NVDA</span>' : ''} <span class="price">${priceLabel(g)}</span></h3><p>${g.desc}</p>
        <div class="kv"><span>Damage H/B/L by range</span><b>${bandStr(g)}</b></div>
        <div class="kv"><span>Fire rate</span><b>${g.mode === 'auto' ? g.rpm + '/s' + (g.adsRpm ? ` (${g.adsRpm}/s ADS)` : '') + (g.spool ? `, spools ${g.spool.from}→${g.spool.to}` : '') : g.rpm + '/s semi'}</b></div>
        <div class="kv"><span>Mag / reload / equip</span><b>${g.mag === Infinity ? '∞' : g.mag} · ${g.reload}s · ${g.equip}s</b></div>
