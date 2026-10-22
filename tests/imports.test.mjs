@@ -26,7 +26,7 @@ for (const f of files) {
 // 2. every `import {a, b} from './x.js'` name must be exported by x.js
 const exportNames = src => {
   const names = new Set();
-  for (const m of src.matchAll(/export\s+(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
+  for (const m of src.matchAll(/export\s+(?:async\s+)?(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
   for (const m of src.matchAll(/export\s*\{([^}]+)\}/g))
     m[1].split(',').forEach(p => { const n = p.trim().split(/\s+as\s+/).pop().trim(); if (n) names.add(n); });
   if (/export\s*\*\s*from/.test(src)) names.add('*');

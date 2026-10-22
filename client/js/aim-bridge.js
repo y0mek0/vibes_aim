@@ -22,6 +22,7 @@ export function activeTickerLabel(ticker) {
 
 let counter = 0;
 let inFlight = new Set();
+let pendingRewards = new Set();
 let chipEl = null;
 let tickerEl = null;
 let activeTicker = readStoredTicker() || DEFAULT_TICKER;
@@ -35,6 +36,10 @@ export function setActiveTicker(t) {
     document.querySelectorAll('[data-dashboard-ticker], [data-game-earned-ticker]').forEach((el) => { el.textContent = t; });
   }
   if (chipEl) chipEl.wrap.setAttribute('aria-label', activeTickerLabel(t));
+}
+
+export async function waitForAimRewards() {
+  await Promise.allSettled([...pendingRewards]);
 }
 
 function ensureChip() {
@@ -99,7 +104,7 @@ function onHit(ev) {
   // Do not send duplicates that we know are in flight.
   if (inFlight.has(hitId)) return;
   inFlight.add(hitId);
-  api.post('/aim/hit', {
+  const reward = api.post('/aim/hit', {
     hitId,
     ticker: activeTicker,
     accuracy: Number(d.accuracy) || 0,
@@ -110,8 +115,12 @@ function onHit(ev) {
     gunId: typeof d.gunId === 'string' ? d.gunId : null,
   }).then((r) => {
     if (r && typeof r.unit === 'number') flashChip(r.unit, r.ticker);
-  }).catch(() => { /* swallow; engine visuals still play. */ })
-    .finally(() => { inFlight.delete(hitId); });
+  }).catch(() => { /* engine visuals still play if a reward request fails. */ });
+  pendingRewards.add(reward);
+  void reward.finally(() => {
+    inFlight.delete(hitId);
+    pendingRewards.delete(reward);
+  });
 }
 
 // Boot when the engine is ready. We attach the listener immediately; the

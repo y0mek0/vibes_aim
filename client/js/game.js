@@ -25,7 +25,7 @@ import { buildWorld, disposeWorld } from './three/world.js?v=20261013-4';
 import { THEMES } from './data/themes.js?v=20261013-4';
 import { createTargets } from './three/targets.js?v=20261013-4';
 import { createEffects } from './three/effects.js?v=20261013-4';
-import { getActiveTicker, setActiveTicker } from './aim-bridge.js?v=20261021-4';
+import { getActiveTicker, setActiveTicker, waitForAimRewards } from './aim-bridge.js?v=20261023-5';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -91,6 +91,9 @@ export function boot() {
   // ---------- player / weapon state ----------
   let state = MENU, mode = 'gridshot';
   let selectedMode = 'gridshot';
+  let runStartTicker = 'AAPL';
+  let runStartBalances = {};
+  let runStartStable = 0;
   let yaw = 0, pitch = 0, recoil = 0, bloom = 0;
   const pos = new THREE.Vector3(0, 1.6, 2), vel = new THREE.Vector3();
   const keys = {};
@@ -469,7 +472,11 @@ export function boot() {
 
   // ---------- flow ----------
   function startGame(m) {
-    mode = m; T.clear(); stats.reset();
+    mode = m;
+    runStartTicker = getActiveTicker();
+    runStartBalances = { ...(window.store?.state?.balances || {}) };
+    runStartStable = Number(window.store?.state?.player?.stable) || 0;
+    T.clear(); stats.reset();
     yaw = 0; pitch = 0; recoil = 0; bloom = 0;
     pos.set(0, 1.6, 2); vel.set(0, 0, 0);
     ammo = gun.mag; reloading = false; pendingSpawn = 0; trackBot = null; stalker = null;
@@ -528,12 +535,15 @@ export function boot() {
     history.push({ m: mode, gun: gun.id, score: r.score, acc, d: Date.now() }); saveHistory();
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
     $('res-score').textContent = r.score;
-    // --- Earned-this-run snapshot. Snapshot the store BEFORE we call
-    // refresh() so we can diff "before" vs "after" reliably. ---
+    // Reward requests are independent from the render loop. Settle them before
+    // reading the authoritative balance for this session report.
+    await waitForAimRewards();
+    const runTicker = runStartTicker || getActiveTicker();
+    const beforeRunTicker = runStartBalances[runTicker] ?? 0;
+    const resultTickerLabel = document.querySelector('.res-tokens-lbl');
+    if (resultTickerLabel) resultTickerLabel.textContent = `${runTicker} earned`;
     const storeRef = window?.store;
-    const beforeBalances = storeRef ? { ...(storeRef.state.balances || {}) } : null;
-    const beforeStable = storeRef?.state?.player?.stable;
-    const beforeAapl = beforeBalances?.AAPL ?? 0;
+    const beforeStable = runStartStable;
     const earnedAaplEl = $('res-earned-aapl');
     const earnedUsdEl = $('res-earned-usd');
     const streakEl = $('res-earned-streak');
@@ -547,13 +557,13 @@ export function boot() {
         await storeRef.refresh();
       } catch (_) { /* server may be down; leave placeholders */ }
       const s = storeRef.state;
-      const afterAapl = s.balances?.AAPL ?? 0;
-      const aaplDelta = afterAapl - beforeAapl;
+      const afterRunTicker = s.balances?.[runTicker] ?? 0;
+      const tickerDelta = afterRunTicker - beforeRunTicker;
       const usdDelta = (s.player?.stable ?? 0) - (beforeStable ?? s.player?.stable ?? 0);
       if (earnedAaplEl) {
-        earnedAaplEl.textContent = `${aaplDelta >= 0 ? '+' : '−'}${Math.abs(aaplDelta).toFixed(4)} ${getActiveTicker()}`;
-        earnedAaplEl.classList.toggle('pos', aaplDelta > 0);
-        earnedAaplEl.classList.toggle('neg', aaplDelta < 0);
+        earnedAaplEl.textContent = `${tickerDelta >= 0 ? '+' : '−'}${Math.abs(tickerDelta).toFixed(4)} ${runTicker}`;
+        earnedAaplEl.classList.toggle('pos', tickerDelta > 0);
+        earnedAaplEl.classList.toggle('neg', tickerDelta < 0);
       }
       if (earnedUsdEl) {
         earnedUsdEl.textContent = `${usdDelta >= 0 ? '+' : '−'}$${Math.abs(usdDelta).toFixed(2)}`;
@@ -579,7 +589,7 @@ export function boot() {
       const bridgeChip = document.querySelector('#aim2stock-bridge');
       const earnedAaplText = (bridgeChip?.children?.[2]?.textContent || '0.0000').trim();
       const earnedAapl = Number(earnedAaplText) || 0;
-      if (earnedAaplEl) earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${getActiveTicker()}`;
+      if (earnedAaplEl) earnedAaplEl.textContent = `+${earnedAapl.toFixed(4)} ${runTicker}`;
       if (streakEl) {
         const baseStreak = 5;
         const bonus = r.bestStreak > baseStreak
