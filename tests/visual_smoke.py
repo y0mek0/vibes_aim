@@ -73,20 +73,28 @@ def main():
                 self.path = "/index.html"
             return super().do_GET()
 
-    def serve():
-        # ES modules are fetched concurrently by Chrome. A single-threaded
-        # TCPServer can refuse parallel imports, leaving an incomplete UI
-        # (for example, missions.js never mounts). ThreadingHTTPServer
-        # serves the complete module graph deterministically.
-        with http.server.ThreadingHTTPServer(("127.0.0.1", client_port), Handler) as httpd:
-            httpd.serve_forever()
-    threading.Thread(target=serve, daemon=True).start()
+    # Bind before launching the thread so a port collision fails here rather
+    # than leaving Playwright to hang on an unserved URL.
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", client_port), Handler)
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
     try:
-        time.sleep(1.2)
-        # Quick liveness
+        # The Node server can take a little longer to bind on a busy Windows
+        # host. Poll a bounded window instead of treating one early refusal
+        # as a UI failure.
         import urllib.request
-        urllib.request.urlopen(f"http://127.0.0.1:{server_port}/health", timeout=3).read()
+        ready_error = None
+        for _ in range(30):
+            try:
+                urllib.request.urlopen(f"http://127.0.0.1:{server_port}/health", timeout=1).read()
+                ready_error = None
+                break
+            except Exception as exc:
+                ready_error = exc
+                time.sleep(0.2)
+        if ready_error:
+            raise ready_error
 
         from playwright.sync_api import sync_playwright
         summary = {
@@ -150,6 +158,14 @@ def main():
             page.wait_for_function('document.getElementById("vibes-boot").hidden === true', timeout=8000)
             page.wait_for_timeout(2500)
 
+            # Crosshair profile belongs with crosshair controls, never Profile.
+            page.click('#customize-open', timeout=10000)
+            page.click('[data-customize-tab="crosshair"]', timeout=3000)
+            summary["dom"]["crosshair_profile_controls_visible"] = page.is_visible('#x-export') and page.is_visible('#x-import')
+            page.click('[data-customize-tab="profile"]', timeout=3000)
+            summary["dom"]["profile_contains_crosshair_profile"] = page.eval_on_selector('[data-customize-pane="profile"]', 'el => !!el.querySelector("#x-export, #x-import")')
+            page.click('#customize-close', timeout=3000)
+
             # Mode selection is a two-step flow: clicking a card selects it;
             # only its dedicated PLAY control starts a session.
             summary["dom"]["default_selected_mode"] = page.eval_on_selector('.mode.mode-selected', 'el => el.className')
@@ -164,6 +180,19 @@ def main():
             page.click('.mode-flick .mode-play', timeout=3000)
             page.wait_for_function('!document.getElementById("menu").classList.contains("open")', timeout=3000)
             summary["dom"]["flick_play_starts_session"] = page.eval_on_selector('#menu', 'el => !el.classList.contains("open")')
+            page.wait_for_function('getComputedStyle(document.getElementById("countdown")).display === "none"', timeout=4000)
+            page.evaluate("""() => {
+                if (document.pointerLockElement) document.exitPointerLock();
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape' }));
+            }""")
+            page.wait_for_selector('#pause.open', timeout=5000)
+            summary["dom"]["pause_crosshair_button_visible"] = page.is_visible('#p-crosshair')
+            page.click('#p-crosshair', timeout=3000)
+            page.wait_for_function('!document.getElementById("customize").hidden', timeout=3000)
+            summary["dom"]["pause_crosshair_opens_customizer"] = page.eval_on_selector('[data-customize-pane="crosshair"]', 'el => el.classList.contains("active")')
+            summary["dom"]["pause_stays_open_while_editing_crosshair"] = page.eval_on_selector('#pause', 'el => el.classList.contains("open")')
+            page.click('#customize-close', timeout=3000)
+            page.wait_for_function('document.getElementById("customize").hidden', timeout=3000)
             page.eval_on_selector('#p-quit', 'el => el.click()')
             page.wait_for_selector('#menu.open', timeout=3000)
             page.click('.mode-tracking', timeout=10000)

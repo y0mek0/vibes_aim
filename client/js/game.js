@@ -1057,6 +1057,7 @@ export function boot() {
       $('countdown').style.display = 'flex'; cdT = 1.0; state = COUNT; requestLock();
     });
     $('p-quit').addEventListener('click', quitToMenu);
+    $('p-crosshair').addEventListener('click', () => { window.openCustomizeTab?.('crosshair'); });
     $('res-retry').addEventListener('click', () => startGame(mode));
     $('res-menu').addEventListener('click', quitToMenu);
     $('buy-close').addEventListener('click', () => toggleBuy(false));

@@ -77,6 +77,12 @@ assert.equal(summary.dom.initial_bridge_text, '', 'removed HUD chip should not r
 assert.equal(summary.dom.initial_bridge_aria_label, null, 'removed HUD chip should not render an aria label');
 assert.equal(summary.dom.initial_ticker, 'AAPL', 'default ticker should be AAPL');
 ok('default ticker is AAPL');
+assert.equal(summary.dom.crosshair_profile_controls_visible, true, 'crosshair export/import is visible in Crosshair settings');
+assert.equal(summary.dom.profile_contains_crosshair_profile, false, 'Profile pane does not contain crosshair profile controls');
+assert.equal(summary.dom.pause_crosshair_button_visible, true, 'pause menu exposes Crosshair settings');
+assert.equal(summary.dom.pause_crosshair_opens_customizer, true, 'pause Crosshair settings opens the Crosshair pane');
+assert.equal(summary.dom.pause_stays_open_while_editing_crosshair, true, 'session stays paused while Crosshair settings are open');
+ok('crosshair import/export placement and pause-menu access work');
 assert.match(summary.dom.default_selected_mode, /mode-gridshot/, 'GRIDSHOT is selected at boot');
 assert.equal(summary.dom.default_selected_play_count, 1, 'only selected GRIDSHOT renders Play at boot');
 assert.equal(summary.dom.flick_select_keeps_menu_open, true, 'selecting FLICK must not launch a game');

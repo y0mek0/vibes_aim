@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261013-7">
-<link rel="stylesheet" href="css/style.css?v=20261022-14">
+<link rel="stylesheet" href="css/style.css?v=20261022-15">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -260,7 +260,7 @@
         <nav class="customize-tabs" aria-label="Customize tabs"><button type="button" class="customize-tab active" data-customize-tab="loadout">Loadout</button><button type="button" class="customize-tab" data-customize-tab="crosshair">Crosshair</button><button type="button" class="customize-tab" data-customize-tab="bots">Bots</button><button type="button" class="customize-tab" data-customize-tab="audio">Audio</button><button type="button" class="customize-tab" data-customize-tab="display">Display</button><button type="button" class="customize-tab" data-customize-tab="profile">Profile</button></nav>
         <div class="customize-content">
           <section class="customize-pane active" data-customize-pane="loadout"><div class="customize-pane-title"><h3>Loadout</h3><p>Choose the gun you take into every session.</p></div><div class="customize-form-grid"><div class="row"><label>Class</label><select id="lo-class" data-search></select></div><div class="row"><label>Weapon</label><select id="lo-gun" data-search></select></div></div><div id="gun-card" class="gun-detail-card"></div></section>
-          <section class="customize-pane" data-customize-pane="crosshair"><div class="customize-pane-title"><h3>Crosshair</h3><p>Keep the sight readable, then take it into the range.</p></div><div class="xboard"><div class="xcol"><div class="xprev"><div id="chpreview"></div><div class="xcolrows"><div class="row row-pair"><label>Color</label><select id="x-color-preset" data-search></select><input type="color" id="x-color-custom"></div><div class="row row-toggle"><label>Outlines</label><input type="checkbox" id="x-outline"></div><div class="row"><label>Outline opacity</label><input type="range" id="x-outline-op" min="0" max="1" step="0.05"></div><div class="row"><label>Outline thickness</label><input type="range" id="x-outline-th" min="1" max="6" step="1"></div><div class="row row-toggle"><label>Center dot</label><input type="checkbox" id="x-dot"></div><div class="row"><label>Dot opacity</label><input type="range" id="x-dot-op" min="0" max="1" step="0.05"></div><div class="row"><label>Dot size</label><input type="range" id="x-dot-size" min="1" max="6" step="1"></div></div></div></div><div class="xcol"><h3>Inner lines</h3><div class="row row-toggle"><label>Show</label><input type="checkbox" id="x-inner"></div><div class="row"><label>Length</label><input type="range" id="x-len" min="0" max="20" step="1"></div><div class="row"><label>Thickness</label><input type="range" id="x-thick" min="0" max="10" step="1"></div><div class="row"><label>Offset</label><input type="range" id="x-gap" min="0" max="20" step="1"></div><div class="row"><label>Opacity</label><input type="range" id="x-op" min="0" max="1" step="0.05"></div><h3 class="subhead">Error behavior</h3><div class="row row-toggle"><label>Move error</label><input type="checkbox" id="x-moveerr"></div><div class="row"><label>Move multiplier</label><input type="number" id="x-move-mult" min="0" max="3" step="0.1"></div><div class="row row-toggle"><label>Fire error</label><input type="checkbox" id="x-fireerr"></div><div class="row"><label>Fire multiplier</label><input type="number" id="x-fire-mult" min="0" max="3" step="0.1"></div><div class="row row-toggle"><label>Fade with fire</label><input type="checkbox" id="x-fade"></div><h3 class="subhead">Outer lines</h3><div class="row row-toggle"><label>Show</label><input type="checkbox" id="x-outer"></div><div class="row"><label>Length</label><input type="range" id="x-olen" min="0" max="10" step="1"></div><div class="row"><label>Thickness</label><input type="range" id="x-othick" min="0" max="10" step="1"></div><div class="row"><label>Offset</label><input type="range" id="x-ogap" min="0" max="40" step="1"></div><div class="row"><label>Opacity</label><input type="range" id="x-oop" min="0" max="1" step="0.05"></div></div></div></section>
+          <section class="customize-pane" data-customize-pane="crosshair"><div class="customize-pane-title"><h3>Crosshair</h3><p>Keep the sight readable, then take it into the range.</p></div><div class="xboard"><div class="xcol"><div class="xprev"><div id="chpreview"></div><div class="xcolrows"><div class="row row-pair"><label>Color</label><select id="x-color-preset" data-search></select><input type="color" id="x-color-custom"></div><div class="row row-toggle"><label>Outlines</label><input type="checkbox" id="x-outline"></div><div class="row"><label>Outline opacity</label><input type="range" id="x-outline-op" min="0" max="1" step="0.05"></div><div class="row"><label>Outline thickness</label><input type="range" id="x-outline-th" min="1" max="6" step="1"></div><div class="row row-toggle"><label>Center dot</label><input type="checkbox" id="x-dot"></div><div class="row"><label>Dot opacity</label><input type="range" id="x-dot-op" min="0" max="1" step="0.05"></div><div class="row"><label>Dot size</label><input type="range" id="x-dot-size" min="1" max="6" step="1"></div></div></div></div><div class="xcol"><h3>Inner lines</h3><div class="row row-toggle"><label>Show</label><input type="checkbox" id="x-inner"></div><div class="row"><label>Length</label><input type="range" id="x-len" min="0" max="20" step="1"></div><div class="row"><label>Thickness</label><input type="range" id="x-thick" min="0" max="10" step="1"></div><div class="row"><label>Offset</label><input type="range" id="x-gap" min="0" max="20" step="1"></div><div class="row"><label>Opacity</label><input type="range" id="x-op" min="0" max="1" step="0.05"></div><h3 class="subhead">Error behavior</h3><div class="row row-toggle"><label>Move error</label><input type="checkbox" id="x-moveerr"></div><div class="row"><label>Move multiplier</label><input type="number" id="x-move-mult" min="0" max="3" step="0.1"></div><div class="row row-toggle"><label>Fire error</label><input type="checkbox" id="x-fireerr"></div><div class="row"><label>Fire multiplier</label><input type="number" id="x-fire-mult" min="0" max="3" step="0.1"></div><div class="row row-toggle"><label>Fade with fire</label><input type="checkbox" id="x-fade"></div><h3 class="subhead">Outer lines</h3><div class="row row-toggle"><label>Show</label><input type="checkbox" id="x-outer"></div><div class="row"><label>Length</label><input type="range" id="x-olen" min="0" max="10" step="1"></div><div class="row"><label>Thickness</label><input type="range" id="x-othick" min="0" max="10" step="1"></div><div class="row"><label>Offset</label><input type="range" id="x-ogap" min="0" max="40" step="1"></div><div class="row"><label>Opacity</label><input type="range" id="x-oop" min="0" max="1" step="0.05"></div></div></div><div class="crosshair-profile"><div class="profile-section-title">Crosshair profile</div><div class="row"><label>Export</label><span class="inline-field"><input type="text" id="x-export" readonly onclick="this.select()"><button class="btn ghost mini" id="x-copy">Copy</button></span></div><div class="row"><label>Import</label><span class="inline-field"><input type="text" id="x-import" placeholder="paste profile code"><button class="btn ghost mini" id="x-doimport">Apply</button></span></div><span id="x-implabel" hidden></span></div></section>
           <section class="customize-pane" data-customize-pane="bots"><div class="customize-pane-title"><h3>Bot behavior</h3><p>Set the movement profile before you start.</p></div><div class="settings-grid"><div class="row"><label>Tracking</label><select id="s-track"><option value="easy">Easy, long strafes</option><option value="medium">Medium, mixed</option><option value="hard">Hard, jukes and crouch</option></select></div><div class="row"><label>Distance</label><select id="s-dist"><option value="close">Close, 4-9m</option><option value="standard">Standard, 10-20m</option><option value="long">Long, 20-35m</option></select></div><div class="row"><label>Orb movement</label><select id="s-orbmove"><option value="still">Still</option><option value="drift">Drift</option><option value="strafe">Strafe</option></select></div><div class="row"><label>Orb size</label><select id="s-orbsize"><option value="xs">XS</option><option value="s">S</option><option value="m">M</option><option value="l">L</option><option value="xl">XL</option></select></div></div></section>
           <section class="customize-pane" data-customize-pane="audio"><div class="customize-pane-title"><h3>Audio</h3><p>Keep feedback audible without covering the game.</p></div><div class="settings-grid"><div class="row"><label>Volume</label><input type="range" id="s-vol" min="0" max="1" step="0.05"></div></div></section>
           <section class="customize-pane" data-customize-pane="display"><div class="customize-pane-title"><h3>Display and controls</h3><p>Match sensitivity, response and visual treatment to your setup.</p></div><div class="settings-grid"><div class="row"><label>Sensitivity</label><input type="number" id="s-sens" step="0.01" min="0.01" max="10"></div><div class="row"><label>Scope multiplier</label><input type="number" id="s-scope" step="0.001" min="0.1" max="2"></div><div class="row"><label>Reload</label><select id="s-reload"><option value="off" selected>Off, infinite mag</option><option value="auto">Auto</option><option value="manual">Manual, R only</option></select></div><div class="row"><label>Theme</label><select id="s-theme" data-search></select></div><div class="row"><label>Render scale</label><select id="s-scale"><option value="0.75">0.75x, lowest latency</option><option value="1">1x</option><option value="dpr">Native, sharpest</option></select></div><div class="row"><label>Zeroing presets</label><span><button class="btn ghost mini" id="zero-ads">ADS 0.870</button><button class="btn ghost mini" id="zero-scope">Scope 0.747</button></span></div></div></section>
@@ -271,13 +271,7 @@
       <div class="row"><label>Signed in as</label><span class="profile-email" id="profile-email">—</span></div>
       <button class="btn ghost" id="auth-signout-profile" type="button">Sign out</button>
     </div>
-    <div class="profile-section-title">Crosshair profile</div>
-        <div class="row"><label>Export</label><span class="inline-field"><input type="text" id="x-export" readonly onclick="this.select()"><button class="btn ghost mini" id="x-copy">Copy</button></span></div>
-        <div class="row"><label>Import</label><span class="inline-field"><input type="text" id="x-import" placeholder="paste profile code"><button class="btn ghost mini" id="x-doimport">Apply</button></span></div>
-        <!-- Empty placeholder, kept so the engine DOM-query test still
-             finds the id it expects to read here. -->
-        <span id="x-implabel" hidden></span>
-        <div class="profile-section-title">Local data</div>
+    <div class="profile-section-title">Local data</div>
     <button class="btn ghost" id="resetprog" type="button">Reset training history</button>
     <button class="btn ghost" id="pwa-install" hidden type="button">Install app</button>
   </div>
@@ -320,6 +314,7 @@
 <div id="pause" class="overlay"><div class="card">
   <h2>Paused</h2>
   <button class="btn" id="p-resume">Resume</button>
+  <button class="btn ghost" id="p-crosshair">Crosshair settings</button>
   <button class="btn ghost" id="p-quit">Quit</button>
 </div></div>
 
@@ -355,7 +350,7 @@
 <div id="privy-wallet-root" hidden></div>
 <script src="js/privy-wallet.bundle.js?v=20261022-4"></script>
 <script type="module" src="js/holding.js?v=20261022-4"></script>
-<script type="module" src="js/main.js?v=20261022-8"></script>
+<script type="module" src="js/main.js?v=20261022-9"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');
@@ -417,12 +412,15 @@
   }));
 
   const customize = document.getElementById('customize');
+  const menuOverlay = document.getElementById('menu');
   const customizeOpen = document.getElementById('customize-open');
   const customizeClose = document.getElementById('customize-close');
   const setCustomizeOpen = (open) => {
     if (!customize) return;
+    const inSession = document.body.classList.contains('playing') || document.body.classList.contains('paused');
     customize.hidden = !open;
     document.body.classList.toggle('customize-open', open);
+    if (inSession) menuOverlay?.classList.toggle('open', open);
     if (open) document.querySelector('[data-customize-tab].active')?.focus();
   };
   customizeOpen?.addEventListener('click', () => setCustomizeOpen(true));
@@ -434,6 +432,12 @@
     document.querySelectorAll('[data-customize-tab]').forEach((item) => item.classList.toggle('active', item === tab));
     document.querySelectorAll('[data-customize-pane]').forEach((pane) => pane.classList.toggle('active', pane.dataset.customizePane === name));
   }));
+  window.openCustomizeTab = (name) => {
+    const tab = document.querySelector(`[data-customize-tab="${name}"]`);
+    if (!tab) return;
+    setCustomizeOpen(true);
+    tab.click();
+  };
 
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->

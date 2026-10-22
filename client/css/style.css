@@ -987,10 +987,15 @@ canvas#game {
 #menu .xcol h3 { margin: 0 0 12px; color: var(--dash-soft); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
 #menu .xcol h3.subhead { margin-top: 24px; }
 #menu .profile-tools { display: grid; gap: 12px; max-width: 680px; }
+#menu .crosshair-profile { grid-column: 1 / -1; margin-top: 2px; padding-top: 18px; border-top: 1px solid var(--dash-line); }
 #menu .inline-field { display: flex; gap: 7px; width: min(400px, 64%); }
 #menu .inline-field input { min-width: 0; flex: 1; }
 
-body.playing #menu { display: none !important; }
+body.playing:not(.customize-open) #menu { display: none !important; }
+body.playing.customize-open #menu,
+body.paused.customize-open #menu { display: block !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; z-index: 20; background: transparent !important; }
+body.playing.customize-open #menu .app-shell,
+body.paused.customize-open #menu .app-shell { display: none !important; }
 body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibes-open-missions { pointer-events: none; }
 @media (max-width: 940px) {
   #menu .app-shell { padding-inline: 18px; }
