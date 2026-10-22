@@ -10,9 +10,11 @@ import { loadoutRoutes } from './loadout.js';
 import { authRoutes } from './auth.js';
 import { holdingRoutes } from './holding.js';
 import { createHoldingService } from '../holding/service.js';
+import { createPrivyService } from '../privy/service.js';
 
-export function mountRoutes({ market, store, config, holding: injectedHolding }) {
+export function mountRoutes({ market, store, config, holding: injectedHolding, privy: injectedPrivy }) {
   const holding = injectedHolding ?? createHoldingService(config.a2s);
+  const privy = injectedPrivy ?? createPrivyService(config.privy);
   const r = createRouter();
   healthRoute(r);
   marketRoutes(r, { market });
@@ -20,7 +22,7 @@ export function mountRoutes({ market, store, config, holding: injectedHolding })
   portfolioRoutes(r, { market, store });
   missionsRoutes(r, { store });
   loadoutRoutes(r, { store });
-  authRoutes(r, { store, config });
-  holdingRoutes(r, { holding });
+  authRoutes(r, { store, config, privy });
+  holdingRoutes(r, { holding, privy });
   return r;
 }

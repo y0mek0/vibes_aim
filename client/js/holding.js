@@ -19,7 +19,6 @@ const esc = (value) => String(value).replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[char]));
 
-const CHAIN_ID = '0xb626';
 const shortAddress = (value) => value ? `${value.slice(0, 6)}…${value.slice(-4)}` : 'Not connected';
 
 function setWalletUi(address, busy = false) {
@@ -32,29 +31,15 @@ function setWalletUi(address, busy = false) {
   }
 }
 
-async function switchToRobinhood() {
-  const ethereum = window.ethereum;
-  if (!ethereum) throw new Error('No injected wallet found. Install MetaMask or another EVM wallet.');
-  const current = await ethereum.request({ method: 'eth_chainId' });
-  if (current.toLowerCase() === CHAIN_ID) return;
-  try {
-    await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] });
-  } catch (error) {
-    if (error?.code !== 4902) throw error;
-    await ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_ID, chainName: 'Robinhood Chain Testnet', nativeCurrency: { name: 'Robinhood', symbol: 'RBH', decimals: 18 }, rpcUrls: ['https://rpc.testnet.chain.robinhood.com'], blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com'] }] });
-  }
-}
-
 async function connectWallet() {
-  const ethereum = window.ethereum;
-  if (!ethereum) throw new Error('No injected wallet found. Install MetaMask or another EVM wallet.');
-  await switchToRobinhood();
-  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-  const wallet = accounts?.[0];
-  if (!wallet) throw new Error('No wallet account was selected.');
-  const challenge = await api.get('/holding/challenge', { query: { wallet } });
-  const signature = await ethereum.request({ method: 'personal_sign', params: [challenge.message, wallet] });
-  const verified = await api.post('/holding/verify', { wallet, message: challenge.message, signature, challengeToken: challenge.challengeToken });
+  const provider = window.aim2stockPrivy;
+  if (!provider || typeof provider.connect !== 'function') {
+    throw new Error('Privy wallet provider is not configured yet.');
+  }
+  const connected = await provider.connect();
+  const verified = await api.post('/holding/privy/verify', { wallet: connected.wallet }, {
+    headers: { Authorization: `Bearer ${connected.accessToken}` },
+  });
   setWalletProof(verified.walletProof);
   setWalletUi(verified.wallet);
   render(await api.get('/holding/status'));
@@ -159,9 +144,6 @@ function render(status) {
 renderTable();
 render(null);
 root.querySelector('[data-holding-connect]')?.addEventListener('click', onConnectClick);
-if (window.ethereum?.on) {
-  window.ethereum.on('accountsChanged', () => { setWalletProof(null); setWalletUi(null); render(null); });
-}
 void refreshHolding();
 
 window.aim2stockHolding = Object.freeze({ render, getHoldingMultiplier, refresh: refreshHolding });

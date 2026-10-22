@@ -1,16 +1,8 @@
-// client/js/auth.js — Google sign-in for aim2stock.
+// client/js/auth.js — Privy sign-in for aim2stock.
 //
-// Flow:
-//   1. Render the official "Sign in with Google" button via Google
-//      Identity Services (loaded from accounts.google.com/gsi/client).
-//   2. GSI yields an id_token credential.
-//   3. We POST the id_token to /auth/google on our backend; the backend
-//      verifies it, finds or creates a player, optionally merges the
-//      current guest player into it, and returns a session_token.
-//   4. We persist session_token in localStorage and re-use it on every
-//      /auth/me call to discover the active player.
-//   5. On sign-out we forget the token locally and tell the backend to
-//      invalidate it.
+// Privy manages Google and wallet authentication. We exchange its access
+// token on our server, which preserves an existing Google-backed player on
+// the first Privy login and returns the application's server session.
 //
 // The class is exposed as a global singleton so the rest of the app can
 // reach auth state without an explicit dependency on this file.
@@ -19,15 +11,6 @@ import { api } from '../src/api.js?v=20261021-2';
 
 const TOKEN_KEY = 'aim2stock.sessionToken.v1';
 const PROFILE_KEY = 'aim2stock.profile.v1';
-
-// Same client_id used in Google Cloud OAuth. The GSI library will only
-// work if this origin is in the OAuth client's "Authorized JavaScript
-// origins" list. We pass it through a meta tag so the server can also
-// validate the aud claim if it wants to.
-function readClientId() {
-  const meta = document.querySelector('meta[name="google-oauth-client-id"]');
-  return (meta && meta.getAttribute('content')) || '';
-}
 
 function safeGet(key) {
   try { return localStorage.getItem(key); } catch { return null; }
@@ -60,8 +43,10 @@ function paintAuthUi(state) {
   }
 }
 
-async function postGoogle(idToken, guestPlayerId) {
-  return api.post('/auth/google', { idToken, guestPlayerId: guestPlayerId || undefined });
+async function postPrivy(accessToken, guestPlayerId) {
+  return api.post('/auth/privy', { guestPlayerId: guestPlayerId || undefined }, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 }
 
 async function postSignOut(sessionToken) {
@@ -73,45 +58,12 @@ async function getMe(sessionToken) {
   return api.get('/auth/me', { headers: { Authorization: `Bearer ${sessionToken}` } });
 }
 
-async function signInWithGooglePopup() {
-  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-    throw new Error('Google Identity Services is not loaded yet');
+async function signInWithPrivy() {
+  const provider = window.aim2stockPrivy;
+  if (!provider || typeof provider.authenticate !== 'function') {
+    throw new Error('Privy authentication is not ready yet');
   }
-  const clientId = readClientId();
-  if (!clientId) {
-    throw new Error('Missing <meta name="google-oauth-client-id"> on the page');
-  }
-  return new Promise((resolve, reject) => {
-    try {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (resp) => {
-          if (resp && resp.credential) resolve(resp.credential);
-          else reject(new Error('Google did not return an id_token'));
-        },
-        cancel_callback: () => reject(new Error('Google sign-in was cancelled')),
-        use_fedcm: true,
-      });
-      window.google.accounts.id.prompt((notification) => {
-        if (notification && notification.isNotDisplayed()) {
-          // Fallback: render the button so the user has a way to sign in.
-          const btn = document.getElementById('auth-signin');
-          if (btn) {
-            btn.hidden = false;
-            window.google.accounts.id.renderButton(btn, {
-              type: 'standard',
-              theme: 'outline',
-              size: 'medium',
-              text: 'signin_with',
-              shape: 'rectangular',
-            });
-          }
-        }
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
+  return provider.authenticate();
 }
 
 export const auth = {
@@ -147,19 +99,11 @@ export const auth = {
     }
   },
 
-  // Trigger the popup / FedCM flow, then exchange the id_token with the
-  // backend. The optional guestPlayerId arg merges the existing local
-  // guest progress into the new Google account.
+  // Opens the Privy modal. Users select Google there; the backend then
+  // binds the verified Privy user to the existing AIM2STOCK player.
   async signIn({ guestPlayerId = null } = {}) {
-    let idToken;
-    try {
-      idToken = await signInWithGooglePopup();
-    } catch (e) {
-      // GIS may be blocked (e.g. test env without internet, or origin
-      // not authorized). Surface the error to the caller.
-      throw e;
-    }
-    const res = await postGoogle(idToken, guestPlayerId);
+    const { accessToken } = await signInWithPrivy();
+    const res = await postPrivy(accessToken, guestPlayerId);
     safeSet(TOKEN_KEY, res.sessionToken);
     safeSet(PROFILE_KEY, JSON.stringify({ email: res.player?.email || null }));
     this.state.sessionToken = res.sessionToken;
@@ -179,6 +123,7 @@ export const auth = {
     safeSet(PROFILE_KEY, null);
     paintAuthUi(null);
     emit(this.state);
+    try { await window.aim2stockPrivy?.disconnect?.(); } catch (_) { /* best-effort */ }
     if (token) await postSignOut(token);
   },
 };

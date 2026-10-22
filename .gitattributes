@@ -13,6 +13,9 @@
 *.py        eol=lf
 *.sh        eol=lf
 
+# Generated third-party SDK bundle retains legal ASCII-art whitespace.
+client/js/privy-wallet.bundle.js -whitespace
+
 # Binary assets (keep gitattributes sane for them).
 *.png      binary
 *.jpg      binary

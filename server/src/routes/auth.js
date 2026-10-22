@@ -37,7 +37,53 @@ function playerView(store, playerId) {
   }));
 }
 
-export function authRoutes(r, { store, config }) {
+export function authRoutes(r, { store, config, privy }) {
+  r.post('/auth/privy', async (req, res, _params, _query, body) => {
+    if (!privy?.config?.enabled) throw new HttpError(503, 'auth_provider_not_configured', 'Privy authentication is not configured.');
+    const accessToken = readBearer(req);
+    if (!accessToken) throw new HttpError(401, 'missing_access_token', 'Privy access token is required');
+
+    let identity;
+    try {
+      identity = await privy.verifyGoogleUser(accessToken);
+    } catch {
+      throw new HttpError(401, 'invalid_privy_identity', 'Sign in with Google through Privy first.');
+    }
+
+    let player = await store.findPlayerByPrivyId({ privyId: identity.user_id });
+    if (player) {
+      player = await store.updatePlayerIdentity({ playerId: player.id, email: identity.email });
+    } else {
+      const legacy = await store.findPlayerByGoogleId({ googleId: identity.googleId });
+      if (legacy) {
+        if (legacy.privyId && legacy.privyId !== identity.user_id) {
+          throw new HttpError(409, 'privy_identity_already_bound', 'This AIM2STOCK account is already linked to another Privy user.');
+        }
+        player = await store.bindPrivyIdentity({ playerId: legacy.id, privyId: identity.user_id, email: identity.email });
+      } else {
+        player = await store.createPlayerWithPrivy({
+          privyId: identity.user_id,
+          googleId: identity.googleId,
+          email: identity.email,
+        });
+      }
+    }
+
+    const guestPlayerId = body?.guestPlayerId;
+    let mergedFromGuest = null;
+    if (guestPlayerId && guestPlayerId !== player.id) {
+      const guest = await store.getPlayer(guestPlayerId);
+      if (guest && !guest.googleId && !guest.privyId) {
+        await store.mergeGuestIntoPlayer({ fromPlayerId: guestPlayerId, toPlayerId: player.id });
+        mergedFromGuest = guestPlayerId;
+      }
+    }
+
+    const { token, expiresAt } = await newSession({ store, playerId: player.id });
+    const view = await playerView(store, player.id);
+    sendJson(res, 200, { ok: true, sessionToken: token, expiresAt, player: view, mergedFromGuest });
+  });
+
   r.post('/auth/google', async (req, res, _params, _query, body) => {
     const { idToken, guestPlayerId } = body || {};
     if (!idToken) throw new HttpError(400, 'missing_id_token', 'idToken is required');

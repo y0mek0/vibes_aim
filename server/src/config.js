@@ -34,6 +34,10 @@ export const config = {
     // OAuth client id used to verify id_token audience (aud claim).
     clientId: readString('GOOGLE_CLIENT_ID', ''),
   },
+  privy: {
+    appId: readString('PRIVY_APP_ID', ''),
+    appSecret: readString('PRIVY_APP_SECRET', ''),
+  },
   aim: {
     hitRps: readNumber('AIM_HIT_RPS', 15),
     hitUnit: readNumber('AIM_HIT_UNIT', 0.0008),

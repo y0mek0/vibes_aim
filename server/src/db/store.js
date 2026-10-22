@@ -199,6 +199,31 @@ export function createStore(supabaseConfig) {
       }
       return null;
     },
+    async findPlayerByPrivyId({ privyId }) {
+      for (const p of mem.players.values()) {
+        if (p.privyId === privyId) return p;
+      }
+      return null;
+    },
+    async bindPrivyIdentity({ playerId, privyId, email }) {
+      const p = mem.players.get(playerId) ?? (await this.getOrCreatePlayer(playerId));
+      p.privyId = privyId;
+      if (email) p.email = email;
+      p.updatedAt = Date.now();
+      return p;
+    },
+    async createPlayerWithPrivy({ privyId, googleId, email }) {
+      const playerId = `privy-${privyId}`;
+      const existing = mem.players.get(playerId);
+      if (existing) return existing;
+      const now = Date.now();
+      const p = {
+        id: playerId, privyId, googleId: googleId || null, email: email || null,
+        stable: 200, preciseBest: 0, createdAt: now, updatedAt: now,
+      };
+      mem.players.set(playerId, p);
+      return p;
+    },
     async createPlayerWithGoogle({ googleId, email }) {
       // Use the google sub as the player id so we never need a separate
       // mapping. Existing row gets a fresh createdAt only if absent.

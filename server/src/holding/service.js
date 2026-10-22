@@ -130,6 +130,21 @@ export function createHoldingService(options = {}) {
     return { wallet: normalized, walletProof, expiresAt, chainId, contract };
   }
 
+  function issuePrivyProof({ wallet, privyUserId }) {
+    const normalized = normalizeWallet(wallet);
+    if (!normalized || typeof privyUserId !== 'string' || !privyUserId) throw new Error('invalid_privy_wallet_proof');
+    const expiresAt = Date.now() + 24 * 60 * 60_000;
+    const walletProof = makeToken(secret, {
+      type: 'wallet',
+      provider: 'privy',
+      wallet: normalized,
+      privyUserId,
+      chainId,
+      expiresAt,
+    });
+    return { wallet: normalized, walletProof, expiresAt, chainId, contract, provider: 'privy' };
+  }
+
   function readProof(token) {
     const payload = readToken(secret, token);
     if (!payload || payload.type !== 'wallet' || Date.now() > payload.expiresAt || payload.chainId !== chainId || payload.wallet !== normalizeWallet(payload.wallet)) return null;
@@ -206,5 +221,5 @@ export function createHoldingService(options = {}) {
     try { return await getStatus(proof.wallet); } catch { return null; }
   }
 
-  return { challenge, verify, readProof, getStatus, getVerifiedStatus, config: { rpcUrl, chainId, contract, decimals } };
+  return { challenge, verify, issuePrivyProof, readProof, getStatus, getVerifiedStatus, config: { rpcUrl, chainId, contract, decimals } };
 }

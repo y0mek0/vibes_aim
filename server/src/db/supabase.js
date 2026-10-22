@@ -78,6 +78,7 @@ export function createSupabaseStore({ url, serviceKey }) {
       // Backward-compatible for a row created before migration 0002.
       preciseBest: Number.isFinite(Number(row.precise_best)) ? Number(row.precise_best) : 0,
       googleId: row.google_id || null,
+      privyId: row.privy_id || null,
       email: row.email || null,
     };
   }
@@ -109,6 +110,33 @@ export function createSupabaseStore({ url, serviceKey }) {
     async findPlayerByGoogleId({ googleId }) {
       const rows = await rpc(TABLE.players, `?${eqFilter('google_id', googleId)}&limit=1`);
       return rows && rows[0] ? toPlayer(rows[0]) : null;
+    },
+    async findPlayerByPrivyId({ privyId }) {
+      const rows = await rpc(TABLE.players, `?${eqFilter('privy_id', privyId)}&limit=1`);
+      return rows && rows[0] ? toPlayer(rows[0]) : null;
+    },
+    async bindPrivyIdentity({ playerId, privyId, email }) {
+      const now = new Date().toISOString();
+      const body = { privy_id: privyId, updated_at: now };
+      if (email) body.email = email;
+      const rows = await rpc(TABLE.players,
+        `?${eqFilter('id', playerId)}`,
+        { method: 'PATCH', body, headers: { 'Prefer': 'return=representation' } });
+      return rows && rows[0] ? toPlayer(rows[0]) : await this.getOrCreatePlayer(playerId);
+    },
+    async createPlayerWithPrivy({ privyId, googleId, email }) {
+      const playerId = `privy-${privyId}`;
+      const cur = await this.getOrCreatePlayer(playerId);
+      if (!cur.privyId) {
+        const now = new Date().toISOString();
+        const rows = await rpc(TABLE.players,
+          `?${eqFilter('id', playerId)}`,
+          { method: 'PATCH',
+            body: { privy_id: privyId, google_id: googleId || null, email: email || null, updated_at: now },
+            headers: { 'Prefer': 'return=representation' } });
+        if (rows && rows[0]) return toPlayer(rows[0]);
+      }
+      return cur;
     },
     async createPlayerWithGoogle({ googleId, email }) {
       // Reuse getOrCreatePlayer logic; the player id == google sub for a
