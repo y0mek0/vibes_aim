@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { PrivyProvider, useLogin, usePrivy, useWallets } from '@privy-io/react-auth';
+import { PrivyProvider, useLinkAccount, useLogin, usePrivy, useWallets } from '@privy-io/react-auth';
 
 const root = document.getElementById('privy-wallet-root');
 const appId = document.querySelector('meta[name="privy-app-id"]')?.getAttribute('content')?.trim() || '';
@@ -16,6 +16,7 @@ function WalletBridge() {
   const { wallets } = useWallets();
   const pendingRef = useRef(null);
   const loginRef = useRef(null);
+  const linkWalletRef = useRef(null);
   const stateRef = useRef({ ready, authenticated, wallets, getAccessToken });
 
   useEffect(() => {
@@ -39,6 +40,14 @@ function WalletBridge() {
   const settlePending = async () => {
     const pending = pendingRef.current;
     if (!pending || !stateRef.current.authenticated) return;
+    const hasEthereumWallet = (stateRef.current.wallets || []).some((item) => item?.chainType === 'ethereum' && item?.address);
+    if (pending.kind === 'wallet' && !hasEthereumWallet) {
+      if (!pending.linking) {
+        pending.linking = true;
+        linkWalletRef.current?.();
+      }
+      return;
+    }
     pendingRef.current = null;
     try {
       pending.resolve(pending.kind === 'wallet' ? await resolveConnected() : await resolveAuthenticated());
@@ -55,15 +64,29 @@ function WalletBridge() {
   });
   loginRef.current = login;
 
+  const { linkWallet } = useLinkAccount({
+    onSuccess: () => { void settlePending(); },
+    onError: (error) => {
+      const pending = pendingRef.current;
+      pendingRef.current = null;
+      if (pending) pending.reject(error);
+    },
+  });
+  linkWalletRef.current = linkWallet;
+
   useEffect(() => { void settlePending(); }, [authenticated, wallets, ready]);
 
   useEffect(() => {
     const beginLogin = (kind) => {
       if (!appId) return Promise.reject(new Error('Privy App ID is not configured.'));
       if (!stateRef.current.ready) return Promise.reject(new Error('Privy wallet provider is still loading.'));
-      if (stateRef.current.authenticated) return kind === 'wallet' ? resolveConnected() : resolveAuthenticated();
+      if (stateRef.current.authenticated && kind !== 'wallet') return resolveAuthenticated();
       return new Promise((resolve, reject) => {
         pendingRef.current = { kind, resolve, reject };
+        if (stateRef.current.authenticated) {
+          void settlePending();
+          return;
+        }
         try { loginRef.current?.(); }
         catch (error) {
           pendingRef.current = null;
