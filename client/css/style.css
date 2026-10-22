@@ -2093,3 +2093,28 @@ body.market-collapsed .vt-market-right { display: none; }
   #menu .mode { padding: 16px 15px; }
   #menu .mode-play { min-height: 52px; padding: 16px 30px; margin: 0 18px 16px 0; }
 }
+
+/* Mode cards are a two-step control: choose a session first, then launch it.
+   The selected visual deliberately reuses the existing Gridshot yellow. */
+#menu .mode-grid > .mode.mode-selected {
+  border: 2px solid rgba(246,212,71,.62);
+  background: linear-gradient(135deg, rgba(246,212,71,.13), #171717 56%);
+}
+#menu .mode-grid > .mode.mode-gridshot:not(.mode-selected) {
+  border: 1px solid var(--dash-line);
+  background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+}
+#menu .mode-grid > .mode:not(.mode-gridshot) .mode-play {
+  min-width: 0;
+  min-height: 28px;
+  margin: 0;
+  padding: 7px 10px;
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+#menu .mode-grid > .mode:not(.mode-gridshot).mode-selected .mode-footer {
+  align-items: flex-end;
+}
+@media (max-width: 680px) {
+  #menu .mode-grid > .mode:not(.mode-gridshot) .mode-play { min-height: 32px; padding: 8px 12px; }
+}

@@ -150,6 +150,33 @@ def main():
             page.wait_for_function('document.getElementById("vibes-boot").hidden === true', timeout=8000)
             page.wait_for_timeout(2500)
 
+            # Mode selection is a two-step flow: clicking a card selects it;
+            # only its dedicated PLAY control starts a session.
+            summary["dom"]["default_selected_mode"] = page.eval_on_selector('.mode.mode-selected', 'el => el.className')
+            summary["dom"]["default_selected_play_count"] = page.eval_on_selector_all('.mode.mode-selected .mode-play', 'els => els.length')
+            page.click('.mode-flick', timeout=10000)
+            page.wait_for_function('document.querySelector(".mode-flick").classList.contains("mode-selected")', timeout=3000)
+            summary["dom"]["flick_select_keeps_menu_open"] = page.eval_on_selector('#menu', 'el => el.classList.contains("open")')
+            summary["dom"]["flick_selected"] = page.eval_on_selector('.mode-flick', 'el => el.classList.contains("mode-selected")')
+            summary["dom"]["gridshot_selected_after_flick"] = page.eval_on_selector('.mode-gridshot', 'el => el.classList.contains("mode-selected")')
+            summary["dom"]["flick_play_count"] = page.eval_on_selector_all('.mode-flick .mode-play', 'els => els.length')
+            summary["dom"]["gridshot_play_count_after_flick"] = page.eval_on_selector_all('.mode-gridshot .mode-play', 'els => els.length')
+            page.click('.mode-flick .mode-play', timeout=3000)
+            page.wait_for_function('!document.getElementById("menu").classList.contains("open")', timeout=3000)
+            summary["dom"]["flick_play_starts_session"] = page.eval_on_selector('#menu', 'el => !el.classList.contains("open")')
+            page.eval_on_selector('#p-quit', 'el => el.click()')
+            page.wait_for_selector('#menu.open', timeout=3000)
+            page.click('.mode-tracking', timeout=10000)
+            page.wait_for_function('document.querySelector(".mode-tracking").classList.contains("mode-selected")', timeout=3000)
+            summary["dom"]["tracking_select_keeps_menu_open"] = page.eval_on_selector('#menu', 'el => el.classList.contains("open")')
+            summary["dom"]["tracking_selected"] = page.eval_on_selector('.mode-tracking', 'el => el.classList.contains("mode-selected")')
+            summary["dom"]["flick_selected_after_tracking"] = page.eval_on_selector('.mode-flick', 'el => el.classList.contains("mode-selected")')
+            summary["dom"]["tracking_play_count"] = page.eval_on_selector_all('.mode-tracking .mode-play', 'els => els.length')
+            summary["dom"]["flick_play_count_after_tracking"] = page.eval_on_selector_all('.mode-flick .mode-play', 'els => els.length')
+            # Restore the documented default presentation before its screenshot.
+            page.click('.mode-gridshot', timeout=10000)
+            page.wait_for_function('document.querySelector(".mode-gridshot").classList.contains("mode-selected")', timeout=3000)
+
             out1 = os.path.join(SCREENSHOTS_DIR, "01-initial-menu.png")
             page.screenshot(path=out1)
             summary["screenshots"].append(out1)

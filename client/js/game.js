@@ -90,6 +90,7 @@ export function boot() {
 
   // ---------- player / weapon state ----------
   let state = MENU, mode = 'gridshot';
+  let selectedMode = 'gridshot';
   let yaw = 0, pitch = 0, recoil = 0, bloom = 0;
   const pos = new THREE.Vector3(0, 1.6, 2), vel = new THREE.Vector3();
   const keys = {};
@@ -738,6 +739,11 @@ export function boot() {
   function showBanner(t) { const b = $('banner'); b.textContent = t; replayAnim(b, 'show'); }
 
   // ---------- menu / settings UI ----------
+  function selectMode(nextMode) {
+    if (!MODE_DEFS[nextMode] || selectedMode === nextMode) return;
+    selectedMode = nextMode;
+    renderMenuStats();
+  }
   function renderMenuStats() {
     const farmPicker = document.querySelector('[data-farm-picker]');
     if (farmPicker) {
@@ -771,13 +777,15 @@ export function boot() {
       mi++;
       const d = MODE_DEFS[id], hs = modeHistory(id);
       const best = hs.length ? Math.max(...hs.map(h => h.score)) : null;
-      const el = document.createElement('div'); el.className = 'mode mode-' + id;
-      el.tabIndex = 0; el.setAttribute('role', 'button');
-      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${best !== null ? `best ${best}` : 'click to start'}</div>${mi === 1 ? '<button type="button" class="mode-play">Play</button>' : ''}</div>`;
-      el.addEventListener('click', () => startGame(id));
+      const selected = id === selectedMode;
+      const el = document.createElement('div'); el.className = 'mode mode-' + id + (selected ? ' mode-selected' : '');
+      el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-pressed', String(selected));
+      const statLabel = best !== null ? `best ${best}` : selected ? 'selected · press play' : 'click to select';
+      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${statLabel}</div>${selected ? `<button type="button" class="mode-play" aria-label="Start ${d.name}">Play</button>` : ''}</div>`;
+      el.addEventListener('click', () => selectMode(id));
       const play = el.querySelector('.mode-play');
-      if (play) play.addEventListener('click', e => { e.stopPropagation(); startGame(id); });
-      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startGame(id); } });
+      if (play) play.addEventListener('click', e => { e.stopPropagation(); startGame(selectedMode); });
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMode(id); } });
       list.appendChild(el);
     }
     const recent = history.slice().sort((a, b) => (b.d || 0) - (a.d || 0));
