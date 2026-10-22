@@ -25,22 +25,33 @@ function emit(state) {
   }
 }
 
+function accountLabel(email) {
+  const raw = String(email || '').trim();
+  const local = raw.split('@')[0].replace(/[._-]+/g, ' ').trim();
+  if (!local) return 'Account';
+  return local.split(/\s+/).map((part) => part[0]?.toUpperCase() + part.slice(1)).join(' ').slice(0, 18);
+}
+
 function paintAuthUi(state) {
-  // Three states: signed-out, signed-in. The header shows at most one
-  // icon button (Sign in with Google) OR one icon button (Profile)
-  // OR neither. We never show the email or a separate sign-out here
-  // — those live in Customize → Profile so the header stays compact.
   const signinBtn = document.getElementById('auth-signin');
   const profileBtn = document.getElementById('auth-profile-btn');
   const profileAccount = document.getElementById('profile-account');
   const profileEmail = document.getElementById('profile-email');
+  const accountAvatar = document.querySelector('[data-auth-avatar]');
+  const accountName = document.querySelector('[data-auth-name]');
+  const email = state?.profile?.email || state?.player?.email || '';
+  const label = accountLabel(email);
   const signedIn = !!(state && state.player);
   if (signinBtn) signinBtn.hidden = signedIn;
-  if (profileBtn) profileBtn.hidden = !signedIn;
-  if (profileAccount) profileAccount.hidden = !signedIn;
-  if (profileEmail) {
-    profileEmail.textContent = state?.profile?.email || state?.player?.email || '—';
+  if (profileBtn) {
+    profileBtn.hidden = !signedIn;
+    profileBtn.title = signedIn ? `Account: ${email || label}` : 'Open account';
+    profileBtn.setAttribute('aria-label', signedIn ? `Open account for ${email || label}` : 'Open account');
   }
+  if (profileAccount) profileAccount.hidden = !signedIn;
+  if (profileEmail) profileEmail.textContent = email || '—';
+  if (accountAvatar) accountAvatar.textContent = label.slice(0, 1).toUpperCase() || 'A';
+  if (accountName) accountName.textContent = label;
 }
 
 async function postPrivy(accessToken, guestPlayerId) {
@@ -128,14 +139,14 @@ export const auth = {
   },
 };
 
-// Wire the static "Sign in with Google" button to call signIn(). We
-// capture the local guest player id (if any) so the backend can merge.
+// Wire the Sign in control to the Privy modal. We capture the local guest
+// player id so the backend can merge guest progress into the account.
 function wireButton() {
   const btn = document.getElementById('auth-signin');
   if (btn) {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
-      btn.setAttribute('aria-label', 'Opening Google…');
+      btn.setAttribute('aria-label', 'Opening sign in…');
       try {
         // Try to read the current guest playerId from the store so the
         // server can merge balances/missions/loadout into the new account.
@@ -153,7 +164,7 @@ function wireButton() {
         btn.setAttribute('aria-label', 'Sign in failed — retry');
         setTimeout(() => {
           btn.disabled = false;
-          btn.setAttribute('aria-label', 'Sign in with Google');
+          btn.setAttribute('aria-label', 'Sign in');
         }, 2000);
       } finally {
         btn.disabled = false;

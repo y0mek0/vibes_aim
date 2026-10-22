@@ -1154,10 +1154,72 @@ body.playing .app-footer { display: none; }
 .nav-icon-btn[disabled] { opacity: .5; cursor: progress; }
 .nav-icon-btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 
-/* Backwards-compat: the old "Sign in with Google" pill button is still
-   referenced by some legacy code paths. Keep the rule but mark it as
-   unused — header now uses the icon variant above. */
-.nav-signin { display: none; }
+/* Compact account controls: the provider icon lives inside Privy. The header
+   only shows a clear signed-out action or the active account identity. */
+.nav-signin-btn,
+.nav-account-chip {
+  height: 36px;
+  border: 1px solid var(--dash-line);
+  border-radius: 4px;
+  font: 700 10px var(--font-mono);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .12s ease, color .12s ease, background .12s ease, transform .12s ease;
+}
+.nav-signin-btn[hidden],
+.nav-account-chip[hidden] { display: none; }
+.nav-signin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: rgba(246,212,71,.09);
+  border-color: rgba(246,212,71,.46);
+  color: var(--dash-accent);
+}
+.nav-signin-mark { font-size: 15px; line-height: 1; transform: translateY(-.5px); }
+.nav-signin-btn:hover { background: rgba(246,212,71,.17); border-color: var(--dash-accent); color: #fff4ae; }
+.nav-signin-btn[disabled] { opacity: .55; cursor: progress; }
+
+.nav-account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 134px;
+  max-width: 184px;
+  padding: 3px 8px 3px 4px;
+  background: rgba(255,255,255,.025);
+  color: var(--dash-soft);
+  text-align: left;
+}
+.nav-account-chip:hover { border-color: rgba(246,212,71,.58); background: rgba(246,212,71,.075); color: var(--fg); }
+.nav-account-avatar {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(246,212,71,.6);
+  border-radius: 50%;
+  background: #161616;
+  color: var(--dash-accent);
+  font: 700 11px var(--font-mono);
+}
+.nav-account-copy { min-width: 0; display: grid; gap: 1px; line-height: 1; }
+.nav-account-copy small { color: var(--dash-muted); font: 600 8px var(--font-mono); letter-spacing: .14em; }
+.nav-account-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; font: 700 10px var(--font-mono); letter-spacing: .06em; }
+.nav-account-status { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--dash-accent); box-shadow: 0 0 8px rgba(246,212,71,.6); }
+.nav-account-chevron { flex: 0 0 14px; color: var(--dash-muted); }
+
+@media (max-width: 760px) {
+  #menu .nav-account { gap: 6px; }
+  .nav-account-chip { min-width: 0; padding-right: 6px; }
+  .nav-account-copy { display: none; }
+  .nav-account-status { margin-left: -5px; align-self: flex-end; margin-bottom: 4px; }
+  .nav-account-chevron { display: none; }
+}
 
 #menu .road-bar i { background: #f6d447; box-shadow: 0 0 12px rgba(246,212,71,.24); }
 #menu .dashboard-intro { padding-bottom: 25px; }

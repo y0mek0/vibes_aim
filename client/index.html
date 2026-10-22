@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261013-7">
-<link rel="stylesheet" href="css/style.css?v=20261021-12">
+<link rel="stylesheet" href="css/style.css?v=20261022-13">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -181,19 +181,15 @@
             <path fill="currentColor" d="M19.43 12.98a7.6 7.6 0 0 0 0-1.96l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.4 7.4 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42l-.38 2.65a7.4 7.4 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65a7.6 7.6 0 0 0 0 1.96L2.45 14.63a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.09.73 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .5-.42l.38-2.65c.6-.25 1.17-.58 1.69-.98l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.12-1.65zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>
           </svg>
         </button>
-        <button type="button" class="nav-icon-btn" id="auth-signin" hidden aria-label="Sign in with Google" title="Sign in with Google">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="currentColor" d="M21.35 11.1H12v2.97h5.34c-.23 1.45-1.66 4.25-5.34 4.25-3.21 0-5.84-2.66-5.84-5.95s2.63-5.95 5.84-5.95c1.83 0 3.06.78 3.76 1.45l2.56-2.47C16.7 3.85 14.55 3 12 3 6.96 3 2.85 7.03 2.85 12s4.11 9 9.15 9c5.28 0 8.77-3.71 8.77-8.94 0-.6-.07-1.06-.18-1.51z"/>
-          </svg>
+        <button type="button" class="nav-signin-btn" id="auth-signin" hidden aria-label="Sign in" title="Sign in">
+          <span class="nav-signin-mark" aria-hidden="true">→</span><span>Sign in</span>
         </button>
-        <button type="button" class="nav-icon-btn" id="auth-profile-btn" hidden aria-label="Account" title="Account">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.34 0-8 1.67-8 5v1h16v-1c0-3.33-4.66-5-8-5z"/>
-          </svg>
+        <button type="button" class="nav-account-chip" id="auth-profile-btn" hidden aria-label="Open account" title="Open account">
+          <span class="nav-account-avatar" data-auth-avatar aria-hidden="true">A</span>
+          <span class="nav-account-copy"><small>Account</small><strong data-auth-name>Signed in</strong></span>
+          <span class="nav-account-status" aria-hidden="true"></span>
+          <svg class="nav-account-chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="m7 10 5 5 5-5z"/></svg>
         </button>
-        <span class="nav-profile" id="auth-profile" hidden>
-          <span class="nav-profile-email" id="auth-email"></span>
-        </span>
       </div>
     </header>
 
@@ -347,7 +343,7 @@
   } catch (_) { /* no-op in browsers that lack these APIs */ }
 </script>
 <script type="module" src="src/bootstrap.js?v=20261013-4"></script>
-<script type="module" src="js/auth.js?v=20261022-2"></script>
+<script type="module" src="js/auth.js?v=20261022-5"></script>
 <!-- aim2stock bridge (auto-registers the aim-bridge and boots the server-availability check) -->
 <script type="module" src="js/aim-bridge.js?v=20261021-4"></script>
 <script type="module" src="js/chart.js?v=20261013-10"></script>
