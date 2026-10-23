@@ -11,6 +11,7 @@
 //
 // Run: node tests/terminal.test.mjs (from aim2stock/)
 
+import fs from 'node:fs';
 import http from 'node:http';
 import assert from 'node:assert/strict';
 import {
@@ -23,6 +24,15 @@ import {
 let fails = 0;
 const ok  = (m) => console.log(`ok   ${m}`);
 const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
+
+// ---------- Terminal markup contract ----------
+{
+  const index = fs.readFileSync(new URL('../client/index.html', import.meta.url), 'utf8');
+  assert.match(index, /<option value="AAPL">AAPL<\/option>/);
+  assert.match(index, /<option value="NVDA">NVDA<\/option>/);
+  assert.doesNotMatch(index, /<option value="AAPL">USDC<\/option>/);
+  ok('spot asset selector exposes AAPL and NVDA with matching labels');
+}
 
 // ---------- Pure helpers ----------
 {
