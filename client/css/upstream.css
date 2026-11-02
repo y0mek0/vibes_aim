@@ -21,7 +21,7 @@ h1,h2,h3,.btn,.big{font-family:'Anton','Arial Narrow',sans-serif;letter-spacing:
 h2{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#000;letter-spacing:.18em;
   margin:0 0 8px;background:var(--yellow);border:2px solid #000;padding:3px 10px;transform:skewX(-8deg);text-shadow:none}
 #game{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;transform:translateZ(0)}
-body.playing{cursor:none}
+body.playing:not(.buy-open){cursor:none}
 #vignette{position:fixed;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at 50% 46%,transparent 58%,rgba(5,5,10,.5) 100%)}
 #startfade{position:fixed;inset:0;background:#050508;opacity:0;visibility:hidden;pointer-events:none;z-index:9}
 
@@ -31,7 +31,7 @@ body.playing #topbar,body.paused #topbar{display:flex}
 .tb{display:flex;align-items:stretch;filter:drop-shadow(4px 4px 0 #000)}
 .tb-left{background:var(--red);border:3px solid #000;padding:6px 22px 6px 16px;min-width:150px;transform:skewX(-6deg)}
 .tb-left .tb-score{font-family:'Anton';font-size:30px;line-height:1;color:#fff;text-shadow:-1px 0 var(--teal),2px 2px 0 #000}
-.tb-left .tb-sub{font-size:11px;letter-spacing:.14em;color:#fff}
+.tb-left .tb-sub{font-size:11px;letter-spacing:.14em;color:#fff;-webkit-text-stroke:.5px #000;text-shadow:1px 1px 0 #000}
 .tb-mid{background:var(--ink);border-top:3px solid #000;border-bottom:3px solid #000;padding:4px 26px;text-align:center;
   background-image:radial-gradient(rgba(244,241,234,.09) 1px,transparent 1.4px);background-size:8px 8px}
 .tb-mid #st-mode{font-size:11px;letter-spacing:.24em;color:var(--yellow)}
@@ -131,7 +131,7 @@ body.playing .hintline{display:block}
 #menu.open{display:flex;flex-direction:column;overflow:hidden}
 .wrap{max-width:1760px;margin:0 auto;padding:12px 24px 14px}
 .btn{display:inline-block;background:var(--red);color:#fff;border:3px solid #000;padding:10px 26px;font-size:17px;cursor:pointer;
-  letter-spacing:.08em;box-shadow:4px 4px 0 #000;position:relative;
+  -webkit-text-stroke:.5px #000;text-shadow:1px 1px 0 #000;letter-spacing:.08em;box-shadow:4px 4px 0 #000;position:relative;
   clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
   transition:transform .09s ease,filter .12s ease,box-shadow .12s ease}
 .btn:hover{filter:brightness(1.1);transform:translate(-1px,-2px);box-shadow:6px 6px 0 #000}

@@ -652,6 +652,7 @@ export function boot() {
   function toggleBuy(open) {
     const b = $('buy');
     b.classList.toggle('open', open);
+    document.body.classList.toggle('buy-open', open);
     if (open) renderBuy();
     if (state === PLAYING && open) { /* keep playing; menu is pointer-released */ if (locked()) document.exitPointerLock(); }
     else if (state === PLAYING && !open) requestLock();

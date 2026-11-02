@@ -153,8 +153,12 @@ def main():
             # the generic "Failed to load resource" line, so we cannot
             # filter on the URL field directly.
 
-            page.goto(f"http://127.0.0.1:{client_port}/", wait_until="domcontentloaded", timeout=30000)
+            # External ESM/CDN imports can delay DOMContentLoaded even after
+            # the static document has arrived. Commit starts navigation; the
+            # required #menu.open assertion below remains the real app-ready gate.
+            page.goto(f"http://127.0.0.1:{client_port}/", wait_until="commit", timeout=30000)
             page.wait_for_selector("#menu.open", timeout=15000)
+            page.wait_for_selector("#vibes-boot", state="attached", timeout=15000)
             page.wait_for_function('document.getElementById("vibes-boot").hidden === true', timeout=8000)
             page.wait_for_timeout(2500)
 

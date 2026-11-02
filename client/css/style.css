@@ -829,10 +829,10 @@ canvas#game {
    header size. */
 .brand-link { display: inline-flex; align-items: center; text-decoration: none; color: inherit; }
 .brand-logo { display: inline-grid; grid-template-columns: auto auto auto; align-items: center; gap: 2px; font-family: 'Inter', system-ui, sans-serif; font-weight: 900; line-height: .82; text-transform: uppercase; letter-spacing: -.02em; user-select: none; }
-.brand-logo-top, .brand-logo-bot { color: #f6d447; font-size: 22px; text-shadow: 1px 1px 0 #000, 3px 3px 0 #000; }
-.brand-logo-mid { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #000; color: #f6d447; border: 2px solid #f6d447; font-size: 18px; transform: skewX(-2deg); box-shadow: 2px 2px 0 #000; }
-.brand-link:hover .brand-logo-top, .brand-link:hover .brand-logo-bot { color: #fff; }
-.brand-link:hover .brand-logo-mid { background: #f6d447; color: #000; }
+#menu .brand-logo-top, #menu .brand-logo-bot { color: #fff; font-size: 22px; text-shadow: 1px 1px 0 #000, 3px 3px 0 #000; }
+#menu .brand-logo-mid { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #f6d447; color: #111; border: 2px solid #f6d447; font-size: 18px; transform: skewX(-2deg); box-shadow: 2px 2px 0 #000; }
+#menu .brand-link:hover .brand-logo-top, #menu .brand-link:hover .brand-logo-bot { color: #f6d447; }
+#menu .brand-link:hover .brand-logo-mid { background: #111; color: #f6d447; border-color: #f6d447; }
 
 .app-nav { min-height: 70px; display: flex; align-items: center; gap: 34px; border-bottom: 1px solid var(--dash-line); }
 #menu 
@@ -2021,6 +2021,14 @@ body.market-collapsed .vt-market-right { display: none; }
   .nvda-boost-badge { display: inline-flex; align-items: center; margin-left: 5px; padding: 2px 5px; border: 1px solid var(--yellow); color: #17140a; background: var(--yellow); font: 600 9px/1 var(--font-mono); letter-spacing: .08em; vertical-align: middle; white-space: nowrap; }
   .buy-meta .nvda-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
   #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
+
+/* Buy menu: use the card space for readable weapon information, not a
+   tall blank silhouette slot. Yellow status chips keep a dark outline. */
+#buy .gsil { height: 14px; margin-bottom: 2px; }
+#buy .buy-meta { align-items: center; flex-wrap: wrap; gap: 6px; }
+#buy .buy-meta b { font-size: 18px; }
+#buy .nvda-boost-badge { font-size: 10px; padding: 3px 6px; }
+#buy .buy-meta .eq { -webkit-text-stroke: .5px #000; text-shadow: 1px 1px 0 #000; }
 
 /* Keep the picker above the session grid on desktop. */
 #menu .training-panel { flex-direction: column; }
