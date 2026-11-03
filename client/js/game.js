@@ -682,16 +682,21 @@ export function boot() {
       const isOwned = ownedSet.has(g.id) || g.start === true;
       const priceStable = Number(g.priceStable) || 0;
       const canAfford = stable + 1e-9 >= priceStable;
+      const priceText = `$${priceStable.toLocaleString()}`;
       const status = isOwned
-        ? '<span class="eq">OWNED</span>'
+        ? '<span class="owned-state">OWNED</span>'
         : (priceStable === 0
-            ? '<span class="eq">FREE</span>'
+            ? '<span class="owned-state">FREE</span>'
             : (canAfford
-                ? `<span class="eq">BUY $${priceStable.toFixed(2)}</span>`
-                : `<span class="locked">LOCKED $${priceStable.toFixed(2)}</span>`));
+                ? `<span class="price price-available">${priceText}</span>`
+                : `<span class="locked">${priceText}</span>`));
+      const boost = nvdaBoostIds.has(g.id)
+        ? '<span class="nvda-boost-badge"><span class="boost-mark">▲</span> NVDA BOOST</span>'
+        : '';
       el.innerHTML =
         `<svg class="gsil" viewBox="0 0 120 40"><use href="#sil-${g.cls.toLowerCase()}"/></svg>` +
-        `<div class="buy-meta"><b>${g.name}</b>${nvdaBoostIds.has(g.id) ? '<span class="nvda-boost-badge">BOOST NVDA</span>' : ''}<span class="price">${status}</span>${g.id === gun.id ? '<span class="eq">EQUIPPED</span>' : ''}</div>` +
+        `<div class="buy-meta"><div class="buy-identity"><b>${g.name}</b>${boost}</div>${status}</div>` +
+        `${g.id === gun.id ? '<div class="equipped-state">EQUIPPED</div>' : ''}` +
         `<div class="buy-bars"><label>PWR ${maxHead}</label>${bar(maxHead / 255 * 100)}` +
         `<label>RPM ${g.rpm}</label>${bar(g.rpm / 16 * 100)}` +
         `<label>MAG ${g.mag === Infinity ? '∞' : g.mag}</label>${bar(g.mag === Infinity ? 100 : g.mag / 100 * 100)}</div>` +
@@ -884,7 +889,7 @@ export function boot() {
     else if (clsSel.value !== gun.cls && document.activeElement !== clsSel) clsSel.value = gun.cls;
     const priceLabel = (item) => {
       const price = Number(item.priceStable) || 0;
-      return price > 0 ? `$${price.toLocaleString()} Stable` : 'Free';
+      return price > 0 ? `$${price.toLocaleString()}` : 'Free';
     };
     gunSel.innerHTML = '';
     GUNS.filter(g => g.cls === clsSel.value).forEach(g => {

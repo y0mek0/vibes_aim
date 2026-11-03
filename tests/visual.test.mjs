@@ -59,6 +59,7 @@ const required = [
   '02-terminal.png',
   '03-missions.png',
   '04-chart-nvda.png',
+  '05-buy-menu.png',
 ];
 for (const name of required) {
   const p = path.join(screenshots, name);
@@ -97,6 +98,11 @@ assert.equal(summary.dom.flick_selected_after_tracking, false, 'FLICK clears aft
 assert.equal(summary.dom.tracking_play_count, 1, 'selected TRACKING renders its Play button');
 assert.equal(summary.dom.flick_play_count_after_tracking, 0, 'inactive FLICK hides its Play button');
 ok('mode cards select first; only their Play control launches a session');
+assert.equal(summary.dom.buy_cursor_visible, true, 'Buy menu restores the system cursor');
+assert.equal(summary.dom.buy_phase_absent, true, 'Buy menu must not render BUY PHASE');
+assert.equal(summary.dom.buy_price_is_number, true, 'weapon price is a number without BUY text');
+assert.equal(summary.dom.buy_equipped_is_not_button, true, 'equipped state is not rendered as a filled button');
+ok('buy menu preserves cursor, price, and equipped-state hierarchy');
 assert.equal(summary.dom.terminal_usd, '200.00', 'fresh player has 200 USD in Account Assets');
 ok('fresh player has 200.00 USD in the shared Market workspace');
 assert.equal(summary.dom.missions_claimed, '0', 'no missions claimed at boot');

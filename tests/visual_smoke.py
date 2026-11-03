@@ -85,7 +85,7 @@ def main():
         # as a UI failure.
         import urllib.request
         ready_error = None
-        for _ in range(30):
+        for _ in range(75):
             try:
                 urllib.request.urlopen(f"http://127.0.0.1:{server_port}/health", timeout=1).read()
                 ready_error = None
@@ -128,6 +128,11 @@ def main():
             ctx = browser.new_context(viewport={"width": 1440, "height": 900})
             ctx.add_init_script(f'window.VIBES_API_BASE = "http://127.0.0.1:{server_port}";')
             page = ctx.new_page()
+            # Font delivery is not part of the app behavior under test and
+            # can stall deferred module execution in isolated CI networks.
+            # The UI has local/system fallbacks; keep all functional CDNs live.
+            page.route("https://fonts.googleapis.com/**", lambda route: route.abort())
+            page.route("https://fonts.gstatic.com/**", lambda route: route.abort())
             def record_console_error(message):
                 if message.type != "error":
                     return
@@ -142,9 +147,12 @@ def main():
 
             page.on("pageerror", lambda e: summary["page_errors"].append(str(e)))
             page.on("console", record_console_error)
-            page.on("requestfailed", lambda r: summary["request_failures"].append({
-                "url": r.url, "failure": r.failure,
-            }))
+            def record_request_failure(request):
+                if "fonts.googleapis.com" in request.url or "fonts.gstatic.com" in request.url:
+                    return
+                summary["request_failures"].append({"url": request.url, "failure": request.failure})
+
+            page.on("requestfailed", record_request_failure)
             page.on("response", lambda r: summary["error_responses"].append({
                 "url": r.url, "status": r.status,
             }) if r.status >= 400 else None)
@@ -158,8 +166,7 @@ def main():
             # required #menu.open assertion below remains the real app-ready gate.
             page.goto(f"http://127.0.0.1:{client_port}/", wait_until="commit", timeout=30000)
             page.wait_for_selector("#menu.open", timeout=15000)
-            page.wait_for_selector("#vibes-boot", state="attached", timeout=15000)
-            page.wait_for_function('document.getElementById("vibes-boot").hidden === true', timeout=8000)
+            page.wait_for_function('window.store && window.store.state && window.store.state.ready === true', timeout=60000)
             page.wait_for_timeout(2500)
 
             # Crosshair profile belongs with crosshair controls, never Profile.
@@ -185,6 +192,21 @@ def main():
             page.wait_for_function('!document.getElementById("menu").classList.contains("open")', timeout=3000)
             summary["dom"]["flick_play_starts_session"] = page.eval_on_selector('#menu', 'el => !el.classList.contains("open")')
             page.wait_for_function('getComputedStyle(document.getElementById("countdown")).display === "none"', timeout=4000)
+
+            # Buy screen: the cursor must return, price is a number rather
+            # than a BUY button, and equipped is a card state rather than a CTA.
+            page.keyboard.press("b")
+            page.wait_for_selector('#buy.open', timeout=3000)
+            summary["dom"]["buy_cursor_visible"] = page.eval_on_selector('body', 'el => getComputedStyle(el).cursor !== "none"')
+            summary["dom"]["buy_phase_absent"] = page.eval_on_selector('#buy', 'el => !el.textContent.includes("BUY PHASE")')
+            summary["dom"]["buy_price_is_number"] = page.eval_on_selector('.price-available, .buy-meta .locked', 'el => /^\\$\\d/.test(el.textContent.trim())')
+            summary["dom"]["buy_equipped_is_not_button"] = page.eval_on_selector('.equipped-state', 'el => getComputedStyle(el).backgroundColor === "rgba(0, 0, 0, 0)"')
+            out5 = os.path.join(SCREENSHOTS_DIR, "05-buy-menu.png")
+            page.screenshot(path=out5)
+            summary["screenshots"].append(out5)
+            page.keyboard.press("b")
+            page.wait_for_function('!document.getElementById("buy").classList.contains("open")', timeout=3000)
+
             page.evaluate("""() => {
                 if (document.pointerLockElement) document.exitPointerLock();
                 window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape' }));

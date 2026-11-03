@@ -2022,13 +2022,21 @@ body.market-collapsed .vt-market-right { display: none; }
   .buy-meta .nvda-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
   #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
 
-/* Buy menu: use the card space for readable weapon information, not a
-   tall blank silhouette slot. Yellow status chips keep a dark outline. */
+/* Buy menu: retain the existing card positions, but make the information
+   hierarchy clear. Yellow is reserved for the selected state, boost and price. */
 #buy .gsil { height: 14px; margin-bottom: 2px; }
-#buy .buy-meta { align-items: center; flex-wrap: wrap; gap: 6px; }
-#buy .buy-meta b { font-size: 18px; }
-#buy .nvda-boost-badge { font-size: 10px; padding: 3px 6px; }
-#buy .buy-meta .eq { -webkit-text-stroke: .5px #000; text-shadow: 1px 1px 0 #000; }
+#buy .buy-head { align-items: center; margin-bottom: 10px; }
+#buy .buy-head h2 { margin: 0; }
+#buy .buy-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#buy .buy-identity { display: flex; align-items: center; gap: 8px; min-width: 0; }
+#buy .buy-meta b { font-size: 22px; line-height: 1; white-space: nowrap; }
+#buy .nvda-boost-badge { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 4px 6px; border: 1px solid var(--yellow); background: transparent; color: var(--yellow); font-size: 11px; line-height: 1; }
+#buy .boost-mark { color: var(--yellow); font-size: 11px; line-height: 1; }
+#buy .owned-state { flex: 0 0 auto; padding: 5px 7px; border: 1px solid #454b57; background: #181b22; color: #c3c9d2; font: 700 11px/1 var(--font-mono); letter-spacing: .08em; }
+#buy .price-available { margin-left: auto; background: transparent; color: var(--yellow); font: 700 24px/1 var(--font-mono); letter-spacing: -.04em; }
+#buy .locked { margin-left: auto; color: #cdb85c; font: 700 20px/1 var(--font-mono); letter-spacing: -.04em; }
+#buy .buy-item.locked { opacity: .8; }
+#buy .equipped-state { display: inline-flex; align-items: center; min-height: 18px; margin: 8px 0 10px; padding-left: 9px; border-left: 3px solid var(--yellow); background: transparent; color: var(--yellow); font: 700 11px/1 var(--font-mono); letter-spacing: .14em; }
 
 /* Keep the picker above the session grid on desktop. */
 #menu .training-panel { flex-direction: column; }
