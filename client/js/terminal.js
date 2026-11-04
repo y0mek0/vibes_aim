@@ -94,7 +94,7 @@ export function mountTerminal({ root } = {}) {
   }
 
   function renderActivity() {
-    panel.querySelectorAll('[data-vt-activity-tab]').forEach((button) => { const active = button.dataset.vtActivityTab === state.activity; toggle(button, active); button.setAttribute('aria-selected', String(active)); }); panel.querySelectorAll('[data-vt-activity-pane]').forEach((pane) => { const active = pane.dataset.vtActivityPane === state.activity; pane.hidden = !active; toggle(pane, active); }); const labels = { positions: 'Open positions', orders: 'Pending orders', history: 'Recent executions', assets: 'Account assets' }; setText(panel.querySelector('[data-vt-activity-meta]'), labels[state.activity]);
+    panel.querySelectorAll('[data-vt-activity-tab]').forEach((button) => { const active = button.dataset.vtActivityTab === state.activity; toggle(button, active); button.setAttribute('aria-selected', String(active)); }); panel.querySelectorAll('[data-vt-activity-pane]').forEach((pane) => { const active = pane.dataset.vtActivityPane === state.activity; pane.hidden = !active; toggle(pane, active); }); const labels = { positions: 'Open positions', orders: 'Pending orders', history: 'Recent executions', assets: '' }; setText(panel.querySelector('[data-vt-activity-meta]'), labels[state.activity]);
   }
 
   async function ensureAssetPrices() {

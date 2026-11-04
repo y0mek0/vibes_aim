@@ -103,6 +103,10 @@ assert.equal(summary.dom.buy_phase_absent, true, 'Buy menu must not render BUY P
 assert.equal(summary.dom.buy_price_is_number, true, 'weapon price is a number without BUY text');
 assert.equal(summary.dom.buy_equipped_is_not_button, true, 'equipped state is not rendered as a filled button');
 ok('buy menu preserves cursor, price, and equipped-state hierarchy');
+assert.equal(summary.dom.terminal_title, 'Trading terminal', 'Market header keeps only Trading terminal');
+assert.equal(summary.dom.terminal_watchlist_label_absent, true, 'Watchlist label is removed');
+assert.equal(summary.dom.terminal_account_assets_absent, true, 'Account assets label is removed');
+assert.equal(summary.dom.terminal_assets_scrollable, true, 'Assets table scrolls inside its pane');
 assert.equal(summary.dom.terminal_usd, '200.00', 'fresh player has 200 USD in Account Assets');
 ok('fresh player has 200.00 USD in the shared Market workspace');
 assert.equal(summary.dom.missions_claimed, '0', 'no missions claimed at boot');

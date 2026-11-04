@@ -239,6 +239,12 @@ def main():
             # Open the terminal
             page.click("#vibes-open-terminal", timeout=10000)
             page.wait_for_timeout(1500)
+            summary["dom"]["terminal_title"] = page.eval_on_selector('.vt-workspace-title', 'el => el.textContent.trim()')
+            summary["dom"]["terminal_watchlist_label_absent"] = page.eval_on_selector('.vt-watchlist .vt-section-head', 'el => !el.textContent.includes("Watchlist")')
+            page.click('[data-vt-activity-tab="assets"]', timeout=5000)
+            page.wait_for_timeout(400)
+            summary["dom"]["terminal_account_assets_absent"] = page.eval_on_selector('[data-vt-activity-meta]', 'el => !el.textContent.includes("Account assets")')
+            summary["dom"]["terminal_assets_scrollable"] = page.eval_on_selector('[data-vt-activity-pane="assets"] .vt-table-scroll', 'el => { const s = getComputedStyle(el); return s.overflowY === "auto" || s.overflowY === "scroll"; }')
             out2 = os.path.join(SCREENSHOTS_DIR, "02-terminal.png")
             page.screenshot(path=out2)
             summary["screenshots"].append(out2)

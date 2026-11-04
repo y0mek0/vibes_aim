@@ -1828,7 +1828,7 @@ body.market-collapsed .vt-market-right { display: none; }
 #menu .app-shell > #vibes-terminal .vt-watch small { overflow: hidden; color: var(--dash-muted); font: 10px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
 #menu .app-shell > #vibes-terminal .vt-watch strong { color: var(--yellow); font: 11px var(--font-mono); white-space: nowrap; }
 #menu .app-shell > #vibes-terminal .vt-watch-note { margin: 14px 5px 0; color: var(--dash-muted); font: 10px/1.45 var(--font-mono); }
-#menu .app-shell > #vibes-terminal .vt-market-center { display: grid; grid-template-rows: minmax(0, 1fr) 190px; gap: 12px; overflow: hidden; }
+#menu .app-shell > #vibes-terminal .vt-market-center { display: grid; grid-template-rows: minmax(0, 1fr) minmax(210px, 28vh); gap: 12px; overflow: hidden; }
 #menu .app-shell > #vibes-terminal .vt-chart-shell { min-height: 0; display: flex; flex-direction: column; padding: 12px; background: var(--dash-panel); border: 1px solid var(--dash-line); }
 #menu .app-shell > #vibes-terminal .vt-chart-head { flex: 0 0 auto; display: flex; align-items: end; justify-content: space-between; gap: 12px; padding-bottom: 10px; }
 #menu .app-shell > #vibes-terminal .vt-chart-head h1 { margin: 4px 0 0; color: var(--fg); font: 600 23px var(--font-mono); letter-spacing: -.03em; }
@@ -1853,15 +1853,41 @@ body.market-collapsed .vt-market-right { display: none; }
 #menu .app-shell > #vibes-terminal .vt-form-tabs button.active,
 #menu .app-shell > #vibes-terminal .vt-order-type button.active { color: var(--yellow); border-bottom-color: var(--yellow); }
 #menu .app-shell > #vibes-terminal .vt-activity-meta { color: var(--dash-muted); font: 10px var(--font-mono); white-space: nowrap; }
-#menu .app-shell > #vibes-terminal .vt-activity-pane { min-height: 0; flex: 1 1 auto; overflow: hidden; padding: 7px 12px 10px; }
+#menu .app-shell > #vibes-terminal .vt-activity-meta:empty { display: none; }
+#menu .app-shell > #vibes-terminal .vt-activity-pane { min-height: 0; flex: 1 1 auto; overflow: hidden; padding: 7px 12px 10px; display: flex; flex-direction: column; }
 #menu .app-shell > #vibes-terminal .vt-activity-pane[hidden],
 #menu .app-shell > #vibes-terminal .vt-form-pane[hidden] { display: none; }
-#menu .app-shell > #vibes-terminal .vt-table-scroll { height: 100%; overflow: auto; }
+#menu .app-shell > #vibes-terminal .vt-table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(246, 212, 71, 0.35) transparent;
+}
+#menu .app-shell > #vibes-terminal .vt-table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+#menu .app-shell > #vibes-terminal .vt-table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(246, 212, 71, 0.28);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+#menu .app-shell > #vibes-terminal .vt-table-scroll::-webkit-scrollbar-track { background: transparent; }
 #menu .app-shell > #vibes-terminal .vt-table { min-width: 610px; font-size: 10px; }
 #menu .app-shell > #vibes-terminal .vt-table th,
 #menu .app-shell > #vibes-terminal .vt-table td { padding: 6px 5px; white-space: nowrap; }
 #menu .app-shell > #vibes-terminal .vt-empty { padding: 18px 4px; color: var(--dash-muted); font: 10px var(--font-mono); }
-#menu .app-shell > #vibes-terminal .vt-assets-total-line { display: flex; justify-content: end; gap: 10px; padding-top: 6px; color: var(--dash-muted); font: 10px var(--font-mono); }
+#menu .app-shell > #vibes-terminal .vt-assets-total-line {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--dash-line);
+  color: var(--dash-muted);
+  font: 10px var(--font-mono);
+}
 #menu .app-shell > #vibes-terminal .vt-assets-total-line b { color: var(--fg); }
 #menu .app-shell > #vibes-terminal .vt-market-right { position: static; top: auto; right: auto; width: auto; max-height: none; display: block; grid-column: auto; grid-row: auto; align-content: normal; z-index: auto; }
 #menu .app-shell > #vibes-terminal select.vt-hidden-control { display: none !important; position: absolute !important; inset: auto !important; width: 1px !important; height: 1px !important; min-width: 0 !important; min-height: 0 !important; opacity: 0 !important; pointer-events: none !important; }
@@ -1933,7 +1959,7 @@ body.market-collapsed .vt-market-right { display: none; }
   #menu .app-shell > #vibes-terminal .vt-watch { flex: 0 0 142px; min-height: 45px; }
   #menu .app-shell > #vibes-terminal .vt-market-center { display: flex; flex-direction: column; min-height: 0; }
   #menu .app-shell > #vibes-terminal .vt-chart-shell { min-height: 420px; }
-  #menu .app-shell > #vibes-terminal .vt-activity { min-height: 190px; }
+  #menu .app-shell > #vibes-terminal .vt-activity { min-height: 210px; }
   #menu .app-shell > #vibes-terminal .vt-market-right { order: 2; }
   #menu .app-shell > #vibes-terminal .vt-chart-note { display: none; }
 }
