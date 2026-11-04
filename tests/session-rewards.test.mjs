@@ -51,7 +51,7 @@ const port = server.address().port;
 
 try {
   for (const mode of ['gridshot', 'flick', 'tracking', 'bots']) {
-    for (const ticker of ['AAPL', 'NVDA']) {
+    for (const ticker of ['AAPL', 'NVDA', 'TSLA', 'MSFT']) {
       const playerId = `reward-matrix-${mode}-${ticker}`;
       const headers = { 'x-player-id': playerId, 'x-session-id': `session-${mode}-${ticker}` };
       const hit = await request(port, 'POST', '/aim/hit', {
@@ -71,7 +71,7 @@ try {
       console.log(`ok   ${mode}/${ticker}: +${hit.body.unit}`);
     }
   }
-  console.log('Session earning report and 4x2 reward matrix: ALL PASS');
+  console.log('Session earning report and 4x4 reward matrix: ALL PASS');
 } finally {
   await new Promise((resolve) => server.close(resolve));
 }

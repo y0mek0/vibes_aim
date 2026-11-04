@@ -40,7 +40,12 @@ export const config = {
   },
   aim: {
     hitRps: readNumber('AIM_HIT_RPS', 15),
-    hitUnit: readNumber('AIM_HIT_UNIT', 0.0008),
+    hitUnits: Object.freeze({
+      AAPL: readNumber('AIM_HIT_UNIT_AAPL', 0.0008),
+      NVDA: readNumber('AIM_HIT_UNIT_NVDA', 0.0008),
+      TSLA: readNumber('AIM_HIT_UNIT_TSLA', 0.0005),
+      MSFT: readNumber('AIM_HIT_UNIT_MSFT', 0.0003),
+    }),
     priceImpactMax: readNumber('AIM_PRICE_IMPACT_MAX', 0.018),
   },
   a2s: {

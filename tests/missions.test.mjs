@@ -257,8 +257,10 @@ async function integration() {
   assert.equal(p.status, 200);
   const unlocks = (p.body.unlocks || []).map((u) => u.ticker);
   assert.ok(unlocks.includes('AAPL'));
-  assert.ok(unlocks.includes('NVDA'));
-  ok('AAPL and NVDA remain active while hold_60s is pending');
+    assert.ok(unlocks.includes('NVDA'));
+    assert.ok(unlocks.includes('MSFT'));
+    assert.ok(unlocks.includes('TSLA'));
+    ok('AAPL, NVDA, MSFT and TSLA remain active while hold_60s is pending');
 
   // 8. /missions/claim already-claimed mission -> 400 already_claimed
   const dup = await req({

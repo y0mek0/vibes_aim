@@ -3,8 +3,8 @@
 
 import * as THREE from 'three';
 import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261021-1';
-import { getNvdaBoostGunIds } from './data/nvda-boost.js?v=20261021-1';
-import { FARM_TICKERS } from './data/farm-tickers.js?v=20261021-1';
+import { getBoostTickerForGun } from './data/nvda-boost.js?v=20261104-1';
+import { FARM_TICKERS } from './data/farm-tickers.js?v=20261104-1';
 import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261021-6';
 import { BUILD } from './build.js?v=20261013-4';
 import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261013-4';
@@ -661,7 +661,6 @@ export function boot() {
   let buyCls = null;
   function renderBuy() {
     const grid = $('buy-grid'); grid.innerHTML = '';
-    const nvdaBoostIds = new Set(getNvdaBoostGunIds(GUNS));
     if (!GUN_CLASSES.includes(buyCls)) buyCls = gun.cls;
     const rail = document.createElement('div'); rail.className = 'buy-rail';
     GUN_CLASSES.forEach(cls => {
@@ -690,8 +689,9 @@ export function boot() {
             : (canAfford
                 ? `<span class="price price-available">${priceText}</span>`
                 : `<span class="locked">${priceText}</span>`));
-      const boost = nvdaBoostIds.has(g.id)
-        ? '<span class="nvda-boost-badge"><span class="boost-mark">▲</span> NVDA BOOST</span>'
+      const boostTicker = getBoostTickerForGun(g.id, GUNS);
+      const boost = boostTicker
+        ? `<span class="ticker-boost-badge"><span class="boost-mark">▲</span> ${boostTicker} BOOST</span>`
         : '';
       el.innerHTML =
         `<svg class="gsil" viewBox="0 0 120 40"><use href="#sil-${g.cls.toLowerCase()}"/></svg>` +
@@ -822,7 +822,7 @@ export function boot() {
       const tickers = Object.keys(balances)
         .filter((t) => t !== 'USD' && balances[t] > 0)
         .map((t) => ({ sym: t, qty: balances[t] }));
-      const nameOf = (sym) => (sym === 'AAPL' ? 'Apple Inc.' : sym === 'NVDA' ? 'NVIDIA Corp.' : sym);
+      const nameOf = (sym) => ({ AAPL: 'Apple Inc.', NVDA: 'NVIDIA Corp.', MSFT: 'Microsoft Corp.', TSLA: 'Tesla Inc.' }[sym] || sym);
       for (const t of tickers) {
         cards.push({ sym: t.sym, name: nameOf(t.sym), qty: t.qty, kind: 'token' });
       }
@@ -898,10 +898,10 @@ export function boot() {
     });
     gunSel.value = GUNS.some(g => g.id === gun.id && g.cls === clsSel.value) ? gun.id : gunSel.options[0].value;
     const g = gunById(gunSel.value) || gun;
-    const isNvdaBoost = getNvdaBoostGunIds(GUNS).includes(g.id);
+    const boostTicker = getBoostTickerForGun(g.id, GUNS);
     const conf = v => v === 'data' ? '<i class="tag ok">game data</i>' : '<i class="tag est">estimate</i>';
     $('gun-card').innerHTML =
-      `<h3>${g.name} ${isNvdaBoost ? '<span class="nvda-boost-badge">BOOST NVDA</span>' : ''} <span class="price">${priceLabel(g)}</span></h3><p>${g.desc}</p>
+      `<h3>${g.name} ${boostTicker ? `<span class="ticker-boost-badge">${boostTicker} BOOST</span>` : ''} <span class="price">${priceLabel(g)}</span></h3><p>${g.desc}</p>
        <div class="kv"><span>Damage H/B/L by range</span><b>${bandStr(g)}</b></div>
        <div class="kv"><span>Fire rate</span><b>${g.mode === 'auto' ? g.rpm + '/s' + (g.adsRpm ? ` (${g.adsRpm}/s ADS)` : '') + (g.spool ? `, spools ${g.spool.from}→${g.spool.to}` : '') : g.rpm + '/s semi'}</b></div>
        <div class="kv"><span>Mag / reload / equip</span><b>${g.mag === Infinity ? '∞' : g.mag} · ${g.reload}s · ${g.equip}s</b></div>

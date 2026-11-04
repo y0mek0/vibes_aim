@@ -10,6 +10,7 @@ const SELECTORS = {
   root: '#vibes-terminal', balance: '[data-vt-balance]', portfolioVal: '[data-vt-portfolio-value]', portfolioTotal: '[data-vt-portfolio-total]', openPnl: '[data-vt-open-pnl]', holdings: '[data-vt-holdings]', assetsTotal: '[data-vt-assets-total]', assetsBody: '[data-vt-assets-body]', convertTicker: '[data-vt-convert-ticker]', convertUnits: '[data-vt-convert-units]', convertInputLabel: '[data-vt-convert-input-label]', convertPrice: '[data-vt-convert-price]', convertUsd: '[data-vt-convert-usd]', convertStatus: '[data-vt-convert-status]', convertSubmit: '[data-vt-convert-submit]', spotSide: '[data-vt-spot-side]', spotPct: '[data-vt-spot-pct]', spotReceiveLabel: '[data-vt-spot-receive-label]', spotReceiveTicker: '[data-vt-spot-receive-ticker]', available: '[data-vt-available]', perpAvailable: '[data-vt-perp-available]', positionsBody: '[data-vt-positions-body]', historyBody: '[data-vt-history-body]', ordersBody: '[data-vt-orders-body]', marketTicker: '[data-vt-market-ticker]', marketPrice: '[data-vt-market-price]', otTicker: '[data-vt-ot-ticker]', otSymbol: '[data-vt-ot-symbol]', otPrice: '[data-vt-ot-price]', otSide: '[data-vt-ot-side]', otNotional: '[data-vt-ot-notional]', otLeverage: '[data-vt-ot-leverage]', otLeverageNum: '[data-vt-ot-leverage-num]', otEntry: '[data-vt-ot-entry]', otLiq: '[data-vt-ot-liq]', otMargin: '[data-vt-ot-margin]', otNotionalTotal: '[data-vt-ot-notional-total]', otStatus: '[data-vt-ot-status]', otConfirmChk: '[data-vt-ot-confirm-chk]', otSubmit: '[data-vt-ot-submit]',
 };
 
+const FREE_TRADE_TICKERS = new Set(['AAPL', 'NVDA', 'MSFT', 'TSLA']);
 const fmtMoney = (n) => Number.isFinite(Number(n)) ? round2(Number(n)).toFixed(2) : '-';
 const fmtUnits = (value) => { const n = Number(value || 0); if (!Number.isFinite(n)) return '-'; if (n === 0) return '0.00'; if (Math.abs(n) >= 100) return n.toFixed(2); if (Math.abs(n) >= 1) return n.toFixed(4).replace(/0+$/, '').replace(/\.$/, ''); return n.toFixed(6).replace(/0+$/, '').replace(/\.$/, ''); };
 const setText = (el, value) => { if (el) el.textContent = value; };
@@ -23,7 +24,7 @@ export function mountTerminal({ root } = {}) {
   const state = { ticker: 'AAPL', mode: 'dex', spotSide: 'buy', perpSide: 'long', leverage: 1, notional: 100, entryPrice: 0, assetPrices: {}, lastPreview: null, activity: 'positions', refreshingPrices: false, marketOpen: true, marketSession: 'paper' };
 
   function priceFor(ticker) { const price = Number(state.assetPrices[ticker]); return Number.isFinite(price) && price > 0 ? price : null; }
-  function visibleTickers() { const unlocks = new Set(store.state.unlocks || []); const tickers = new Set(['AAPL', 'NVDA', state.ticker]); for (const ticker of Object.keys(store.state.balances || {})) tickers.add(ticker); return [...tickers].filter((ticker) => ticker === 'AAPL' || ticker === 'NVDA' || unlocks.has(ticker)).sort(); }
+  function visibleTickers() { const unlocks = new Set(store.state.unlocks || []); const tickers = new Set([...FREE_TRADE_TICKERS, state.ticker]); for (const ticker of Object.keys(store.state.balances || {})) tickers.add(ticker); return [...tickers].filter((ticker) => FREE_TRADE_TICKERS.has(ticker) || unlocks.has(ticker)).sort(); }
 
   function renderPortfolio() {
     const player = store.state.player; if (!player) return;
@@ -47,7 +48,7 @@ export function mountTerminal({ root } = {}) {
 
   function renderWatchlist() {
     const unlocked = new Set(store.state.unlocks || []);
-    for (const button of panel.querySelectorAll('[data-vt-watch]')) { const ticker = button.dataset.vtWatch; button.hidden = !(ticker === 'AAPL' || ticker === 'NVDA' || unlocked.has(ticker) || ticker === state.ticker); toggle(button, ticker === state.ticker); const price = priceFor(ticker); setText(button.querySelector('[data-vt-watch-price]'), price == null ? '-' : fmtMoney(price)); }
+    for (const button of panel.querySelectorAll('[data-vt-watch]')) { const ticker = button.dataset.vtWatch; button.hidden = !(FREE_TRADE_TICKERS.has(ticker) || unlocked.has(ticker) || ticker === state.ticker); toggle(button, ticker === state.ticker); const price = priceFor(ticker); setText(button.querySelector('[data-vt-watch-price]'), price == null ? '-' : fmtMoney(price)); }
   }
 
   function renderTickerContext() {

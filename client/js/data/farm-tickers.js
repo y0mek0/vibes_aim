@@ -3,8 +3,8 @@
 export const FARM_TICKERS = Object.freeze([
   { ticker: 'AAPL', name: 'Apple', active: true },
   { ticker: 'NVDA', name: 'NVIDIA', active: true },
-  { ticker: 'MSFT', name: 'Microsoft', active: false },
-  { ticker: 'TSLA', name: 'Tesla', active: false },
+  { ticker: 'MSFT', name: 'Microsoft', active: true },
+  { ticker: 'TSLA', name: 'Tesla', active: true },
   { ticker: 'AMZN', name: 'Amazon', active: false },
   { ticker: 'SPY', name: 'S&P 500', active: false },
 ]);

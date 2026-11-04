@@ -28,9 +28,11 @@
   --accent: #f6d447;
   --accent-dim: #8a751d;
   --aapl: #c9ccd1;
-  --aapl-dim: #5d626a;
-  --nvda: #f6d447;
-  --nvda-dim: #8a751d;
+    --aapl-dim: #5d626a;
+    --nvda: #f6d447;
+    --nvda-dim: #8a751d;
+    --msft: #9db4ff;
+    --tsla: #f6d447;
   --spcx: #f6d447;
   --pre: #9aa3b2;
   --gain: #f6d447;
@@ -210,6 +212,8 @@ canvas#game {
 }
 .stock[data-ticker="AAPL"]  { border-left-color: var(--aapl); }
 .stock[data-ticker="NVDA"]  { border-left-color: var(--nvda); }
+.stock[data-ticker="MSFT"]  { border-left-color: var(--msft); }
+.stock[data-ticker="TSLA"]  { border-left-color: var(--tsla); }
 .stock[data-ticker="SPCX"]  { border-left-color: var(--spcx); }
 .stock[data-ticker="OPENAI"],
 .stock[data-ticker="ANTHROPIC"] { border-left-color: var(--pre); color: var(--fg-dim); }
@@ -336,6 +340,8 @@ canvas#game {
 }
 #vibes-chart[data-ticker="AAPL"] .vc-ticker { border-left-color: var(--aapl); }
 #vibes-chart[data-ticker="NVDA"] .vc-ticker { border-left-color: var(--nvda); }
+#vibes-chart[data-ticker="MSFT"] .vc-ticker { border-left-color: var(--msft); }
+#vibes-chart[data-ticker="TSLA"] .vc-ticker { border-left-color: var(--tsla); }
 .vc-price {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -2018,9 +2024,9 @@ body.market-collapsed .vt-market-right { display: none; }
   .ah-panel-head { align-items: flex-start; flex-direction: column; }
   }
 
-  .nvda-boost-badge { display: inline-flex; align-items: center; margin-left: 5px; padding: 2px 5px; border: 1px solid var(--yellow); color: #17140a; background: var(--yellow); font: 600 9px/1 var(--font-mono); letter-spacing: .08em; vertical-align: middle; white-space: nowrap; }
-  .buy-meta .nvda-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
-  #menu .gun-detail-card .nvda-boost-badge { font-size: 9px; }
+  .ticker-boost-badge { display: inline-flex; align-items: center; margin-left: 5px; padding: 2px 5px; border: 1px solid var(--yellow); color: #17140a; background: var(--yellow); font: 600 9px/1 var(--font-mono); letter-spacing: .08em; vertical-align: middle; white-space: nowrap; }
+  .buy-meta .ticker-boost-badge { flex: 0 0 auto; margin-left: 0; font-size: 8px; }
+  #menu .gun-detail-card .ticker-boost-badge { font-size: 9px; }
 
 /* Buy menu: retain the existing card positions, but make the information
    hierarchy clear. Yellow is reserved for the selected state, boost and price. */
@@ -2030,7 +2036,7 @@ body.market-collapsed .vt-market-right { display: none; }
 #buy .buy-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 #buy .buy-identity { display: flex; align-items: center; gap: 8px; min-width: 0; }
 #buy .buy-meta b { font-size: 22px; line-height: 1; white-space: nowrap; }
-#buy .nvda-boost-badge { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 4px 6px; border: 1px solid var(--yellow); background: transparent; color: var(--yellow); font-size: 11px; line-height: 1; }
+#buy .ticker-boost-badge { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 4px 6px; border: 1px solid var(--yellow); background: transparent; color: var(--yellow); font-size: 11px; line-height: 1; }
 #buy .boost-mark { color: var(--yellow); font-size: 11px; line-height: 1; }
 #buy .owned-state { flex: 0 0 auto; padding: 5px 7px; border: 1px solid #454b57; background: #181b22; color: #c3c9d2; font: 700 11px/1 var(--font-mono); letter-spacing: .08em; }
 #buy .price-available { margin-left: auto; background: transparent; color: var(--yellow); font: 700 24px/1 var(--font-mono); letter-spacing: -.04em; }

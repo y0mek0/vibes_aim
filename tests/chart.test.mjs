@@ -28,8 +28,10 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
 {
   // accentColor: AAPL silver, tradeable tickers yellow, Pre-IPO dim, others silver.
   assert.equal(accentColor('AAPL'), '#c9ccd1');
-  assert.equal(accentColor('NVDA'), '#f6d447');
-  assert.equal(accentColor('SPCX'), '#f6d447');
+    assert.equal(accentColor('NVDA'), '#f6d447');
+    assert.equal(accentColor('TSLA'), '#f6d447');
+    assert.equal(accentColor('MSFT'), '#9db4ff');
+    assert.equal(accentColor('SPCX'), '#f6d447');
   assert.equal(accentColor('OPENAI'), '#9aa3b2');
   assert.equal(accentColor('ANTHROPIC'), '#9aa3b2');
   assert.equal(accentColor('NOPE'), '#c9ccd1');
@@ -218,8 +220,8 @@ async function integration() {
   const r5 = await get('/market/symbols');
   assert.equal(r5.status, 200);
   const tickers = r5.body.symbols.map((s) => s.symbol);
-  assert.ok(tickers.includes('AAPL') && tickers.includes('NVDA'));
-  ok('GET /market/symbols includes AAPL and NVDA');
+  assert.ok(tickers.includes('AAPL') && tickers.includes('NVDA') && tickers.includes('MSFT') && tickers.includes('TSLA'));
+    ok('GET /market/symbols includes AAPL, NVDA, MSFT and TSLA');
 
   server.close();
 }

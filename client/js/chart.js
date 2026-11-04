@@ -51,7 +51,8 @@ function loadLightweightCharts() {
 // --- Pure helpers (testable) -----------------------------------------
 
 export function accentColor(t) {
-  if (t === 'NVDA') return '#f6d447';
+  if (t === 'NVDA' || t === 'TSLA') return '#f6d447';
+  if (t === 'MSFT') return '#9db4ff';
   if (t === 'SPCX') return '#f6d447';
   if (t === 'OPENAI' || t === 'ANTHROPIC') return '#9aa3b2';
   return '#c9ccd1';
@@ -484,7 +485,7 @@ export function mountChart({ root, ticker = 'AAPL', range = '1D' } = {}) {
     const unlocked = store.state.unlocks;
     for (const btn of els.tickerBtns) {
       const t = btn.dataset.vcTickerBtn;
-      const visible = t === 'AAPL' || t === 'NVDA' || (Array.isArray(unlocked) && unlocked.includes(t));
+      const visible = t === 'AAPL' || t === 'NVDA' || t === 'MSFT' || t === 'TSLA' || (Array.isArray(unlocked) && unlocked.includes(t));
       btn.hidden = !visible;
     }
   }

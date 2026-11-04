@@ -1,5 +1,13 @@
-// Deterministic daily NVDA boost rotation shared by the shop and reward route.
-// The rotation changes once per UTC day and never rerolls on page refresh.
+// Deterministic ticker boost catalog shared by the shop and reward route.
+// NVDA rotates once per UTC day. TSLA and MSFT have two deliberate fixed boosts
+// each, and NVDA excludes those IDs so a hit can never route to two tickers.
+
+export const FIXED_TICKER_BOOSTS = Object.freeze({
+  TSLA: Object.freeze(['mp9', 'xm1014']),
+  MSFT: Object.freeze(['p2000', 'm4a1']),
+});
+
+const RESERVED_BOOST_IDS = new Set(Object.values(FIXED_TICKER_BOOSTS).flat());
 
 function hashString(value) {
   let hash = 2166136261;
@@ -28,7 +36,7 @@ export function getNvdaBoostRotationKey(date = new Date()) {
 }
 
 export function getNvdaBoostGunIds(catalog, date = new Date()) {
-  const items = Array.isArray(catalog) ? catalog : [];
+  const items = (Array.isArray(catalog) ? catalog : []).filter((gun) => !RESERVED_BOOST_IDS.has(gun?.id));
   const classes = [...new Set(items.map((gun) => gun?.cls).filter(Boolean))];
   const state = { value: hashString(getNvdaBoostRotationKey(date)) };
   const shuffledClasses = classes.slice();
@@ -43,6 +51,20 @@ export function getNvdaBoostGunIds(catalog, date = new Date()) {
   }).filter(Boolean);
 }
 
+export function getTickerBoostGunIds(ticker, catalog, date = new Date()) {
+  const symbol = String(ticker || '').toUpperCase();
+  if (symbol === 'NVDA') return getNvdaBoostGunIds(catalog, date);
+  const knownIds = new Set((Array.isArray(catalog) ? catalog : []).map((gun) => gun?.id));
+  return (FIXED_TICKER_BOOSTS[symbol] || []).filter((id) => knownIds.has(id));
+}
+
+export function getBoostTickerForGun(gunId, catalog, date = new Date()) {
+  for (const ticker of ['TSLA', 'MSFT', 'NVDA']) {
+    if (getTickerBoostGunIds(ticker, catalog, date).includes(gunId)) return ticker;
+  }
+  return null;
+}
+
 export function isNvdaBoostGun(gunId, catalog, date = new Date()) {
-  return getNvdaBoostGunIds(catalog, date).includes(gunId);
+  return getTickerBoostGunIds('NVDA', catalog, date).includes(gunId);
 }

@@ -29,9 +29,11 @@ const bad = (m) => { fails++; console.error(`FAIL ${m}`); };
 {
   const index = fs.readFileSync(new URL('../client/index.html', import.meta.url), 'utf8');
   assert.match(index, /<option value="AAPL">AAPL<\/option>/);
-  assert.match(index, /<option value="NVDA">NVDA<\/option>/);
-  assert.doesNotMatch(index, /<option value="AAPL">USDC<\/option>/);
-  ok('spot asset selector exposes AAPL and NVDA with matching labels');
+    assert.match(index, /<option value="NVDA">NVDA<\/option>/);
+    assert.match(index, /<option value="MSFT">MSFT<\/option>/);
+    assert.match(index, /<option value="TSLA">TSLA<\/option>/);
+    assert.doesNotMatch(index, /<option value="AAPL">USDC<\/option>/);
+    ok('spot asset selector exposes AAPL, NVDA, MSFT and TSLA with matching labels');
 }
 
 // ---------- Pure helpers ----------
@@ -323,7 +325,26 @@ async function integration() {
   assert.equal(nvdaClose.status, 200);
   ok('NVDA spot BUY/SELL and PERP LONG/CLOSE execute');
 
-  // 4. /portfolio/preview: long 5x AAPL
+    for (const ticker of ['MSFT', 'TSLA']) {
+      const player = `term-${ticker.toLowerCase()}-player`;
+      const before = await req({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': player } });
+      const buy = await req({ method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': player }, body: { ticker, side: 'buy', units: 0.2 } });
+      assert.equal(buy.status, 200, JSON.stringify(buy.body));
+      assert.equal(buy.body.ticker, ticker);
+      assert.ok(buy.body.player.stable < before.body.player.stable);
+      const sell = await req({ method: 'POST', path: '/portfolio/spot', headers: { 'X-Player-Id': player }, body: { ticker, side: 'sell', units: 0.2 } });
+      assert.equal(sell.status, 200, JSON.stringify(sell.body));
+      assert.equal(sell.body.balance, 0);
+      const preview = await req({ method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': player }, body: { ticker, side: 'short', leverage: 2, notional: 80 } });
+      assert.equal(preview.status, 200);
+      const order = await req({ method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': player }, body: { ticker, side: 'short', leverage: 2, notional: 80, confirmLiquidation: true } });
+      assert.equal(order.status, 200, JSON.stringify(order.body));
+      const close = await req({ method: 'POST', path: '/portfolio/close', headers: { 'X-Player-Id': player }, body: { tradeId: order.body.trade.id } });
+      assert.equal(close.status, 200, JSON.stringify(close.body));
+    }
+    ok('MSFT and TSLA spot BUY/SELL and PERP SHORT/CLOSE execute');
+
+    // 4. /portfolio/preview: long 5x AAPL
   const prev = await req({
     method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': playerId },
     body: { ticker: 'AAPL', side: 'long', leverage: 5, notional: 500 },

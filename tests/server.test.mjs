@@ -378,9 +378,11 @@ async function main() {
     assert.ok(r.body.balance > 0);
     const portfolio = await client.request({ method: 'GET', path: '/portfolio', headers: { 'X-Player-Id': 'active-farm-player' } });
     assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'AAPL'));
-    assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'NVDA'));
-    assert.ok((portfolio.body.balances.NVDA || 0) > 0);
-    ok('POST /aim/hit with NVDA works immediately and persists NVDA balance/unlock');
+        assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'NVDA'));
+        assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'MSFT'));
+        assert.ok(portfolio.body.unlocks.some((u) => u.ticker === 'TSLA'));
+        assert.ok((portfolio.body.balances.NVDA || 0) > 0);
+        ok('POST /aim/hit with NVDA works immediately and persists NVDA balance/unlock');
   });
 
   // AAPL still works for the same player.
@@ -407,28 +409,52 @@ async function main() {
     assert.equal(sold.status, 200, JSON.stringify(sold.body));
     assert.equal(sold.body.ticker, 'NVDA');
     ok('NVDA supports preview, BUY and SELL through the existing paper-trading flow');
-  });
+      });
 
-  // /portfolio/preview and /portfolio/order also gate on unlocks.
-  await step(async () => {
-    const r = await client.request({
-      method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': 'locked-player' },
-      body: { ticker: 'TSLA', side: 'long', leverage: 1, notional: 100 },
-    });
-    assert.equal(r.status, 400);
-    assert.equal(r.body.error, 'ticker_locked');
-    ok('POST /portfolio/preview with locked ticker -> 400 ticker_locked');
-  });
+      // TSLA and MSFT are active immediately with the same farm/trade contract.
+      await step(async () => {
+        for (const ticker of ['TSLA', 'MSFT']) {
+          const headers = { 'X-Player-Id': `active-${ticker.toLowerCase()}-player`, 'X-Session-Id': `s-${ticker.toLowerCase()}` };
+          const hit = await client.request({
+            method: 'POST', path: '/aim/hit', headers,
+            body: { hitId: `${ticker}-hit-1`, ticker, accuracy: 0.8, streak: 0, gunId: 'usp', ts: Date.now() },
+          });
+          assert.equal(hit.status, 200, JSON.stringify(hit.body));
+          assert.equal(hit.body.ticker, ticker);
+          assert.ok(hit.body.unit > 0);
+          const portfolio = await client.request({ method: 'GET', path: '/portfolio', headers });
+          assert.ok(portfolio.body.unlocks.some((u) => u.ticker === ticker));
+          assert.ok((portfolio.body.balances[ticker] || 0) > 0);
+          const preview = await client.request({ method: 'POST', path: '/portfolio/preview', headers, body: { ticker, side: 'long', leverage: 2, notional: 100 } });
+          assert.equal(preview.status, 200);
+          const bought = await client.request({ method: 'POST', path: '/portfolio/spot', headers, body: { ticker, side: 'buy', units: 0.05 } });
+          assert.equal(bought.status, 200, JSON.stringify(bought.body));
+          const sold = await client.request({ method: 'POST', path: '/portfolio/spot', headers, body: { ticker, side: 'sell', units: 0.05 } });
+          assert.equal(sold.status, 200, JSON.stringify(sold.body));
+        }
+        ok('TSLA and MSFT support farm hits plus preview/BUY/SELL');
+      });
 
-  await step(async () => {
-    const r = await client.request({
-      method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': 'locked-player' },
-      body: { ticker: 'TSLA', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
-    });
-    assert.equal(r.status, 400);
-    assert.equal(r.body.error, 'ticker_locked');
-    ok('POST /portfolio/order with locked ticker -> 400 ticker_locked');
-  });
+      // /portfolio/preview and /portfolio/order also gate on unlocks.
+      await step(async () => {
+        const r = await client.request({
+          method: 'POST', path: '/portfolio/preview', headers: { 'X-Player-Id': 'locked-player' },
+          body: { ticker: 'AMZN', side: 'long', leverage: 1, notional: 100 },
+        });
+        assert.equal(r.status, 400);
+        assert.equal(r.body.error, 'ticker_locked');
+        ok('POST /portfolio/preview with locked ticker -> 400 ticker_locked');
+      });
+
+      await step(async () => {
+        const r = await client.request({
+          method: 'POST', path: '/portfolio/order', headers: { 'X-Player-Id': 'locked-player' },
+          body: { ticker: 'AMZN', side: 'long', leverage: 1, notional: 100, confirmLiquidation: true },
+        });
+        assert.equal(r.status, 400);
+        assert.equal(r.body.error, 'ticker_locked');
+        ok('POST /portfolio/order with locked ticker -> 400 ticker_locked');
+      });
 
   // Pre-IPO tickers (OPENAI/ANTHROPIC) are valid hit targets; the
   // server still mints their unit but the chart shows no price.

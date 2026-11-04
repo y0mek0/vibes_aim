@@ -10,7 +10,7 @@ const MAX_LEVERAGE = 20;
 // AAPL and NVDA are active from the start. Future market entries stay
 // visible in the farm selector but remain unavailable until activated.
 const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
-const FREE_TRADE_TICKERS = new Set(['AAPL', 'NVDA']);
+const FREE_TRADE_TICKERS = new Set(['AAPL', 'NVDA', 'TSLA', 'MSFT']);
 async function ensureDefaultFarmUnlocks(store, playerId) {
   await Promise.all([...FREE_TRADE_TICKERS].map((ticker) => store.unlock(playerId, ticker)));
 }
