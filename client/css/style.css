@@ -1311,19 +1311,51 @@ body.playing .app-footer { display: none; }
 #menu .road-foot { align-items: baseline; }
 #menu .road-foot span:first-child { flex: 1 1 auto; min-width: 0; }
 #menu .road-foot span:last-child { flex: 0 0 auto; white-space: nowrap; }
-#menu .road-card { cursor: default; }
+#menu .road-card { cursor: default; position: relative; z-index: 6; }
 #menu .road-summary { display: block; cursor: pointer; list-style: none; outline: none; }
 #menu .road-summary::-webkit-details-marker { display: none; }
 #menu .road-summary::marker { content: ''; }
 #menu .road-summary:focus-visible { outline: 1px solid #f6d447; outline-offset: 5px; }
 #menu .road-toggle { color: #f6d447; }
 #menu .road-card[open] .road-toggle { color: #fff; }
-#menu .road-missions { display: grid; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--dash-line); }
-#menu .road-mission { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 10px; min-width: 0; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.08); font: 9px var(--font-mono); }
+#menu .road-card[open] { z-index: 40; }
+#menu .road-missions {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  left: auto;
+  z-index: 45;
+  width: min(540px, calc(100vw - 40px));
+  max-height: min(64vh, 460px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 14px 16px 12px;
+  border: 1px solid rgba(246, 212, 71, 0.22);
+  border-radius: 6px;
+  background: rgba(7, 9, 13, 0.97);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(246, 212, 71, 0.35) transparent;
+}
+#menu .road-mission {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 2px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  font: 12px/1.35 var(--font-mono);
+}
 #menu .road-mission:last-child { border-bottom: 0; }
-#menu .road-mission-label { min-width: 0; color: var(--dash-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#menu .road-mission-progress { color: #fff; white-space: nowrap; }
-#menu .road-mission-status { color: var(--dash-muted); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+#menu .road-mission-label { min-width: 0; color: #e8ebf2; font-size: 13px; line-height: 1.35; white-space: normal; }
+#menu .road-mission-progress { color: #fff; font-size: 12px; white-space: nowrap; }
+#menu .road-mission-status { color: var(--dash-muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 #menu .road-mission-status.ready, #menu .road-mission-status.claimed { color: #f6d447; }
 
 /* The engine stylesheet disables selection globally; the dashboard must remain selectable. */
@@ -1346,7 +1378,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu 
 
 /* Geometry pass: keep hero, train, roadmap, portfolio and chart on one 63/37 grid. */
-#menu .dashboard-intro { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(360px, 1fr); gap: 22px; align-items: end; padding: 16px 0 12px; }
+#menu .dashboard-intro { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(360px, 1fr); gap: 22px; align-items: end; padding: 16px 0 12px; position: relative; z-index: 4; }
 #menu .dashboard-intro > div:first-child { min-width: 0; }
 #menu .dashboard-grid { grid-template-columns: minmax(0, 1.65fr) minmax(360px, 1fr); gap: 22px; align-items: start; }
 #menu .dashboard-intro h1 { font-size: clamp(28px, 2.8vw, 40px); line-height: .94; }
