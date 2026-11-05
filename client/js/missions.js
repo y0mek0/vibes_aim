@@ -57,8 +57,8 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
       tr.dataset.vmKind = def.kind;
       const pct = def.target > 0 ? Math.min(1, (live.progress || 0) / def.target) : 0;
       const barWidth = `${Math.round(pct * 100)}%`;
-      const statusLabel = live.claimed ? 'claimed' : (live.done ? 'complete' : 'in progress');
-      const statusClass = live.claimed ? 'claimed' : (live.done ? 'done' : '');
+      const statusLabel = live.claimed ? 'Done' : '—';
+      const statusClass = live.claimed ? 'claimed' : (live.done ? 'done' : 'open');
       const claimControl = live.done && !live.claimed
         ? `<button type="button" class="vm-claim-btn" data-vm-claim="${def.kind}">Claim</button>`
         : '';
@@ -95,11 +95,12 @@ export function mountMissions({ root, onTickerUnlocked } = {}) {
     if (roadMissions) {
       roadMissions.innerHTML = MISSIONS.map((def) => {
         const live = missions.find((m) => m.kind === def.kind) || { progress: 0, done: false, claimed: false };
-        const status = live.claimed ? 'claimed' : (live.done ? 'ready' : 'in progress');
+        const status = live.claimed ? 'Done' : (live.done ? 'Claim' : '—');
+        const statusClass = live.claimed ? 'claimed' : (live.done ? 'ready' : 'open');
         return `<div class="road-mission" data-road-kind="${def.kind}">
           <span class="road-mission-label">${def.label}</span>
           <span class="road-mission-progress">${formatProgress(def, live.progress || 0)}</span>
-          <span class="road-mission-status ${status.replace(' ', '-')}">${status}</span>
+          <span class="road-mission-status ${statusClass}">${status}</span>
         </div>`;
       }).join('');
     }
