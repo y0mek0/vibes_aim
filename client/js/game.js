@@ -39,7 +39,7 @@ const armorHp = () => PLAYER_HP;
 // Default loadout: sidearm in slot 2 (free USP), slot 1 empty until the
 // player buys something. Legacy settings (slot1: 'vandal' / slot2:
 // 'classic') get remapped through resolveGunId on first read.
-const DEFAULTS = { sens: 0.4, scope: 1.0, volume: 0.5, scale: '1', slot1: null, slot2: 'usp',
+const DEFAULTS = { sens: 0.4, scope: 1.0, volume: 0.5, scale: '1', slot1: null, slot2: 'usp', sessionDuration: 60,
   // Default to infinite mag so the player never has to think about
   // reloading mid-session. They can switch to manual in Display.
   reload: 'off', trackDiff: 'medium', dist: 'standard', orbMove: 'drift', orbSize: 'm', theme: 'protocol',
@@ -58,6 +58,16 @@ const MODE_DEFS = {
   tracking: { name: 'TRACKING', time: 45, desc: 'A bot strafes, jukes, pauses and crouches like a duelist. Stay glued — time-on-target + consistency. Difficulty in Settings.' },
   bots:     { name: 'RANGE BOTS', time: 60, desc: 'VALORANT Range, hard mode. Real per-gun damage: tap heads, manage your mag, R to reload.' },
 };
+const SESSION_DURATION_OPTIONS = [
+  { seconds: 60, label: '1m' },
+  { seconds: 180, label: '3m' },
+  { seconds: 300, label: '5m' },
+];
+const normalizeSessionDuration = (value) => {
+  const seconds = Number(value);
+  return SESSION_DURATION_OPTIONS.some((item) => item.seconds === seconds) ? seconds : 60;
+};
+const flickTargetsForDuration = (seconds) => Math.round(30 * normalizeSessionDuration(seconds) / 60);
 const MENU = 0, COUNT = 1, PLAYING = 2, PAUSED = 3, RESULTS = 4;
 
 export function boot() {
@@ -91,6 +101,8 @@ export function boot() {
   // ---------- player / weapon state ----------
   let state = MENU, mode = 'gridshot';
   let selectedMode = 'gridshot';
+  let sessionDuration = normalizeSessionDuration(settings.sessionDuration);
+  settings.sessionDuration = sessionDuration;
   let runStartTicker = 'AAPL';
   let runStartBalances = {};
   let runStartStable = 0;
@@ -411,7 +423,7 @@ export function boot() {
     T.remove(t);
     if (mode === 'gridshot') { r.score += 100; spawnGridOrb(); }
     else if (mode === 'flick') { r.ttks.push(ttkMs); r.score += Math.round(clamp(1200 - ttkMs, 100, 1200));
-      if (r.kills >= MODE_DEFS.flick.targets) { endGame(); return; } spawnFlickOrb(); }
+      if (r.kills >= flickTargetsForDuration(sessionDuration)) { endGame(); return; } spawnFlickOrb(); }
     else if (mode === 'bots') { r.score += 100 + (wasHead ? 50 : 0); pendingSpawn = 0.15; }
     else if (mode === 'tracking') {
       // Tracking is continuous, but a dead bot must be replaced immediately
@@ -486,7 +498,7 @@ export function boot() {
     FX.setSniperScope(false); $('scope').classList.remove('on'); document.body.classList.toggle('scoped', scoped);
     spoolT = 0; burstLeft = 0; burstCool = 0;
     vy = 0; airH = 0; grounded = true; camH = CAM_STAND;
-    timeLeft = MODE_DEFS[m].time ?? 120; elapsed = 0;
+    timeLeft = sessionDuration; elapsed = 0;
     $('st-mode').textContent = MODE_DEFS[m].name;
     $('st-gunname').textContent = `${gun.name} · ${gun.cls.toUpperCase()} · ${gun.mag === Infinity ? '∞' : gun.mag} MAG`;
     $('menu').classList.remove('open'); $('results').classList.remove('open'); $('pause').classList.remove('open'); toggleBuy(false);
@@ -760,6 +772,14 @@ export function boot() {
     selectedMode = nextMode;
     renderMenuStats();
   }
+  function selectSessionDuration(nextDuration) {
+    const seconds = normalizeSessionDuration(nextDuration);
+    if (sessionDuration === seconds) return;
+    sessionDuration = seconds;
+    settings.sessionDuration = seconds;
+    saveSettings();
+    renderMenuStats();
+  }
   function renderMenuStats() {
     const farmPicker = document.querySelector('[data-farm-picker]');
     if (farmPicker) {
@@ -786,6 +806,15 @@ export function boot() {
           renderMenuStats();
         }));
       }
+      const durationPicker = document.querySelector('[data-session-duration-picker]');
+      if (durationPicker) {
+        durationPicker.querySelectorAll('[data-session-duration]').forEach((button) => {
+          const activeDuration = Number(button.dataset.sessionDuration) === sessionDuration;
+          button.classList.toggle('active', activeDuration);
+          button.setAttribute('aria-pressed', String(activeDuration));
+          button.onclick = () => selectSessionDuration(button.dataset.sessionDuration);
+        });
+      }
     }
     const list = $('modelist'); list.innerHTML = '';
     let mi = 0;
@@ -794,10 +823,13 @@ export function boot() {
       const d = MODE_DEFS[id], hs = modeHistory(id);
       const best = hs.length ? Math.max(...hs.map(h => h.score)) : null;
       const selected = id === selectedMode;
+      const desc = id === 'flick'
+        ? `One target at a time, random position. ${flickTargetsForDuration(sessionDuration)} targets — true flick reaction time.`
+        : d.desc;
       const el = document.createElement('div'); el.className = 'mode mode-' + id + (selected ? ' mode-selected' : '');
       el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-pressed', String(selected));
       const statLabel = best !== null ? `best ${best}` : selected ? 'selected · press play' : 'click to select';
-      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${d.desc}</p></div><div class="mode-footer"><div class="stats">${statLabel}</div>${selected ? `<button type="button" class="mode-play" aria-label="Start ${d.name}">Play</button>` : ''}</div>`;
+      el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${desc}</p></div><div class="mode-footer"><div class="stats">${statLabel}</div>${selected ? `<button type="button" class="mode-play" aria-label="Start ${d.name}">Play</button>` : ''}</div>`;
       el.addEventListener('click', () => selectMode(id));
       const play = el.querySelector('.mode-play');
       if (play) play.addEventListener('click', e => { e.stopPropagation(); startGame(selectedMode); });
@@ -1223,8 +1255,8 @@ export function boot() {
         if (secClock >= 1) { trackSecs.push(Math.min(1, secOn / secClock)); secClock = 0; secOn = 0; }
       }
       if (pendingSpawn > 0) { pendingSpawn -= dt; if (pendingSpawn <= 0 && mode === 'bots') spawnRangeBot(); }
-      if (MODE_DEFS[mode].time !== null) { timeLeft -= dt; if (timeLeft <= 0) endGame(); }
-      else { timeLeft -= dt; if (timeLeft <= -120) endGame(); }
+      timeLeft -= dt;
+      if (timeLeft <= 0) endGame();
     }
     recoil *= Math.pow(0.002, dt);
     fovKick *= Math.pow(0.002, dt);

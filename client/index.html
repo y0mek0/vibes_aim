@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261023-8">
-<link rel="stylesheet" href="css/style.css?v=20261104-4">
+<link rel="stylesheet" href="css/style.css?v=20261106-1">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -218,6 +218,11 @@
             <div class="farm-picker" data-farm-picker aria-label="Farm ticker">
               <div class="farm-picker-summary"><span class="farm-picker-kicker">Farm ticker</span><strong data-farm-current>AAPL</strong><span class="farm-picker-hint">Hits pay into the selected ticker.</span></div>
               <div class="farm-picker-options" role="group" aria-label="Farm ticker options"></div>
+              <div class="session-duration-picker" data-session-duration-picker role="group" aria-label="Session duration">
+                <button type="button" class="session-duration-btn active" data-session-duration="60" aria-label="1 minute session" aria-pressed="true">1m</button>
+                <button type="button" class="session-duration-btn" data-session-duration="180" aria-label="3 minute session" aria-pressed="false">3m</button>
+                <button type="button" class="session-duration-btn" data-session-duration="300" aria-label="5 minute session" aria-pressed="false">5m</button>
+              </div>
             </div>
             <div id="modelist" class="mode-grid"></div>
           </section>
@@ -354,7 +359,7 @@
 <div id="privy-wallet-root" hidden></div>
 <script src="js/privy-wallet.bundle.js?v=20261022-4"></script>
 <script type="module" src="js/holding.js?v=20261022-4"></script>
-<script type="module" src="js/main.js?v=20261104-1"></script>
+<script type="module" src="js/main.js?v=20261106-1"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');
