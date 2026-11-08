@@ -15,6 +15,10 @@ export function buildWorld(scene, camera, themeId, farmAccent = null) {
     accent: farmAccent?.accent || base.accent,
     glow: farmAccent?.glow || base.glow,
   };
+  const rgba = (hex, alpha) => {
+    const c = new THREE.Color(hex);
+    return `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},${alpha})`;
+  };
   const group = new THREE.Group(); scene.add(group);
   const occluders = [];
   const has = k => TH.extras.includes(k);
@@ -63,7 +67,7 @@ export function buildWorld(scene, camera, themeId, farmAccent = null) {
     g.strokeRect(0, 0, w, h);
     g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
     if (TH.id === 'sakura') { // fallen petals baked in
-      g.fillStyle = 'rgba(246,212,71,0.22)';
+      g.fillStyle = rgba(TH.accent, 0.22);
       for (let i = 0; i < 120; i++) { g.beginPath(); g.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 2.5, 0, 7); g.fill(); }
     }
     if (TH.id === 'lunar') { // craters
@@ -104,7 +108,7 @@ export function buildWorld(scene, camera, themeId, farmAccent = null) {
     if (TH.id === 'abyss') { // portholes baked into the wall
       for (let x = 32; x < w; x += 128) {
         g.fillStyle = '#05090e'; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.fill();
-        g.fillStyle = 'rgba(246,212,71,0.35)'; g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
+        g.fillStyle = rgba(TH.glow, 0.35); g.beginPath(); g.arc(x, 150, 22, 0, 7); g.fill();
         g.strokeStyle = '#3a4a58'; g.lineWidth = 5; g.beginPath(); g.arc(x, 150, 30, 0, 7); g.stroke();
       }
     }
@@ -179,7 +183,7 @@ export function buildWorld(scene, camera, themeId, farmAccent = null) {
       const e = new THREE.Sprite(new THREE.SpriteMaterial({ map: et, transparent: true, fog: false, depthWrite: false }));
       e.position.set(28, 52, -120); e.scale.set(20, 20, 1); add(e);
     } else {
-      const sunTex = glowTex('rgba(246,212,71,0.95)', 'rgba(246,212,71,0.34)');
+      const sunTex = glowTex(rgba(TH.glow, 0.95), rgba(TH.glow, 0.34));
       const big = TH.id === 'sunset';
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
       sp.position.set(big ? -30 : -46, big ? 16 : 34, -110); sp.scale.set(big ? 46 : 34, big ? 46 : 34, 1); add(sp);
