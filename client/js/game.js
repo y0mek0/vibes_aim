@@ -17,11 +17,11 @@ import { createStalker } from './core/stalker.js?v=20261013-4';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
   spawnDist, orbScale, gridConeHalfWidth, FORWARD_CONE_HALF_ANGLE_DEG } from './core/gunplay.js?v=20261021-6';
-import { createStats, createKillfeed } from './core/stats.js?v=20261013-4';
+import { createStats, createKillfeed } from './core/stats.js?v=20261108-1';
 import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-4';
 import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-4';
 import { audio } from './fx/audio.js?v=20261013-4';
-import { buildWorld, disposeWorld } from './three/world.js?v=20261108-2';
+import { buildWorld, disposeWorld } from './three/world.js?v=20261108-3';
 import { THEMES } from './data/themes.js?v=20261013-4';
 import { createTargets } from './three/targets.js?v=20261108-1';
 import { createEffects } from './three/effects.js?v=20261108-1';
@@ -434,7 +434,8 @@ export function boot() {
     if (wasHead) r.headKills++;
     audio.kill();
     W.pulseKill(); // jumbotron kill flash
-    feed.push(gun.name, dmg, wasHead, dist || 0);
+    // Gridshot and Flick are target drills; the killfeed adds noise there.
+    if (mode !== 'gridshot' && mode !== 'flick') feed.push(gun.name, dmg, wasHead, dist || 0);
     if (t.type === 'orb') FX.flash(t.meshes[0]);
     const ttkMs = now - t.spawnT;
     T.remove(t);
@@ -505,7 +506,7 @@ export function boot() {
     runStartTicker = getActiveTicker();
     runStartBalances = { ...(window.store?.state?.balances || {}) };
     runStartStable = Number(window.store?.state?.player?.stable) || 0;
-    T.clear(); stats.reset();
+    T.clear(); stats.reset(); feed.clear();
     yaw = 0; pitch = 0; recoil = 0; bloom = 0;
     pos.set(0, 1.6, 2); vel.set(0, 0, 0);
     ammo = gun.mag; reloading = false; pendingSpawn = 0; trackBot = null; stalker = null;

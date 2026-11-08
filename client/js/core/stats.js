@@ -80,6 +80,9 @@ export function createKillfeed() {
       r.el.style.opacity = '1';
       r.t = performance.now();
     },
+    clear() {
+      for (const r of rows) { r.el.style.opacity = '0'; r.t = 0; }
+    },
     tick() {
       const now = performance.now();
       for (const r of rows) if (r.t && now - r.t > 4000) { r.el.style.opacity = '0'; r.t = 0; }

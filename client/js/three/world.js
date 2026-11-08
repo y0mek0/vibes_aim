@@ -93,7 +93,8 @@ export function buildWorld(scene, camera, themeId, farmAccent = null) {
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
     const em = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4),
       new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
-    em.rotation.x = -Math.PI / 2; em.position.set(0, 0.016, -6); add(em);
+    // Keep the spawn marker beneath the player's initial spawn, not out in the range.
+    em.rotation.x = -Math.PI / 2; em.position.set(0, 0.016, 2); add(em);
   }
 
   // ---------- walls (tall indoor / back wall + berms outdoor) ----------
