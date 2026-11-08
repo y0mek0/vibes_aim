@@ -81,6 +81,19 @@ function ensureChip() {
 let lastUnit = 0;
 let total = 0;
 let lastRewardTicker = activeTicker;
+let pendingHits = 0;
+function renderPendingState() {
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('[data-game-earned]').forEach((el) => {
+    el.classList.toggle('reward-pending', pendingHits > 0);
+    el.setAttribute('aria-busy', pendingHits > 0 ? 'true' : 'false');
+    el.dataset.pendingHits = String(pendingHits);
+  });
+}
+function markPending(delta) {
+  pendingHits = Math.max(0, pendingHits + delta);
+  renderPendingState();
+}
 function flashChip(unit, ticker = activeTicker) {
   lastUnit = unit;
   total += unit;
@@ -104,6 +117,10 @@ function onHit(ev) {
   // Do not send duplicates that we know are in flight.
   if (inFlight.has(hitId)) return;
   inFlight.add(hitId);
+  // The score is local and immediate; token minting is authoritative and
+  // async. Mark the HUD immediately so the network round-trip is visible
+  // instead of making a confirmed reward look like a delayed hit.
+  markPending(1);
   const reward = api.post('/aim/hit', {
     hitId,
     ticker: activeTicker,
@@ -114,10 +131,14 @@ function onHit(ev) {
     // (e.g. legacy pre-rename) fall back to 1.0x on the server.
     gunId: typeof d.gunId === 'string' ? d.gunId : null,
   }).then((r) => {
-    if (r && typeof r.unit === 'number') flashChip(r.unit, r.ticker);
+    if (r && typeof r.unit === 'number') {
+      flashChip(r.unit, r.ticker);
+      window.store?.applyAimRewardResult?.(r);
+    }
   }).catch(() => { /* engine visuals still play if a reward request fails. */ });
   pendingRewards.add(reward);
   void reward.finally(() => {
+    markPending(-1);
     inFlight.delete(hitId);
     pendingRewards.delete(reward);
   });

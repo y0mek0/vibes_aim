@@ -134,6 +134,16 @@ function createStore() {
     return r;
   }
 
+  // The aim bridge owns the live hit POST. Apply its authoritative response
+  // here so dashboard balances do not wait until the session ends to catch up.
+  function applyAimRewardResult(r) {
+    if (!r || typeof r.ticker !== 'string' || typeof r.balance !== 'number') return;
+    state.lastHit = r;
+    state.balances = { ...state.balances, [r.ticker]: r.balance };
+    saveGuestSnapshot(state);
+    emit();
+  }
+
   async function previewOrder({ ticker, side, leverage, notional }) {
     return api.post('/portfolio/preview', { ticker, side, leverage, notional });
   }
@@ -207,6 +217,7 @@ function createStore() {
     bootstrap,
     refresh,
     recordAimHit,
+    applyAimRewardResult,
     previewOrder,
     openOrder,
     closeOrder,

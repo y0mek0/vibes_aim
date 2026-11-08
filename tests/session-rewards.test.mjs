@@ -17,7 +17,7 @@ assert.match(game, /await waitForAimRewards\(\)/);
 assert.match(game, /const runTicker = runStartTicker \|\| getActiveTicker\(\);/);
 assert.match(game, /const beforeRunTicker = runStartBalances\[runTicker\] \?\? 0;/);
 assert.match(bridge, /export async function waitForAimRewards\(\)/);
-assert.match(index, /js\/aim-bridge\.js\?v=20261023-5/);
+assert.match(index, /js\/aim-bridge\.js\?v=20261108-1/);
 
 function request(port, method, path, body, headers = {}) {
   return new Promise((resolve, reject) => {

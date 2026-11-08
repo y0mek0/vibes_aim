@@ -25,7 +25,7 @@ import { buildWorld, disposeWorld } from './three/world.js?v=20261108-3';
 import { THEMES } from './data/themes.js?v=20261013-4';
 import { createTargets } from './three/targets.js?v=20261108-1';
 import { createEffects } from './three/effects.js?v=20261108-1';
-import { getActiveTicker, setActiveTicker, waitForAimRewards } from './aim-bridge.js?v=20261023-5';
+import { getActiveTicker, setActiveTicker, waitForAimRewards } from './aim-bridge.js?v=20261108-1';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

@@ -1363,6 +1363,10 @@ body.playing .app-footer { display: none; }
 button, input, select, textarea, option { -webkit-user-select: text; user-select: text; }
 canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: none; }
 
+/* The score is local and instant; this subtle state shows that token minting
+   is being confirmed by the server rather than making the reward look stuck. */
+.tb-left .tb-score.reward-pending { color: var(--teal); }
+
 @media (max-width: 900px) {
   #menu .stats-layout { grid-template-columns: 1fr; }
 }

@@ -14,22 +14,24 @@ export function aimRoutes(r, { store, config, holding }) {
     const { hitId, ticker, accuracy, streak, ts } = body || {};
     if (!hitId || typeof hitId !== 'string') throw new HttpError(400, 'missing_hit_id', 'hitId is required');
     if (!ticker || typeof ticker !== 'string') throw new HttpError(400, 'missing_ticker', 'ticker is required');
-    const boostTicker = getBoostTickerForGun(body?.gunId, GUNS_CATALOG);
-
     // AAPL, NVDA, TSLA and MSFT are active farm tickers from the start.
     const FREE_FARM_TICKERS = new Set(['AAPL', 'NVDA', 'TSLA', 'MSFT']);
     const PRE_IPO = new Set(['OPENAI', 'ANTHROPIC']);
-    const unlocks = await store.listUnlocks(playerId);
+    const boostTicker = getBoostTickerForGun(body?.gunId, GUNS_CATALOG);
     const effectiveTicker = boostTicker || ticker;
-    if (!FREE_FARM_TICKERS.has(effectiveTicker) && !PRE_IPO.has(effectiveTicker) && !unlocks.some((unlock) => unlock.ticker === effectiveTicker)) {
-      throw new HttpError(400, 'ticker_locked', `Ticker ${effectiveTicker} is not active for farming yet.`);
+    if (!FREE_FARM_TICKERS.has(effectiveTicker) && !PRE_IPO.has(effectiveTicker)) {
+      const unlocks = await store.listUnlocks(playerId);
+      if (!unlocks.some((unlock) => unlock.ticker === effectiveTicker)) {
+        throw new HttpError(400, 'ticker_locked', `Ticker ${effectiveTicker} is not active for farming yet.`);
+      }
     }
 
-    const holdingStatus = holding ? await holding.getVerifiedStatus(req.headers['x-wallet-proof']) : null;
-    const holdingMultiplier = holdingStatus?.multiplier || 1;
-
     // Rate limit (per session, sliding window)
-    const rate = await store.hitRateCheck({ sessionId, windowMs: 1000, maxInWindow: config.aim.hitRps });
+    const [holdingStatus, rate] = await Promise.all([
+      holding ? holding.getVerifiedStatus(req.headers['x-wallet-proof']) : null,
+      store.hitRateCheck({ sessionId, windowMs: 1000, maxInWindow: config.aim.hitRps }),
+    ]);
+    const holdingMultiplier = holdingStatus?.multiplier || 1;
     if (!rate.allowed) {
       throw new HttpError(429, 'rate_limited', `max ${config.aim.hitRps} hits/sec/session`);
     }
@@ -63,8 +65,10 @@ export function aimRoutes(r, { store, config, holding }) {
     }
 
     await store.getOrCreatePlayer(playerId);
-    if (Number.isFinite(acc)) await store.recordAccuracy(playerId, acc);
     const bal = await store.addTickerUnits(playerId, effectiveTicker, unit);
+    // Best-accuracy is ancillary session data; do not hold the reward receipt
+    // on a second persistence round-trip after the balance has been minted.
+    if (Number.isFinite(acc)) void store.recordAccuracy(playerId, acc).catch(() => {});
 
     sendJson(res, 200, {
       ok: true,
