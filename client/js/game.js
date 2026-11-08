@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { GUNS, gunById, GUN_CLASSES, resolveGunId } from './data/guns.js?v=20261021-1';
 import { getBoostTickerForGun } from './data/nvda-boost.js?v=20261104-1';
-import { FARM_TICKERS } from './data/farm-tickers.js?v=20261104-1';
+import { FARM_TICKERS, farmTickerColor } from './data/farm-tickers.js?v=20261108-1';
 import { slotForClass, cycleSlot } from './core/gunplay.js?v=20261021-6';
 import { BUILD } from './build.js?v=20261013-4';
 import { STAT_TICK_MS, SENS_YAW, HFOV, scopedDPC, ZERO_MATCH } from './data/mechanics.js?v=20261013-4';
@@ -21,10 +21,10 @@ import { createStats, createKillfeed } from './core/stats.js?v=20261013-4';
 import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-4';
 import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-4';
 import { audio } from './fx/audio.js?v=20261013-4';
-import { buildWorld, disposeWorld } from './three/world.js?v=20261013-4';
+import { buildWorld, disposeWorld } from './three/world.js?v=20261108-1';
 import { THEMES } from './data/themes.js?v=20261013-4';
-import { createTargets } from './three/targets.js?v=20261013-4';
-import { createEffects } from './three/effects.js?v=20261013-4';
+import { createTargets } from './three/targets.js?v=20261108-1';
+import { createEffects } from './three/effects.js?v=20261108-1';
 import { getActiveTicker, setActiveTicker, waitForAimRewards } from './aim-bridge.js?v=20261023-5';
 
 const $ = id => document.getElementById(id);
@@ -79,11 +79,28 @@ export function boot() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(71, 1, 0.05, 200);
-  let W = buildWorld(scene, camera, settings.theme); // live handles: jumbotron, kill flash, occluders
+  const initialFarmColor = farmTickerColor(getActiveTicker());
+  let W = buildWorld(scene, camera, settings.theme, { accent: initialFarmColor, glow: initialFarmColor }); // live handles: jumbotron, kill flash, occluders
   const T = createTargets(scene);
+  T.setOrbColor(initialFarmColor);
   const FX = createEffects(scene, camera, T.orbFlash, T.orbMat);
+  FX.setAccentColor(initialFarmColor);
+  let appliedFarmTicker = null;
   const stats = createStats();
   const feed = createKillfeed();
+
+  function applyFarmTickerTheme(ticker) {
+    const active = FARM_TICKERS.some((item) => item.active && item.ticker === ticker)
+      ? ticker : FARM_TICKERS[0].ticker;
+    if (appliedFarmTicker === active) return;
+    const color = farmTickerColor(active);
+    T.setOrbColor(color);
+    FX.setAccentColor(color);
+    disposeWorld(scene, W);
+    W = buildWorld(scene, camera, settings.theme, { accent: color, glow: color });
+    appliedFarmTicker = active;
+    renderer.compile(scene, camera);
+  }
 
   const pixelRatio = () => settings.scale === 'dpr' ? Math.min(devicePixelRatio, 2) : parseFloat(settings.scale);
   let baseFov = 71, fovKick = 0;
@@ -371,7 +388,7 @@ export function boot() {
         continue;
       }
       const h = tHit, ud = h.object.userData;
-      FX.tracer(from, h.point, gun.silenced ? 0xf6d447 : 0xf6d447);
+      FX.tracer(from, h.point);
       if (!ud || !ud.t) { FX.spark(h.point, 0x888888); continue; }
       _hit.copy(h.point);
       const t = ud.t, dist = camera.position.distanceTo(h.point);
@@ -379,7 +396,7 @@ export function boot() {
         // one-shot modes: any valid hit kills the orb — no weapon damage math
         hitAny = true; stats.raw.pelletHits++; stats.raw.hits++;
         stats.raw.damage += 100;
-        FX.spark(h.point, 0xf6d447);
+        FX.spark(h.point);
         FX.dmgNum(h.point, '+100', false);
         markHit(false);
         killTarget(t, now, false, dist, 100);
@@ -391,7 +408,7 @@ export function boot() {
       else dmg = damageAtRange(gun, dist, part);
       totalDmg += dmg; if (part === 'head') headDmg += dmg;
       hitAny = true; stats.raw.pelletHits++;
-      FX.spark(h.point, part === 'head' ? 0xf6d447 : t.type === 'orb' ? 0xf6d447 : 0xf6d447);
+      FX.spark(h.point);
       t.hp -= dmg;
       if (t.type === 'bot') T.setHpBar(t);
       if (t.hp <= 0 && t.alive) killInfo = { t, part, dist, dmg: totalDmg };
@@ -448,12 +465,12 @@ export function boot() {
         clamp(pos.z + fz * d + rz * lx, -63, 11));
       let ok = p.distanceTo(pos) > 2;
       if (ok) for (const t of T.targets) if (t.group.position.distanceTo(p) < 1.5) { ok = false; break; }
-      if (ok) { const t = T.spawnOrb(p, armorHp(), orbScale(settings.orbSize)); FX.spark(p, 0xf6d447); return t; }
+      if (ok) { const t = T.spawnOrb(p, armorHp(), orbScale(settings.orbSize)); FX.spark(p); return t; }
     }
     const d = bandDist();
     const fp = new THREE.Vector3(clamp(pos.x - Math.sin(yaw) * d, -32, 32), 2,
       clamp(pos.z - Math.cos(yaw) * d, -63, 11));
-    FX.spark(fp, 0xf6d447);
+    FX.spark(fp);
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
@@ -465,7 +482,7 @@ export function boot() {
       clamp(pos.x + fx * dd + rx * lx, -32, 32),
       clamp(pos.y + Math.sin(el) * d, 0.6, 4.5),
       clamp(pos.z + fz * dd + rz * lx, -63, 11));
-    FX.spark(p, 0xf6d447);
+    FX.spark(p);
     return T.spawnOrb(p, armorHp(), orbScale(settings.orbSize));
   }
   function spawnRangeBot() {
@@ -787,6 +804,7 @@ export function boot() {
       const stored = getActiveTicker();
       const active = available.includes(stored) ? stored : available[0];
       if (active !== stored) setActiveTicker(active);
+      applyFarmTickerTheme(active);
       const current = farmPicker.querySelector('[data-farm-current]');
       const options = farmPicker.querySelector('.farm-picker-options');
       if (current) current.textContent = active;
@@ -1244,7 +1262,7 @@ export function boot() {
             hitFrame = true;
             stats.raw.onT += dt; stats.raw.hits++; stats.raw.damage += 1;
             trackBot.head.scale.setScalar(1.3);
-            if (Math.random() < dt * 8) FX.spark(tHit.point, 0xf6d447);
+            if (Math.random() < dt * 8) FX.spark(tHit.point);
           } else {
             trackBot.head.scale.setScalar(1);
             if (oHit && Math.random() < dt * 8) FX.spark(oHit.point, 0x7b8087);
@@ -1291,7 +1309,9 @@ export function boot() {
   function switchTheme(id) { // menu-only rebuild: new skin, same gameplay contract
     settings.theme = id; saveSettings();
     disposeWorld(scene, W);
-    W = buildWorld(scene, camera, id);
+    const color = farmTickerColor(appliedFarmTicker || getActiveTicker());
+    W = buildWorld(scene, camera, id, { accent: color, glow: color });
+    renderer.compile(scene, camera);
     warmupAll();
   }
   warmupAll(); // boot-time compile, behind the menu

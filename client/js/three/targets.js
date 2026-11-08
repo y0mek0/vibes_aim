@@ -8,9 +8,15 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 export function createTargets(scene) {
   const orbGeo = new THREE.SphereGeometry(0.26, 18, 12);
-  // Project palette: stable yellow targets on a dark field; no animated emissive pulse.
+  // Default to the site's yellow; the active farm ticker can retint this material.
   const orbMat = new THREE.MeshLambertMaterial({ color: 0xf6d447, emissive: 0x6f5b12, emissiveIntensity: 0.35 });
   const orbFlash = new THREE.MeshBasicMaterial({ color: 0xf4f1ea });
+  function setOrbColor(color) {
+    const c = new THREE.Color(color);
+    orbMat.color.copy(c);
+    orbMat.emissive.copy(c).multiplyScalar(0.42);
+    orbFlash.color.copy(c);
+  }
   const bodyMat = new THREE.MeshLambertMaterial({ color: 0x26313a, emissive: 0x090d10, emissiveIntensity: 0.2 });
   const headMat = new THREE.MeshLambertMaterial({ color: 0xf4f1ea, emissive: 0x27303a, emissiveIntensity: 0.2 });
   const visorMat = new THREE.MeshBasicMaterial({ color: 0x07070c });
@@ -120,5 +126,5 @@ export function createTargets(scene) {
       }
     }
   }
-  return { targets, meshes: () => meshes, spawnOrb, spawnBot, remove, clear, idle, setHpBar, setOrbScaleAll, orbFlash, orbMat };
+  return { targets, meshes: () => meshes, spawnOrb, spawnBot, remove, clear, idle, setHpBar, setOrbScaleAll, setOrbColor, orbFlash, orbMat };
 }

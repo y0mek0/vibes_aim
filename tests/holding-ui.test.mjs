@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { FARM_TICKERS, farmTickerColor } from '../client/js/data/farm-tickers.js';
 import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('../client/index.html', import.meta.url), 'utf8');
@@ -42,7 +43,13 @@ assert.match(farm, /AAPL.*active: true/);
 assert.match(farm, /NVDA.*active: true/);
 assert.match(farm, /MSFT.*active: true/);
 assert.match(farm, /TSLA.*active: true/);
-assert.equal((farm.match(/active: true/g) || []).length, 4);
+assert.equal(farmTickerColor('AAPL'), '#f6d447');
+assert.equal(farmTickerColor('NVDA'), '#76b900');
+assert.equal(farmTickerColor('MSFT'), '#00a4ef');
+assert.equal(farmTickerColor('TSLA'), '#e82127');
+assert.equal(farmTickerColor('UNKNOWN'), '#f6d447');
+assert.equal(new Set(FARM_TICKERS.map((item) => item.color)).size, FARM_TICKERS.length);
+
 assert.equal((farm.match(/ticker: '/g) || []).length, 6);
 assert.match(aim, /FREE_FARM_TICKERS = new Set\(\['AAPL', 'NVDA', 'TSLA', 'MSFT'\]\)/);
 assert.match(portfolio, /FREE_TRADE_TICKERS = new Set\(\['AAPL', 'NVDA', 'TSLA', 'MSFT'\]\)/);

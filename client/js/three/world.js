@@ -7,8 +7,14 @@
 import * as THREE from 'three';
 import { themeById } from '../data/themes.js';
 
-export function buildWorld(scene, camera, themeId) {
-  const TH = themeById(themeId);
+export function buildWorld(scene, camera, themeId, farmAccent = null) {
+  const base = themeById(themeId);
+  // Keep the selected scenery's geometry and base lighting intact. Only the
+  // existing accent/glow surfaces follow the active farm ticker.
+  const TH = { ...base,
+    accent: farmAccent?.accent || base.accent,
+    glow: farmAccent?.glow || base.glow,
+  };
   const group = new THREE.Group(); scene.add(group);
   const occluders = [];
   const has = k => TH.extras.includes(k);

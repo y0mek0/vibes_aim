@@ -13,7 +13,8 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
     m.visible = false; scene.add(m); sparks.push({ m, t: 1, life: 0.16, vx: 0, vy: 0, vz: 0 });
   }
   let sparkIdx = 0;
-  const spark = (point, color) => {
+  let accentHex = 0xf6d447;
+  const spark = (point, color = accentHex) => {
     const s = sparks[sparkIdx++ % sparks.length];
     s.m.visible = true; s.m.position.copy(point); s.m.material.color.setHex(color);
     s.m.material.opacity = 0.95; s.m.scale.setScalar(1); s.t = 0;
@@ -27,7 +28,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
     m.visible = false; scene.add(m); tracers.push({ m, t: 1 });
   }
   let tracerIdx = 0;
-  const tracer = (from, to, color = 0xf6d447) => {
+  const tracer = (from, to, color = accentHex) => {
     const tr = tracers[tracerIdx++ % tracers.length];
     TV.addVectors(from, to).multiplyScalar(0.5);
     tr.m.position.copy(TV); tr.m.lookAt(to);
@@ -94,6 +95,14 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
   const setGunClass = cls => { for (const k of Object.keys(models)) models[k].visible = false; modelFor(cls).visible = true; };
   setGunClass('Rifle');
   const setSniperScope = on => { gun.visible = !on; }; // hide viewmodel when scoped like real ADS
+  const setAccentColor = color => {
+    accentHex = typeof color === 'number' ? color : new THREE.Color(color).getHex();
+    const c = new THREE.Color(accentHex);
+    for (const s of sparks) s.m.material.color.copy(c);
+    for (const tr of tracers) tr.m.material.color.copy(c);
+    _dotMat.color.copy(c);
+    muzzle.material.color.copy(c);
+  };
 
   const muzzle = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xf6d447, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
   muzzle.position.set(0.22, -0.18, -1.28); muzzle.scale.set(0.22, 0.22, 1);
@@ -155,7 +164,7 @@ export function createEffects(scene, camera, orbFlash, orbMat) {
     for (const [m, v, y] of moved) { m.visible = v; m.position.y = y; }
     scene.remove(s1); scene.remove(s2);
   }
-  return { spark, tracer, decal, flash, dmgNum, update, gun, popMuzzle, setGunClass, setSniperScope, warmup,
+  return { spark, tracer, decal, flash, dmgNum, update, gun, popMuzzle, setGunClass, setSniperScope, setAccentColor, warmup,
     kick: () => { gun.position.z = 0.06; },
     recover: (dt, elapsed, speedFrac, recoil, lagYaw, lagPitch) => {
       gun.position.z += (0 - gun.position.z) * Math.min(1, dt * 14);
