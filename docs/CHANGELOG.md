@@ -469,7 +469,28 @@
 - Checked all README screenshot and migration paths exist.
 - Fresh `npm test` → exit 0 / `ALL PASS`, including clean strict visual smoke.
 
-## Stage 11.8 — Ticker UI guard and active HUD cue (2026-10-05)
+## Stage 11.13 — Multi-domain rank calibration (2026-11-10)
+
+- Added the first versioned rank catalog in `client/js/data/ranks.js`: Mark → Apex, karate belt colors, four mode-specific score tables, USD balance thresholds, 100-result / top-three-average helpers, non-demoting aim candidate rank, demoting balance rank, and weighted decimal overall rating.
+- Draft thresholds are explicitly provisional until real qualified five-minute playtest data is collected; no existing gameplay or trading contract was changed.
+- Added `tests/ranks.test.mjs` and included it in `npm test`.
+- Updated `docs/PLAN.md` and `docs/TODO.md` with the implementation plan, draft table, and external design references.
+
+### Evidence
+
+- `node tests/ranks.test.mjs` → exit 0 / `rank calibration and weighting: ALL PASS`.
+- `node --check client/js/data/ranks.js` → exit 0.
+- Full `npm.cmd test` → exit 0 / `ALL PASS`.
+- Web research sources: Aimlabs Benchmarks and Ranked Seasons, KovaaK's leaderboard/performance-file documentation, Aiming.Pro ranks, and Voltaic benchmark notes. Raw scores were not copied.
+
+### Remaining work
+
+- Wire 5-minute qualification into session records, retain the latest 100 qualified results per mode, and persist attained aim ranks.
+- Add USD total-balance valuation and dynamic balance rank.
+- Add the Stats profile card, five rank rows, used top-three scores, rank legend, and explicit five-minute copy.
+- Calibrate the draft thresholds against actual runs before treating them as final.
+
+
 
 - Confirmed pre-IPO symbols are data-only: neither `OPENAI` nor `ANTHROPIC` is rendered as a chart button or terminal option. The browser smoke now fails if either gains a selectable control.
 - Changed the floating aim HUD from ambiguous `FARM AAPL` to explicit `ACTIVE AAPL`, with an accessible `Active farm ticker: <symbol>` label. The bridge test proves the label contract follows AAPL → NVDA → AAPL.

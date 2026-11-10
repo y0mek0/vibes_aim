@@ -2,6 +2,16 @@
 
 > Active backlog. One line per item, with stage number and acceptance criterion. Move to CHANGELOG only when actually done and verified.
 
+## Stage 11.13 — Multi-domain rank calibration
+
+- [x] Inventory score/session completion and balance-value semantics in the shipped code. → score/history are local in `client/js/game.js`; current server reward data does not yet persist rank sessions.
+- [x] Research Kovaak's, Aim Lab, and comparable rank systems with cited sources. → fixed thresholds, best-result aggregation, scenario-specific scales, and percentile systems reviewed; sources recorded in PLAN.
+- [x] Define and fixture-test eight score thresholds for Gridshot, Flick Shot, Tracking, and Range Bots. → draft v1 table in `client/js/data/ranks.js`; runtime calibration remains pending playtest data.
+- [x] Define and fixture-test eight USD total-balance thresholds. → draft v1 table starts at $200 and ends at $5,000.
+- [ ] Implement latest-100/top-3 qualification, non-demoting aim ranks, demoting balance rank, and weighted decimal overall rank.
+- [ ] Add Stats profile card, five rank rows, rank legend, used-score display, and explicit five-minute qualification copy.
+- [ ] Run focused tests, full `npm test`, and fresh desktop browser verification before commit.
+
 ## Stage 1 — Clone valotrainer and strip brand markers
 
 - [x] Pin the valotrainer commit we will base on, record SHA in CHANGELOG. → `ded498f5eb54867bd3d55648774984f6e3a90004`

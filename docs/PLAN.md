@@ -52,6 +52,53 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.13 — Multi-domain rank calibration (IN PROGRESS — 2026-11-10)
+
+**Goal:** design and implement a permanent eight-rank progression across four aim modes and one USD balance rating, using only complete five-minute sessions for aim ranking.
+
+**Rules already fixed:**
+
+- Gridshot, Flick Shot, Tracking, and Range Bots each have their own score thresholds.
+- Only complete 300-second sessions qualify for aim ranking; shorter sessions remain ordinary history only.
+- Keep the latest 100 qualifying scores per mode; average the three highest scores from that window.
+- Aim ranks never decrease. A player starts at White / Mark before three qualifying scores exist.
+- Trading rank is based on current total balance in USD, can decrease, and has no activity minimum.
+- Overall rating is decimal and weighted 50/50: the four aim ranks together have 50% weight; balance rank has 50% weight. UI shows the current whole rank plus progress toward the next rank.
+
+**Work sequence:**
+
+1. Inspect shipped score/session/balance semantics and collect real ranges.
+2. Research public Kovaak's, Aim Lab, and comparable rank models; record sources and limits.
+3. Produce a versioned threshold table for all four aim modes and balance.
+4. Add pure rank-calculation data/helpers with tests before UI wiring.
+5. Add Stats profile/rank breakdown, including the five-minute qualification notice and the three scores used.
+6. Run unit/integration tests and fresh desktop browser verification; do not claim thresholds are tuned until the score fixtures and runtime path are exercised.
+
+**Draft v1 calibration table:**
+
+| Domain | White / Mark | Yellow / Sight | Orange / Trace | Green / Tempo | Blue / Strike | Purple / Drive | Brown / Prime | Black / Apex |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Gridshot score | 0 | 5,000 | 8,000 | 11,000 | 14,000 | 17,000 | 20,000 | 24,000 |
+| Flick score | 0 | 40,000 | 65,000 | 90,000 | 115,000 | 135,000 | 150,000 | 165,000 |
+| Tracking score | 0 | 1,000 | 2,000 | 3,000 | 4,000 | 5,000 | 6,500 | 8,000 |
+| Range Bots score | 0 | 3,000 | 6,000 | 9,000 | 12,000 | 15,000 | 19,000 | 24,000 |
+| Total balance USD | 200 | 300 | 450 | 700 | 1,100 | 1,800 | 3,000 | 5,000 |
+
+These are a first fixed calibration, not claimed player-distribution facts. They are derived from the shipped score formulas and 300-second envelopes: Gridshot and Range Bots award kill points, Flick awards reaction-time points up to 180,000 at 150 targets, and Tracking uses time-on-target points. The table must be playtested and may receive a new calibration version; it must not silently rewrite earned ranks.
+
+**External design references consulted:**
+
+- https://aimlabs.com/articles/aimlabs/what-does-your-aimlabs-benchmarks-rank-actually-mean
+- https://aimlabs.com/articles/aimlabs/welcome-to-ranked-seasons-2-dusk-runners/
+- https://kovaaks.com/kovaaks/leaderboards
+- https://wiki.kovaaks.com/home/KovaaK%27s/PerformanceFiles
+- https://aiming.pro/ranks-and-badges
+- https://voltaic.medium.com/open-beta-benchmarks-season-2-aim-lab-season-4-kovaaks-ca1147b9e134
+
+These systems were used as design references, not as raw-number sources: Aimlabs uses best results across categories/subcategories, KovaaK's uses scenario-specific score tables, and Aiming.Pro uses percentile bands. Their raw scores are not copied because their scenarios and scoring scales differ.
+
+**Out of scope for this stage:** leaderboard percentiles, seasonal resets, sub-ranks, profit-based scoring, bonus-based scoring, and changes to trading/aim contracts.
+
 ### Stage 11.12 — Finnhub upstream WebSocket adapter (DONE — mock-verified, 2026-10-05)
 
 **Verified evidence:** official Finnhub documentation confirms `wss://ws.finnhub.io?token=…`. `node tests/finnhub.test.mjs` passes 12 assertions, including URL encoding, subscribe-frame emission, trade filtering, malformed payload handling, unsubscribe cleanup, no-WebSocket REST fallback, and no-token rejection. `node tests/stream.test.mjs` and `node tests/stream-wire.test.mjs` pass. Live upstream validation is explicitly unverified because `FINNHUB_TOKEN` is absent after the local reboot.

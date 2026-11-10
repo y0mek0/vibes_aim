@@ -102,3 +102,4 @@
 ## Stage 11.8 — Background terminal result was not test evidence (2026-10-05)
 
 - A background `node tests/visual.test.mjs` process exited with only `bash: no job control in this shell` and `stdin is not a tty`; it produced no test assertion output. It was treated as a launcher/PTY failure, not a passing or failing UI result. A single foreground visual run then completed with `ALL PASS`; use that output as evidence and do not rerun blindly after infrastructure-only background failures.
+- A direct page extractor could not fetch the cited public rank pages because the configured web backend was search-only. The search backend still returned the relevant official snippets and URLs, which are recorded in `docs/PLAN.md`; do not describe this as a full page archive or as evidence of raw threshold numbers.
