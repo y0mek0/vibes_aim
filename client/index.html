@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261023-8">
-<link rel="stylesheet" href="css/style.css?v=20261110-2">
+<link rel="stylesheet" href="css/style.css?v=20261110-3">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -175,6 +175,7 @@
         <button type="button" class="nav-link" id="vibes-open-missions" data-dashboard-section="missions">Missions</button>
         <button type="button" class="nav-link" id="vibes-open-holding" data-dashboard-section="holding">A2S Holding</button>
         <button type="button" class="nav-link" data-dashboard-section="stats">Stats</button>
+        <button type="button" class="nav-link nav-updates" id="updates-open" aria-haspopup="dialog" aria-expanded="false" aria-controls="updates-panel"><span>Updates</span></button>
       </nav>
       <div class="nav-account">
         <span id="buildtag" hidden></span>
@@ -296,8 +297,18 @@
       </div>
     </section>
   </div>
-</div>
-<div id="buy" class="overlay"><div class="card buyphase">
+  <div id="updates-panel" class="updates-backdrop" hidden>
+    <section class="updates-modal" role="dialog" aria-modal="true" aria-labelledby="updates-title">
+      <header class="updates-head"><div><span class="section-kicker">Latest changes</span><h2 id="updates-title">Updates</h2></div><button type="button" class="modal-close" id="updates-close" aria-label="Close updates">×</button></header>
+      <div class="updates-list">
+        <article class="updates-item"><span class="updates-item-kicker">TRAINING PROFILE</span><h3>24-point rank progression</h3><p>Eight belt colors now split into Mark I through Apex III across four aim modes, Balance and Overall.</p></article>
+        <article class="updates-item"><span class="updates-item-kicker">RANK RULES</span><h3>Complete sessions count</h3><p>Only completed 5-minute sessions qualify. Aim uses the top three scores from the latest 100 qualifying runs.</p></article>
+        <article class="updates-item"><span class="updates-item-kicker">PAPER MARKET</span><h3>Balance stays live</h3><p>Trading Balance and Overall recalculate from the current portfolio value as holdings change.</p></article>
+      </div>
+    </section>
+  </div>
+  </div>
+  <div id="buy" class="overlay"><div class="card buyphase">
   <div class="buy-head"><div><h2>Choose your weapon</h2></div><div class="credits">∞ CREDITS</div></div>
   <div class="small">click to equip instantly — run continues · <b>B</b> or <b>ESC</b> to close</div>
   <div id="buy-grid"></div>
@@ -456,6 +467,19 @@
     setCustomizeOpen(true);
     tab.click();
   };
+  const updatesPanel = document.getElementById('updates-panel');
+  const updatesOpen = document.getElementById('updates-open');
+  const updatesClose = document.getElementById('updates-close');
+  const setUpdatesOpen = (open) => {
+    if (!updatesPanel) return;
+    updatesPanel.hidden = !open;
+    updatesOpen?.setAttribute('aria-expanded', String(open));
+    if (open) updatesClose?.focus();
+  };
+  updatesOpen?.addEventListener('click', () => setUpdatesOpen(true));
+  updatesClose?.addEventListener('click', () => setUpdatesOpen(false));
+  updatesPanel?.addEventListener('click', (event) => { if (event.target === updatesPanel) setUpdatesOpen(false); });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && updatesPanel && !updatesPanel.hidden) setUpdatesOpen(false); });
 
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
