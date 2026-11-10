@@ -82,7 +82,9 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 | Flick score | 0 | 40,000 | 65,000 | 90,000 | 115,000 | 135,000 | 150,000 | 165,000 |
 | Tracking score | 0 | 1,000 | 2,000 | 3,000 | 4,000 | 5,000 | 6,500 | 8,000 |
 | Range Bots score | 0 | 3,000 | 6,000 | 9,000 | 12,000 | 15,000 | 19,000 | 24,000 |
-| Total balance USD | 200 | 300 | 450 | 700 | 1,100 | 1,800 | 3,000 | 5,000 |
+| Total balance USD | 200 | 1,000 | 5,000 | 20,000 | 75,000 | 250,000 | 1,000,000 | 5,000,000 |
+
+**Balance calibration v2 rationale:** the current reward path can produce roughly `$200/min` at the observed no-boost ceiling. The strongest existing combination is approximately `3.5x` gun earn × `10x` maximum verified holding multiplier, with the existing streak bonus treated conservatively as an additional ceiling. The resulting stress case is about `$10,500/min`; at that rate the last two balance steps still require roughly 95 minutes to Prime and 476 minutes to Apex from the $200 start. Without boosts, the same milestones require roughly 83 hours and 417 hours. This is intentionally a progression curve, not a promise of player income; actual rate depends on hit rate, accuracy, ticker price, and session play.
 
 These are a first fixed calibration, not claimed player-distribution facts. They are derived from the shipped score formulas and 300-second envelopes: Gridshot and Range Bots award kill points, Flick awards reaction-time points up to 180,000 at 150 targets, and Tracking uses time-on-target points. The table must be playtested and may receive a new calibration version; it must not silently rewrite earned ranks.
 

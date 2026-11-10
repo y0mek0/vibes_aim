@@ -483,6 +483,18 @@
 - Full `npm.cmd test` → exit 0 / `ALL PASS`.
 - Web research sources: Aimlabs Benchmarks and Ranked Seasons, KovaaK's leaderboard/performance-file documentation, Aiming.Pro ranks, and Voltaic benchmark notes. Raw scores were not copied.
 
+## Stage 11.13b — Balance progression recalibration (2026-11-10)
+
+- Replaced the balance v1 thresholds (`$200…$5,000`) with v2: `$200, $1,000, $5,000, $20,000, $75,000, $250,000, $1,000,000, $5,000,000`.
+- Basis: the current reward ceiling is roughly `$200/min` without gun/holding boosts. The stress case uses the existing maximum `3.5x` gun earn, `10x` verified holding multiplier, and the existing streak ceiling, producing a conservative `$10,500/min` ceiling.
+- At that stress case, Prime requires about 95 minutes and Apex about 476 minutes from the $200 start; without boosts they require about 83 and 417 hours. This keeps the last two ranks meaningfully long even with the current boosts.
+- Bumped `RANK_CALIBRATION_VERSION` to `2026-11-v2`. Aim thresholds and rank rules were not changed.
+
+### Evidence
+
+- `node tests/ranks.test.mjs` → exit 0 / `rank calibration and weighting: ALL PASS`.
+- The three rate scenarios and cumulative threshold times were calculated with a Node probe; the first shell-quoted attempt failed, then the corrected probe returned the values recorded above.
+
 ### Remaining work
 
 - Wire 5-minute qualification into session records, retain the latest 100 qualified results per mode, and persist attained aim ranks.

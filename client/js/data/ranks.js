@@ -2,7 +2,7 @@
 // Aim thresholds use the shipped raw score of each mode. Balance thresholds
 // use current total portfolio value in USD, not profit or reward bonuses.
 
-export const RANK_CALIBRATION_VERSION = '2026-11-v1';
+export const RANK_CALIBRATION_VERSION = '2026-11-v2';
 export const QUALIFYING_SESSION_SECONDS = 300;
 export const RANK_SCORE_WINDOW = 100;
 export const RANK_SCORE_SAMPLE = 3;
@@ -47,7 +47,7 @@ export const AIM_SCORE_THRESHOLDS = Object.freeze({
 // Starting balance is 200 USD. The current total balance is dynamic and can
 // move down; balance rank is therefore not an attained/high-water-mark rank.
 export const BALANCE_THRESHOLDS_USD = Object.freeze([
-  200, 300, 450, 700, 1_100, 1_800, 3_000, 5_000,
+  200, 1_000, 5_000, 20_000, 75_000, 250_000, 1_000_000, 5_000_000,
 ]);
 
 const RANK_BY_ID = new Map(KARATE_RANKS.map((rank) => [rank.id, rank]));

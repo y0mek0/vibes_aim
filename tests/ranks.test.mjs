@@ -50,7 +50,7 @@ assert.equal(aimRankLevel('gridshot', 24_000), 8);
 assert.equal(aimRankFromScores('gridshot', [5_000, 5_000, 5_000]), 2);
 assert.equal(aimRankFromScores('gridshot', [1, 2, 3], 5), 5);
 assert.equal(balanceRankLevel(200), 1);
-assert.equal(balanceRankLevel(5_000), 8);
+assert.equal(balanceRankLevel(5_000_000), 8);
 assert.equal(balanceRankLevel(199), 1);
 
 assert.equal(overallRating([1, 1, 1, 1], 1), 1);
