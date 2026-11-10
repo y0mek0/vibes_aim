@@ -246,6 +246,15 @@
       </section>
 
       <section class="dashboard-stats-panel" data-dashboard-section-target="stats">
+        <section class="rank-profile" data-rank-profile aria-labelledby="rank-profile-title">
+          <div class="rank-profile-top">
+            <div><span class="section-kicker">Training profile</span><h2 id="rank-profile-title">Overall rank</h2><p class="rank-profile-note">24 points · Balance carries 4× weight · aim uses the top 3 of the latest 100 qualifying scores.</p></div>
+            <div class="rank-overall-badge"><span class="rank-square rank-overall-square" data-rank-overall-square aria-hidden="true"></span><div><strong data-rank-overall-name>Mark I</strong><b data-rank-overall-rating>1.00 / 24</b></div></div>
+          </div>
+          <div class="rank-overall-progress"><div class="rank-progress-track"><i data-rank-overall-bar style="width:0%"></i></div><span data-rank-overall-next>Next: Mark II</span></div>
+          <div class="rank-domain-list" data-rank-rows></div>
+          <div class="rank-profile-foot"><span>Only completed 5-minute sessions enter aim rank.</span><div class="rank-legend" data-rank-legend aria-label="Rank legend"></div></div>
+        </section>
         <div class="stats-layout">
           <section class="stats-records-panel">
             <div class="panel-heading compact"><div><span class="section-kicker">Records</span><h2>Records by mode</h2></div><span class="panel-meta">Personal bests</span></div>
@@ -359,7 +368,7 @@
 <div id="privy-wallet-root" hidden></div>
 <script src="js/privy-wallet.bundle.js?v=20261022-4"></script>
 <script type="module" src="js/holding.js?v=20261022-4"></script>
-<script type="module" src="js/main.js?v=20261108-3"></script>
+<script type="module" src="js/main.js?v=20261110-1"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

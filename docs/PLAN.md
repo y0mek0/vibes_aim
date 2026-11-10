@@ -52,16 +52,17 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
-### Stage 11.13 — Multi-domain rank calibration (IN PROGRESS — 2026-11-10)
+### Stage 11.13 — Multi-domain rank calibration (INTEGRATED — draft calibration, 2026-11-10)
 
-**Goal:** design and implement a permanent eight-rank progression across four aim modes and one USD balance rating, using only complete five-minute sessions for aim ranking.
+**Goal:** design and implement a compact 24-point progression across four aim modes and one USD balance rating, using only complete five-minute sessions for aim ranking.
 
 **Rules already fixed:**
 
 - Gridshot, Flick Shot, Tracking, and Range Bots each have their own score thresholds.
 - Only complete 300-second sessions qualify for aim ranking; shorter sessions remain ordinary history only.
 - Keep the latest 100 qualifying scores per mode; average the three highest scores from that window.
-- Aim ranks never decrease. A player starts at White / Mark before three qualifying scores exist.
+- The eight karate colors are each split into three sequential Roman points: `Mark I–III` through `Apex I–III` (24 points total).
+- Aim ranks never decrease. A player starts at White / Mark I before three qualifying scores exist.
 - Trading rank is based on current total balance in USD, can decrease, and has no activity minimum.
 - Overall rating is decimal and weighted 50/50: the four aim ranks together have 50% weight; balance rank has 50% weight. UI shows the current whole rank plus progress toward the next rank.
 
@@ -70,9 +71,9 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 1. Inspect shipped score/session/balance semantics and collect real ranges.
 2. Research public Kovaak's, Aim Lab, and comparable rank models; record sources and limits.
 3. Produce a versioned threshold table for all four aim modes and balance.
-4. Add pure rank-calculation data/helpers with tests before UI wiring.
-5. Add Stats profile/rank breakdown, including the five-minute qualification notice and the three scores used.
-6. Run unit/integration tests and fresh desktop browser verification; do not claim thresholds are tuned until the score fixtures and runtime path are exercised.
+4. Add pure rank-calculation data/helpers with tests before UI wiring. **Done:** `client/js/data/ranks.js` now exposes 24 point stages and version `2026-11-v3`.
+5. Add Stats profile/rank breakdown, including the five-minute qualification notice and the three scores used. **Done:** `client/index.html`, `client/js/game.js`, and `client/css/style.css` contain the live profile.
+6. Run unit/integration tests and fresh desktop browser verification; do not claim thresholds are tuned until the score fixtures and runtime path are exercised. **Done for integration:** focused/full suites pass; browser checks covered 1920×1080, 1280×800, promotion/demotion fixtures, bars, legend, and zero console errors. Thresholds remain draft until real player distributions are collected.
 
 **Draft v1 calibration table:**
 
@@ -99,7 +100,7 @@ These are a first fixed calibration, not claimed player-distribution facts. They
 
 These systems were used as design references, not as raw-number sources: Aimlabs uses best results across categories/subcategories, KovaaK's uses scenario-specific score tables, and Aiming.Pro uses percentile bands. Their raw scores are not copied because their scenarios and scoring scales differ.
 
-**Out of scope for this stage:** leaderboard percentiles, seasonal resets, sub-ranks, profit-based scoring, bonus-based scoring, and changes to trading/aim contracts.
+**Out of scope for this stage:** leaderboard percentiles, seasonal resets, profit-based scoring, bonus-based scoring, and changes to trading/aim contracts.
 
 ### Stage 11.12 — Finnhub upstream WebSocket adapter (DONE — mock-verified, 2026-10-05)
 

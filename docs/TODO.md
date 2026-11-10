@@ -6,11 +6,12 @@
 
 - [x] Inventory score/session completion and balance-value semantics in the shipped code. → score/history are local in `client/js/game.js`; current server reward data does not yet persist rank sessions.
 - [x] Research Kovaak's, Aim Lab, and comparable rank systems with cited sources. → fixed thresholds, best-result aggregation, scenario-specific scales, and percentile systems reviewed; sources recorded in PLAN.
-- [x] Define and fixture-test eight score thresholds for Gridshot, Flick Shot, Tracking, and Range Bots. → draft v1 table in `client/js/data/ranks.js`; runtime calibration remains pending playtest data.
-- [x] Define and fixture-test eight USD total-balance thresholds. → calibration v2 is based on the observed ~$200/min no-boost ceiling and stress-tested against 3.5x gun × 10x holding × streak ceiling; Prime/Apex are now $1,000,000/$5,000,000.
-- [ ] Implement latest-100/top-3 qualification, non-demoting aim ranks, demoting balance rank, and weighted decimal overall rank.
-- [ ] Add Stats profile card, five rank rows, rank legend, used-score display, and explicit five-minute qualification copy.
-- [ ] Run focused tests, full `npm test`, and fresh desktop browser verification before commit.
+- [x] Define and fixture-test 24 score thresholds for Gridshot, Flick Shot, Tracking, and Range Bots. → each mode has 24 monotonic points in `client/js/data/ranks.js`; runtime calibration remains pending playtest data.
+- [x] Define and fixture-test 24 USD total-balance thresholds. → balance v2 anchors are split into 24 points, ending at $20,000,000 for Apex III.
+- [x] Implement 24-point latest-100/top-3 qualification, non-demoting aim ranks, demoting balance rank, and weighted decimal overall rank. → `client/js/data/ranks.js` v3 plus local `vlt_rank_progress_v1` persistence in `client/js/game.js`.
+- [x] Add Stats profile card, five rank rows, rank legend, used-score display, and explicit five-minute qualification copy. → live DOM/CSS profile in `client/index.html`, `client/js/game.js`, and `client/css/style.css`.
+- [x] Run focused tests, full `npm test`, and fresh desktop browser verification before commit. → runtime wiring/rank tests and full suite pass; browser fixtures pass at 1920×1080 and 1280×800 with no console errors.
+- [ ] Collect real player score distributions and issue a later calibration version if Apex or intermediate aim thresholds need adjustment.
 
 ## Stage 1 — Clone valotrainer and strip brand markers
 

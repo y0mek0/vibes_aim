@@ -26,11 +26,16 @@ import { THEMES } from './data/themes.js?v=20261013-4';
 import { createTargets } from './three/targets.js?v=20261108-1';
 import { createEffects } from './three/effects.js?v=20261108-1';
 import { getActiveTicker, setActiveTicker, waitForAimRewards } from './aim-bridge.js?v=20261108-1';
+import {
+  AIM_RANK_MODES, AIM_SCORE_THRESHOLDS, BALANCE_THRESHOLDS_USD, QUALIFYING_SESSION_SECONDS,
+  RANK_STAGES, TOTAL_RANK_POINTS, aimRankFromScores, balanceRankLevel, overallDisplay, overallRating,
+  qualifyingAimSession, rankByPoint, topScores, topScoresAverage,
+} from './data/ranks.js?v=20261110-1';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const DEG = Math.PI / 180;
-const STORE_S = 'vlt_settings_v1', STORE_H = 'vlt_history_v1';
+const STORE_S = 'vlt_settings_v1', STORE_H = 'vlt_history_v1', STORE_R = 'vlt_rank_progress_v1';
 
 // Flat 100 HP for player and bots. No shields, no armor tiers. Kept as a
 // function so legacy armorHp() calls still resolve without an import.
@@ -51,6 +56,14 @@ let chExtra = { segments: { A: null, S: null }, unknown: [] };
 const saveSettings = () => localStorage.setItem(STORE_S, JSON.stringify(settings));
 let history = (() => { try { return JSON.parse(localStorage.getItem(STORE_H)) || []; } catch (e) { return []; } })();
 const saveHistory = () => localStorage.setItem(STORE_H, JSON.stringify(history));
+let rankProgress = (() => {
+  const fallback = { aim: { gridshot: 1, flick: 1, tracking: 1, bots: 1 } };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_R)) || {};
+    return { aim: { ...fallback.aim, ...(saved.aim || {}) } };
+  } catch (_) { return fallback; }
+})();
+const saveRankProgress = () => localStorage.setItem(STORE_R, JSON.stringify(rankProgress));
 
 const MODE_DEFS = {
   gridshot: { name: 'GRIDSHOT', time: 60, desc: 'Three bots live at all times. Kill fast, keep the streak — pure speed & precision.' },
@@ -547,6 +560,27 @@ export function boot() {
         hp: '100 HP' }) });
   }
   function modeHistory(m) { return history.filter(h => h.m === m); }
+  function qualifiedScores(m) {
+    return history.filter(h => h.m === m && h.qualified === true).slice(-100).map(h => h.score);
+  }
+  function updateAimRankProgress(m) {
+    if (!AIM_RANK_MODES.includes(m)) return;
+    rankProgress.aim[m] = aimRankFromScores(m, qualifiedScores(m), rankProgress.aim[m]);
+    saveRankProgress();
+  }
+  function portfolioValueUsd() {
+    const exposed = Number(window.__aim2stockPortfolioValue?.total);
+    if (Number.isFinite(exposed)) return Math.max(0, exposed);
+    const text = document.querySelector('[data-dashboard-portfolio-total]')?.textContent || '';
+    const parsed = Number(text.replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(parsed) ? Math.max(0, parsed) : 200;
+  }
+  function rankSnapshot() {
+    const balancePoint = balanceRankLevel(portfolioValueUsd());
+    const aimPoints = AIM_RANK_MODES.map((m) => Math.max(1, Math.min(TOTAL_RANK_POINTS, Number(rankProgress.aim[m]) || 1)));
+    const overall = overallDisplay(overallRating(aimPoints, balancePoint));
+    return { balancePoint, aimPoints, overall };
+  }
   function improvement(m) {
     const hs = modeHistory(m); if (hs.length < 4) return null;
     const base = hs.slice(0, 3).reduce((a, b) => a + b.score, 0) / 3;
@@ -562,7 +596,16 @@ export function boot() {
     if (mode === 'tracking') r.score = Math.round(r.onT * 100);
     const acc = r.shots > 0 ? Math.round(100 * r.hits / r.shots) : 0;
     const accbar = $('res-accbar'); if (accbar) accbar.style.width = acc + '%';
-    history.push({ m: mode, gun: gun.id, score: r.score, acc, d: Date.now() }); saveHistory();
+    const durationSeconds = Math.round(elapsed);
+    const completedFullSession = sessionDuration === QUALIFYING_SESSION_SECONDS
+      && durationSeconds >= QUALIFYING_SESSION_SECONDS;
+    const qualified = qualifyingAimSession({ mode, durationSeconds, completed: completedFullSession });
+    history.push({
+      m: mode, gun: gun.id, score: r.score, acc, d: Date.now(),
+      durationSeconds, qualified,
+    });
+    saveHistory();
+    if (qualified) updateAimRankProgress(mode);
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
     $('res-score').textContent = r.score;
     // Reward requests are independent from the render loop. Settle them before
@@ -798,7 +841,72 @@ export function boot() {
     saveSettings();
     renderMenuStats();
   }
+  function renderRankProfile() {
+    const root = document.querySelector('[data-rank-profile]');
+    if (!root) return;
+    const snapshot = rankSnapshot();
+    const overall = snapshot.overall;
+    const overallNext = overall.level < TOTAL_RANK_POINTS ? rankByPoint(overall.level + 1) : null;
+    const overallName = root.querySelector('[data-rank-overall-name]');
+    const overallRatingEl = root.querySelector('[data-rank-overall-rating]');
+    const overallBar = root.querySelector('[data-rank-overall-bar]');
+    const overallNextEl = root.querySelector('[data-rank-overall-next]');
+    const overallSquare = root.querySelector('[data-rank-overall-square]');
+    if (overallName) overallName.textContent = overall.rank.displayName;
+    if (overallRatingEl) overallRatingEl.textContent = `${overall.rating.toFixed(2)} / ${TOTAL_RANK_POINTS}`;
+    if (overallBar) overallBar.style.width = `${Math.round(overall.progress * 100)}%`;
+    if (overallNextEl) overallNextEl.textContent = overallNext ? `Next: ${overallNext.displayName}` : 'Maximum rank';
+    if (overallSquare) {
+      overallSquare.style.background = overall.rank.color;
+      overallSquare.style.color = overall.rank.textColor;
+    }
+
+    const labels = ['Gridshot', 'Flick Shot', 'Tracking', 'Range Bots'];
+    const rows = root.querySelector('[data-rank-rows]');
+    const formatScore = (value) => value === null ? '—' : Math.round(value).toLocaleString('en-US');
+    const formatUsd = (value) => `$${Math.round(value).toLocaleString('en-US')}`;
+    const progressFor = (value, thresholds, point, hasValue) => {
+      if (!hasValue) return 0;
+      if (point >= TOTAL_RANK_POINTS) return 1;
+      const start = thresholds[point - 1] || 0;
+      const end = thresholds[point] || start + 1;
+      return clamp((value - start) / Math.max(1, end - start), 0, 1);
+    };
+    const rowData = AIM_RANK_MODES.map((modeName, index) => {
+      const scores = qualifiedScores(modeName);
+      const average = topScoresAverage(scores);
+      const point = snapshot.aimPoints[index];
+      const rank = rankByPoint(point);
+      const thresholds = AIM_SCORE_THRESHOLDS[modeName];
+      const nextThreshold = point < TOTAL_RANK_POINTS ? formatScore(thresholds[point]) : 'MAX';
+      const used = topScores(scores).map(formatScore).join(' · ') || 'Need 3 qualifying runs';
+      return {
+        label: labels[index], rank, point, current: formatScore(average), next: nextThreshold,
+        used, progress: progressFor(average || 0, thresholds, point, average !== null),
+      };
+    });
+    const balanceValue = portfolioValueUsd();
+    const balancePoint = snapshot.balancePoint;
+    const balanceRank = rankByPoint(balancePoint);
+    const balanceNext = balancePoint < TOTAL_RANK_POINTS ? formatUsd(BALANCE_THRESHOLDS_USD[balancePoint]) : 'MAX';
+    rowData.push({
+      label: 'Trading Balance', rank: balanceRank, point: balancePoint,
+      current: formatUsd(balanceValue), next: balanceNext, used: 'Current portfolio value · USD',
+      progress: progressFor(balanceValue, BALANCE_THRESHOLDS_USD, balancePoint, true),
+    });
+    if (rows) {
+      rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
+        <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b><em>${item.point}/${TOTAL_RANK_POINTS}</em></div>
+        <div class="rank-domain-bar"><i style="width:${Math.round(item.progress * 100)}%"></i></div>
+        <div class="rank-domain-meta"><span>${item.current}</span><span>Next ${item.next}</span></div>
+        <div class="rank-domain-used">${item.used}</div>
+      </article>`).join('');
+    }
+    const legend = root.querySelector('[data-rank-legend]');
+    if (legend) legend.innerHTML = RANK_STAGES.filter((_, index) => index % 3 === 0).map((stage) => `<span><i style="background:${stage.color}"></i>${stage.name} <b>I · II · III</b></span>`).join('');
+  }
   function renderMenuStats() {
+    renderRankProfile();
     const farmPicker = document.querySelector('[data-farm-picker]');
     if (farmPicker) {
       const available = FARM_TICKERS.filter((item) => item.active).map((item) => item.ticker);
@@ -1121,7 +1229,7 @@ export function boot() {
       lab.textContent = 'Copied — paste into VALORANT Settings → Crosshair → Import Profile Code';
       lab.style.color = 'var(--teal)';
     });
-    $('resetprog').addEventListener('click', () => { if (confirm('Reset all training history?')) { history = []; saveHistory(); renderMenuStats(); } });
+    $('resetprog').addEventListener('click', () => { if (confirm('Reset all training history?')) { history = []; rankProgress = { aim: { gridshot: 1, flick: 1, tracking: 1, bots: 1 } }; saveHistory(); saveRankProgress(); renderMenuStats(); } });
     $('p-resume').addEventListener('click', () => {
       $('pause').classList.remove('open'); toggleBuy(false);
       document.body.classList.add('playing'); document.body.classList.remove('paused');

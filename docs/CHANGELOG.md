@@ -512,3 +512,25 @@
 - `node tests/client-bridge.test.mjs` → exit 0.
 - Strict `node tests/visual.test.mjs` → exit 0; confirms HUD copy/aria label, zero pre-IPO controls, and zero browser errors.
 - Fresh full `npm test` → exit 0 / `ALL PASS`.
+
+## Stage 11.13 — 24-point rank integration (2026-11-10)
+
+- Replaced the eight-point runtime catalog with 24 sequential stages: `Mark I–III` through `Apex I–III`.
+- Split each mode-specific aim table into 24 thresholds and retained the long-tail Balance curve through `$20,000,000` at Apex III.
+- Wired complete 300-second session qualification into local history. Incomplete sessions remain ordinary history and are excluded from rank calculation.
+- Added local non-demoting aim progress, current demoting Balance rank, exact decimal Overall `/24`, 1:1:1:1:4 weighting, and latest-100/top-3 score usage.
+- Added Stats profile UI with five domain rows, current values, next thresholds, progress bars, used top-three values, color legend, and `I · II · III` copy.
+- Portfolio valuation now refreshes the Balance row after terminal/store updates without changing ticker/farming colors.
+
+### Evidence
+
+- `node tests/rank-runtime.test.mjs` → exit 0 / `rank runtime wiring: ALL PASS`.
+- `node tests/ranks.test.mjs` → exit 0 / `rank calibration and weighting: ALL PASS`.
+- `npm.cmd test` → exit 0 / `ALL PASS`.
+- Browser at 1920×1080: five rows, 24-point labels, no horizontal overflow, no console errors.
+- Browser at 1280×800: responsive profile rendered with five rows and no horizontal overflow.
+- Browser fixtures: aim promotion state displayed `Strike II`; Balance moved `Mark III → Sight I → Mark I`; Overall changed accordingly.
+
+### Calibration status
+
+- v3 thresholds are integrated draft calibration. They still require real player score distributions and may be revised under a new version; no earned rank is silently rewritten.

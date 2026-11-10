@@ -1,12 +1,13 @@
-// Rank catalog and first calibration table for the five-domain profile.
-// Aim thresholds use the shipped raw score of each mode. Balance thresholds
-// use current total portfolio value in USD, not profit or reward bonuses.
+// Rank catalog and versioned calibration table for the five-domain profile.
+// Aim thresholds use each mode's raw score. Balance thresholds use current
+// total portfolio value in USD, not profit or reward bonuses.
 
-export const RANK_CALIBRATION_VERSION = '2026-11-v2';
+export const RANK_CALIBRATION_VERSION = '2026-11-v3';
 export const QUALIFYING_SESSION_SECONDS = 300;
 export const RANK_SCORE_WINDOW = 100;
 export const RANK_SCORE_SAMPLE = 3;
 export const AIM_RANK_MODES = Object.freeze(['gridshot', 'flick', 'tracking', 'bots']);
+export const RANK_DIVISIONS = Object.freeze(['I', 'II', 'III']);
 
 const RANK_COLORS = Object.freeze({
   white: '#f4f1ea',
@@ -34,20 +35,57 @@ export const KARATE_RANKS = Object.freeze([
   makeRank(8, 'apex', 'Apex', 'Black', RANK_COLORS.black, '#f4f1ea'),
 ]);
 
-// Draft v1 thresholds are intentionally mode-specific because the game uses
-// different raw score scales: Flick is reaction-time points, Tracking is
-// time-on-target points, and the other modes award kill points.
-export const AIM_SCORE_THRESHOLDS = Object.freeze({
+export const TOTAL_RANK_POINTS = KARATE_RANKS.length * RANK_DIVISIONS.length;
+
+export const RANK_STAGES = Object.freeze(KARATE_RANKS.flatMap((rank) => RANK_DIVISIONS.map((division, index) => Object.freeze({
+  ...rank,
+  point: (rank.level - 1) * RANK_DIVISIONS.length + index + 1,
+  division,
+  displayName: `${rank.name} ${division}`,
+}))));
+
+// These are the existing eight color anchors. Each interval is divided into
+// three deterministic score bands. Apex II/III are explicit ceilings for the
+// 300-second mode rather than invented copies of the previous Apex threshold.
+const AIM_MAJOR_THRESHOLDS = Object.freeze({
   gridshot: Object.freeze([0, 5_000, 8_000, 11_000, 14_000, 17_000, 20_000, 24_000]),
   flick: Object.freeze([0, 40_000, 65_000, 90_000, 115_000, 135_000, 150_000, 165_000]),
   tracking: Object.freeze([0, 1_000, 2_000, 3_000, 4_000, 5_000, 6_500, 8_000]),
   bots: Object.freeze([0, 3_000, 6_000, 9_000, 12_000, 15_000, 19_000, 24_000]),
 });
 
-// Starting balance is 200 USD. The current total balance is dynamic and can
-// move down; balance rank is therefore not an attained/high-water-mark rank.
+function splitThirds(start, end) {
+  const delta = end - start;
+  return [start, Math.round(start + delta / 3), Math.round(start + (delta * 2) / 3)];
+}
+
+function expandAimThresholds(anchors, apexTail) {
+  const values = [];
+  for (let index = 0; index < anchors.length - 1; index += 1) {
+    values.push(...splitThirds(anchors[index], anchors[index + 1]));
+  }
+  values.push(...apexTail);
+  return Object.freeze(values);
+}
+
+export const AIM_SCORE_THRESHOLDS = Object.freeze({
+  gridshot: expandAimThresholds(AIM_MAJOR_THRESHOLDS.gridshot, [24_000, 27_000, 30_000]),
+  flick: expandAimThresholds(AIM_MAJOR_THRESHOLDS.flick, [165_000, 172_500, 180_000]),
+  tracking: expandAimThresholds(AIM_MAJOR_THRESHOLDS.tracking, [8_000, 19_000, 30_000]),
+  bots: expandAimThresholds(AIM_MAJOR_THRESHOLDS.bots, [24_000, 30_000, 36_000]),
+});
+
+// Balance v2 color anchors split into geometric thirds. Apex has an explicit
+// long tail so Apex I, II and III are all real progression targets.
 export const BALANCE_THRESHOLDS_USD = Object.freeze([
-  200, 1_000, 5_000, 20_000, 75_000, 250_000, 1_000_000, 5_000_000,
+  200, 342, 585,
+  1_000, 1_710, 2_924,
+  5_000, 7_937, 12_599,
+  20_000, 31_072, 48_274,
+  75_000, 112_035, 167_358,
+  250_000, 396_850, 629_961,
+  1_000_000, 1_709_976, 2_924_018,
+  5_000_000, 10_000_000, 20_000_000,
 ]);
 
 const RANK_BY_ID = new Map(KARATE_RANKS.map((rank) => [rank.id, rank]));
@@ -62,6 +100,11 @@ export function rankByLevel(level) {
   return KARATE_RANKS[Math.max(0, Math.min(KARATE_RANKS.length - 1, n - 1))];
 }
 
+export function rankByPoint(point) {
+  const n = Math.trunc(numeric(point, 1));
+  return RANK_STAGES[Math.max(0, Math.min(TOTAL_RANK_POINTS - 1, n - 1))];
+}
+
 export function rankById(id) {
   return RANK_BY_ID.get(String(id || '').toLowerCase()) || KARATE_RANKS[0];
 }
@@ -69,7 +112,7 @@ export function rankById(id) {
 export function rankLevelForThreshold(value, thresholds) {
   const amount = Math.max(0, numeric(value));
   let level = 1;
-  for (let i = 0; i < thresholds.length; i++) {
+  for (let i = 0; i < thresholds.length; i += 1) {
     if (amount >= thresholds[i]) level = i + 1;
     else break;
   }
@@ -104,26 +147,28 @@ export function topScoresAverage(scores, windowSize = RANK_SCORE_WINDOW, sampleS
   return selected.reduce((sum, value) => sum + value, 0) / selected.length;
 }
 
-export function aimRankFromScores(mode, scores, attainedLevel = 1) {
+export function aimRankFromScores(mode, scores, attainedPoint = 1) {
   const average = topScoresAverage(scores);
   const candidate = average === null ? 1 : aimRankLevel(mode, average);
-  return Math.max(1, Math.min(8, Math.max(Math.trunc(attainedLevel) || 1, candidate)));
+  return Math.max(1, Math.min(TOTAL_RANK_POINTS, Math.max(Math.trunc(attainedPoint) || 1, candidate)));
 }
 
-export function overallRating(aimLevels, balanceLevel) {
-  const aim = Array.isArray(aimLevels) ? aimLevels.slice(0, 4).map((value) => Math.max(1, Math.min(8, numeric(value, 1)))) : [];
+export function overallRating(aimPoints, balancePoint) {
+  const aim = Array.isArray(aimPoints)
+    ? aimPoints.slice(0, 4).map((value) => Math.max(1, Math.min(TOTAL_RANK_POINTS, numeric(value, 1))))
+    : [];
   while (aim.length < 4) aim.push(1);
-  const balance = Math.max(1, Math.min(8, numeric(balanceLevel, 1)));
+  const balance = Math.max(1, Math.min(TOTAL_RANK_POINTS, numeric(balancePoint, 1)));
   return (aim.reduce((sum, value) => sum + value, 0) + balance * 4) / 8;
 }
 
 export function overallDisplay(rating) {
-  const value = Math.max(1, Math.min(8, numeric(rating, 1)));
-  const level = value >= 8 ? 8 : Math.floor(value);
+  const value = Math.max(1, Math.min(TOTAL_RANK_POINTS, numeric(rating, 1)));
+  const level = value >= TOTAL_RANK_POINTS ? TOTAL_RANK_POINTS : Math.floor(value);
   return {
     rating: value,
     level,
-    progress: level >= 8 ? 1 : value - level,
-    rank: rankByLevel(level),
+    progress: level >= TOTAL_RANK_POINTS ? 1 : value - level,
+    rank: rankByPoint(level),
   };
 }

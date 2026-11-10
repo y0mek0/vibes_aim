@@ -35,6 +35,8 @@ export function mountTerminal({ root } = {}) {
     setText(els.balance, fmtMoney(value.stable)); setText(els.portfolioVal, fmtMoney(value.holdingsValue)); setText(els.portfolioTotal, fmtMoney(value.total)); setText(els.openPnl, formatPnl(value.openPnl).text); toggle(els.openPnl, value.openPnl > 0, 'pos'); toggle(els.openPnl, value.openPnl < 0, 'neg');
     document.querySelectorAll('[data-dashboard-stable]').forEach((el) => { el.textContent = fmtMoney(value.stable); });
     document.querySelectorAll('[data-dashboard-portfolio-total]').forEach((el) => { el.textContent = fmtMoney(value.total); });
+    window.__aim2stockPortfolioValue = { total: Number(value.total), stable: Number(value.stable), holdings: Number(value.holdingsValue) };
+    if (typeof window.renderMenuStats === 'function') window.renderMenuStats();
   }
 
   function renderAssets() {
