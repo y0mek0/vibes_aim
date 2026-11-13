@@ -2,6 +2,14 @@
 
 > Active backlog. One line per item, with stage number and acceptance criterion. Move to CHANGELOG only when actually done and verified.
 
+## Stage 11.14 — Separate Updates archive (DONE — 2026-11-13)
+
+- [x] Replace the Updates modal with a separate, simple player-facing page.
+- [x] Keep all 169 source commits in the generated data, but show only player-facing changes grouped by date; display dates without times.
+- [x] Label dates as coming from Git history; do not present commit dates as publication/deployment dates.
+- [x] Hide the dashboard Updates button; retain the separate page for direct URL access.
+- [x] Verify full test suite, hidden dashboard nav item, direct route access, date disclosure, desktop 1920×1080, mobile 390×843, and zero browser console errors.
+
 ## Stage 11.13 — Multi-domain rank calibration
 
 - [x] Inventory score/session completion and balance-value semantics in the shipped code. → score/history are local in `client/js/game.js`; current server reward data does not yet persist rank sessions.

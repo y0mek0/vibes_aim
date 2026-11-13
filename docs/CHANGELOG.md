@@ -534,3 +534,17 @@
 ### Calibration status
 
 - v3 thresholds are integrated draft calibration. They still require real player score distributions and may be revised under a new version; no earned rank is silently rewritten.
+
+## Stage 11.14 — Separate Updates archive (2026-11-13)
+
+- Replaced the three-item Updates modal with a separate `client/updates.html` page. The dashboard Updates button is hidden; the page remains available through its direct route.
+- Simplified the page to a site-matched date list. Dates expand to show player-facing changes; technical/build/test commits are hidden from the page. The source archive still contains all 169 commits.
+- Display dates only and label them as coming from Git history, not as publication/deployment dates.
+- Added `scripts/build-update-history.mjs` to regenerate the static snapshot and Vercel rewrites for `/updates.html` and `/data/:path*`.
+- Added `tests/updates.test.mjs` to validate the archive, page links, and deployment routes; wired it into `npm test`.
+
+### Evidence
+
+- `npm.cmd test` → exit 0; all suites pass.
+- Browser: Updates is hidden in the dashboard navigation; the `/updates.html` route remains directly accessible. Page shows 48 player-facing updates across 17 dates. No horizontal overflow at 1920×1080 or 390×843; console errors → 0.
+- The source JSON contains 169 commits through `ee333a5`; the page does not display times or technical-only entries.

@@ -33,6 +33,8 @@
   ],
   "rewrites": [
     { "source": "/", "destination": "/client/index.html" },
+    { "source": "/updates.html", "destination": "/client/updates.html" },
+    { "source": "/data/:path*", "destination": "/client/data/:path*" },
     { "source": "/css/:path*", "destination": "/client/css/:path*" },
     { "source": "/js/:path*", "destination": "/client/js/:path*" },
     { "source": "/src/:path*", "destination": "/client/src/:path*" },

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="description" content="Player-facing AIM2STOCK updates, grouped by date.">
+  <title>Updates | AIM2STOCK</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/updates.css?v=20261113-3">
+  <script type="module" src="js/updates.js?v=20261113-3"></script>
+</head>
+<body>
+  <a class="skip-link" href="#updates-list">Skip to updates</a>
+  <div class="updates-page">
+    <header class="updates-nav">
+      <a class="brand-link" href="/" aria-label="AIM2STOCK dashboard">
+        <span class="brand-logo" aria-hidden="true"><span class="brand-logo-top">AIM</span><span class="brand-logo-mid">2</span><span class="brand-logo-bot">STOCK</span></span>
+      </a>
+      <span class="nav-title">Updates</span>
+      <a class="back-link" href="/">Back to dashboard</a>
+    </header>
+
+    <main>
+      <section class="page-intro" aria-labelledby="page-title">
+        <h1 id="page-title">Updates</h1>
+        <p>Changes to training, the market and your account.</p>
+      </section>
+      <section id="updates-list" class="updates-list" aria-label="Player-facing updates" aria-live="polite">
+        <p class="loading-state">Loading updates…</p>
+      </section>
+      <p class="source-note">Dates are taken from project Git history.</p>
+    </main>
+  </div>
+</body>
+</html>

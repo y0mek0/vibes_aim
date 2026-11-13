@@ -104,3 +104,10 @@
 - A background `node tests/visual.test.mjs` process exited with only `bash: no job control in this shell` and `stdin is not a tty`; it produced no test assertion output. It was treated as a launcher/PTY failure, not a passing or failing UI result. A single foreground visual run then completed with `ALL PASS`; use that output as evidence and do not rerun blindly after infrastructure-only background failures.
 - A direct page extractor could not fetch the cited public rank pages because the configured web backend was search-only. The search backend still returned the relevant official snippets and URLs, which are recorded in `docs/PLAN.md`; do not describe this as a full page archive or as evidence of raw threshold numbers.
 - The first balance-rate Node probe used a template literal inside a double-quoted Bash command; Bash expanded `${...}` before Node received it, producing a syntax error. The probe was rerun with safe single-quote wrapping and only the corrected output was used.
+
+## Stage 11.14 — Vercel rewrite JSON patch rejected (2026-11-13)
+
+- The first targeted insertion of `/updates.html` and `/data/:path*` rewrites omitted the comma after the existing CSS rewrite. JSON validation rejected the candidate (`Expecting ',' delimiter`); the file was not modified.
+- Reapplied the route insertion with the comma in place. `vercel.json` then passed syntax validation and `tests/updates.test.mjs` confirmed both rewrite destinations.
+- Lesson: when editing a JSON list, include the boundary comma in the exact replacement and rely on the parser plus a route-level assertion before proceeding.
+- Attempts to start local frontend/API servers on ports 4173/4174 exited because those addresses were unavailable (`WinError 10013` and `EADDRINUSE`). The existing services were already responding, so I verified their page/data HTTP responses and `/health` instead. Do not describe those services as newly started by this run.

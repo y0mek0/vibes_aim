@@ -52,6 +52,19 @@ Stages are small, each ends with evidence in `CHANGELOG.md` and (when relevant) 
 
 ## Active stage
 
+### Stage 11.14 — Separate Updates archive (DONE — 2026-11-13)
+
+**Goal:** replace the Updates modal with a dedicated, simple history page; preserve repository timestamps as dates only.
+
+**Delivered:**
+
+- Added `client/updates.html` with a restrained, site-matched date list; dates expand to show player-facing changes only.
+- Kept all 169 source commits in the generated JSON, while the page filters out technical/build/test noise and displays dates without times.
+- Label dates as Git history dates, not publication or deployment dates.
+- Hid the dashboard Updates button; the direct `/updates.html` route remains accessible. Vercel rewrites serve the page and data archive; a Git-history JSON generator creates the snapshot.
+
+**Verification:** full `npm.cmd test` passes; the dedicated Updates test validates the archive and deployment rewrites. The page renders 48 filtered updates grouped across 17 dates at 1920×1080 and mobile 390×843 without horizontal overflow. The dashboard Updates button is hidden while the `/updates.html` route remains available directly; browser console has zero errors.
+
 ### Stage 11.13 — Multi-domain rank calibration (INTEGRATED — draft calibration, 2026-11-10)
 
 **Goal:** design and implement a compact 24-point progression across four aim modes and one USD balance rating, using only complete five-minute sessions for aim ranking.

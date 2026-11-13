@@ -1,0 +1,1024 @@
+{
+  "source": "git-commit-history",
+  "timestampField": "committer-date",
+  "firstCommit": "2026-10-04T20:58:51+08:00",
+  "latestCommit": "2026-11-13T17:43:44+08:00",
+  "latestHash": "ee333a5",
+  "count": 169,
+  "commits": [
+    {
+      "hash": "579a32c",
+      "timestamp": "2026-10-04T20:58:51+08:00",
+      "subject": "stage 0+0b: 4-doc log skeleton at vibes_aim",
+      "category": "build"
+    },
+    {
+      "hash": "7981858",
+      "timestamp": "2026-10-04T21:05:09+08:00",
+      "subject": "stage 1: import valotrainer@ded498f into client/, refit tests, brand-free host page",
+      "category": "build"
+    },
+    {
+      "hash": "638198f",
+      "timestamp": "2026-10-04T21:15:52+08:00",
+      "subject": "stage 2: design system MASTER + token override CSS + host-page DOM skeleton (valotrainer@ded498f)",
+      "category": "design"
+    },
+    {
+      "hash": "f27d001",
+      "timestamp": "2026-10-04T21:16:01+08:00",
+      "subject": "stage 2 cleanup: drop leftover upstream index reference",
+      "category": "build"
+    },
+    {
+      "hash": "68bf936",
+      "timestamp": "2026-10-04T21:28:14+08:00",
+      "subject": "stage 3: server (no-dep) with provider-neutral market adapter, aim/portfolio/missions routes, 23-assert server test, supabase schema",
+      "category": "build"
+    },
+    {
+      "hash": "0477f44",
+      "timestamp": "2026-10-04T21:39:20+08:00",
+      "subject": "stage 4: client api/persist/store + supabase store + dom/finnhub tests (10/10 suites green)",
+      "category": "build"
+    },
+    {
+      "hash": "ca08ed9",
+      "timestamp": "2026-10-04T21:52:52+08:00",
+      "subject": "stage 5: aim bridge (engine->POST), boot banner, client-bridge + supabase mocked tests (12/12 suites green)",
+      "category": "build"
+    },
+    {
+      "hash": "22fdff5",
+      "timestamp": "2026-10-04T21:58:19+08:00",
+      "subject": "stage 6: mini chart panel (TV Lightweight Charts via importmap), ticker/range switcher, polling, 12-assert chart test (13/13 suites green)",
+      "category": "build"
+    },
+    {
+      "hash": "efa864c",
+      "timestamp": "2026-10-04T22:16:34+08:00",
+      "subject": "stage 7: trading terminal (portfolio + order ticket + positions + history), 23-assert terminal test (14/14 suites green)",
+      "category": "build"
+    },
+    {
+      "hash": "8c316c9",
+      "timestamp": "2026-10-04T22:28:26+08:00",
+      "subject": "stage 8: missions panel + AAPL->NVDA unlock chain (21-assert test, 15/15 suites green)",
+      "category": "build"
+    },
+    {
+      "hash": "c96390d",
+      "timestamp": "2026-10-05T01:09:21+08:00",
+      "subject": "stage 9: visual smoke (Python Playwright + Node runner), bootstrap.js store warmup, unlocked tickers list, 4 bug fixes from headless browser (16/16 suites green)",
+      "category": "qa"
+    },
+    {
+      "hash": "6c86c99",
+      "timestamp": "2026-10-05T01:14:56+08:00",
+      "subject": "stage 10: polish, release tag mvp-v0.1 (README, LICENSE, .nvmrc, .gitattributes, vercel.json, Procfile, deploy/README.md)",
+      "category": "docs"
+    },
+    {
+      "hash": "f82f314",
+      "timestamp": "2026-10-05T01:21:13+08:00",
+      "subject": "stage 11: public release + GitHub Actions CI on ubuntu/windows Node 20 + ruleset main-protection (no force-push, no delete)",
+      "category": "build"
+    },
+    {
+      "hash": "0bcc55f",
+      "timestamp": "2026-10-05T09:20:23+08:00",
+      "subject": "stage 11.1-1.2-1.6: hold_60s real 60s, precise_session real accuracy, start stable=200",
+      "category": "build"
+    },
+    {
+      "hash": "28310e7",
+      "timestamp": "2026-10-05T14:27:10+08:00",
+      "subject": "stage 11.3-11.4: secure ticker unlocks and margin",
+      "category": "build"
+    },
+    {
+      "hash": "4487ae0",
+      "timestamp": "2026-10-05T14:39:43+08:00",
+      "subject": "stage 11.5: gate orders by market session",
+      "category": "build"
+    },
+    {
+      "hash": "54b47db",
+      "timestamp": "2026-10-05T15:07:57+08:00",
+      "subject": "stage 11.6: enforce clean visual smoke",
+      "category": "qa"
+    },
+    {
+      "hash": "7202afa",
+      "timestamp": "2026-10-05T15:16:45+08:00",
+      "subject": "docs: align README with shipped game rules",
+      "category": "docs"
+    },
+    {
+      "hash": "32c6966",
+      "timestamp": "2026-10-05T15:26:57+08:00",
+      "subject": "stage 11.8: clarify active ticker HUD",
+      "category": "build"
+    },
+    {
+      "hash": "1616e7c",
+      "timestamp": "2026-10-05T17:16:48+08:00",
+      "subject": "stage 11.9: ship minimal server Docker image",
+      "category": "build"
+    },
+    {
+      "hash": "c26d726",
+      "timestamp": "2026-10-05T17:27:41+08:00",
+      "subject": "stage 11.10: server-sent events for live market ticks",
+      "category": "build"
+    },
+    {
+      "hash": "e5d3e8c",
+      "timestamp": "2026-10-05T17:28:09+08:00",
+      "subject": "docs: stage 11.10 SSE",
+      "category": "docs"
+    },
+    {
+      "hash": "c1173ef",
+      "timestamp": "2026-10-05T17:40:50+08:00",
+      "subject": "stage 11.11: make visual smoke portable",
+      "category": "qa"
+    },
+    {
+      "hash": "cf345d7",
+      "timestamp": "2026-10-05T18:08:18+08:00",
+      "subject": "stage 11.12: add Finnhub upstream WebSocket adapter",
+      "category": "build"
+    },
+    {
+      "hash": "1d1db14",
+      "timestamp": "2026-10-05T21:28:20+08:00",
+      "subject": "stage 12.1: ESM direct-start guard + entrypoint smoke test",
+      "category": "build"
+    },
+    {
+      "hash": "dc0a167",
+      "timestamp": "2026-10-05T21:32:23+08:00",
+      "subject": "stage 12.2 (1/6): drop project name from menu headers and boot card",
+      "category": "build"
+    },
+    {
+      "hash": "9084325",
+      "timestamp": "2026-10-05T21:33:37+08:00",
+      "subject": "stage 12.2 (2/6): hide katana slot 3 and drop 3 from loadout hint",
+      "category": "build"
+    },
+    {
+      "hash": "f115f2e",
+      "timestamp": "2026-10-05T21:34:36+08:00",
+      "subject": "stage 12.2 (3/6): turn missions panel into a centered modal",
+      "category": "build"
+    },
+    {
+      "hash": "a62565e",
+      "timestamp": "2026-10-05T21:35:14+08:00",
+      "subject": "stage 12.2 (4/6): chart panel — wider, accent bar, soft drop shadow",
+      "category": "build"
+    },
+    {
+      "hash": "a08194e",
+      "timestamp": "2026-10-05T21:36:40+08:00",
+      "subject": "stage 12.2 (5/6): terminal — modal card, accent top bar, highlighted order ticket",
+      "category": "build"
+    },
+    {
+      "hash": "515109f",
+      "timestamp": "2026-10-05T21:38:44+08:00",
+      "subject": "stage 12.2 (6/6): rAF-debounce resize and soften vignette to kill first-frame flicker",
+      "category": "build"
+    },
+    {
+      "hash": "6217ddf",
+      "timestamp": "2026-10-05T21:40:59+08:00",
+      "subject": "stage 12.2 (6/6) fix: remove premature applySize() that hit adsZoom TDZ",
+      "category": "fix"
+    },
+    {
+      "hash": "d854b71",
+      "timestamp": "2026-10-05T21:47:07+08:00",
+      "subject": "revert: drop stage 12.2 UI changes that did not match what was requested",
+      "category": "build"
+    },
+    {
+      "hash": "fb2fdda",
+      "timestamp": "2026-10-05T22:58:23+08:00",
+      "subject": "stage 12.3: refine dashboard market loop",
+      "category": "design"
+    },
+    {
+      "hash": "8c58f0c",
+      "timestamp": "2026-10-05T23:10:05+08:00",
+      "subject": "fix dashboard training grid alignment",
+      "category": "fix"
+    },
+    {
+      "hash": "959e1c4",
+      "timestamp": "2026-10-05T23:29:13+08:00",
+      "subject": "refine dashboard stats and selection",
+      "category": "design"
+    },
+    {
+      "hash": "e7725c3",
+      "timestamp": "2026-10-05T23:47:09+08:00",
+      "subject": "clean dashboard branding and session labels",
+      "category": "design"
+    },
+    {
+      "hash": "9ab7363",
+      "timestamp": "2026-10-05T23:55:49+08:00",
+      "subject": "rebalance dashboard geometry",
+      "category": "build"
+    },
+    {
+      "hash": "8704799",
+      "timestamp": "2026-10-06T00:11:07+08:00",
+      "subject": "fix dashboard composition and chart noise",
+      "category": "fix"
+    },
+    {
+      "hash": "e52e3fa",
+      "timestamp": "2026-10-06T00:25:33+08:00",
+      "subject": "tighten dashboard vertical composition",
+      "category": "build"
+    },
+    {
+      "hash": "f3b60b3",
+      "timestamp": "2026-10-06T00:41:45+08:00",
+      "subject": "apply train layout correction guide",
+      "category": "design"
+    },
+    {
+      "hash": "4555932",
+      "timestamp": "2026-10-06T00:53:02+08:00",
+      "subject": "stretch train and active market row",
+      "category": "build"
+    },
+    {
+      "hash": "b079888",
+      "timestamp": "2026-10-06T01:23:35+08:00",
+      "subject": "clarify missions and dashboard accents",
+      "category": "build"
+    },
+    {
+      "hash": "9aaee85",
+      "timestamp": "2026-10-06T01:44:27+08:00",
+      "subject": "build exchange-style market and missions workspaces",
+      "category": "feature"
+    },
+    {
+      "hash": "7128907",
+      "timestamp": "2026-10-06T02:11:42+08:00",
+      "subject": "unify market and missions under dashboard shell",
+      "category": "build"
+    },
+    {
+      "hash": "8006964",
+      "timestamp": "2026-10-06T02:25:26+08:00",
+      "subject": "refine missions into compact objective feed",
+      "category": "design"
+    },
+    {
+      "hash": "72ec84e",
+      "timestamp": "2026-10-06T05:07:11+08:00",
+      "subject": "finish market economy and loadout cleanup",
+      "category": "build"
+    },
+    {
+      "hash": "8deb44b",
+      "timestamp": "2026-10-06T05:12:30+08:00",
+      "subject": "finish market economy and loadout cleanup",
+      "category": "build"
+    },
+    {
+      "hash": "c1d757a",
+      "timestamp": "2026-10-06T05:45:42+08:00",
+      "subject": "stabilize game render palette",
+      "category": "fix"
+    },
+    {
+      "hash": "e7d1067",
+      "timestamp": "2026-10-06T05:57:45+08:00",
+      "subject": "add AAPL spot trading",
+      "category": "feature"
+    },
+    {
+      "hash": "de48b88",
+      "timestamp": "2026-10-06T16:08:37+08:00",
+      "subject": "fix jumbotron shimmer, add earned report, tighten 1D/5D amplitude",
+      "category": "fix"
+    },
+    {
+      "hash": "722c6eb",
+      "timestamp": "2026-10-06T16:23:39+08:00",
+      "subject": "refresh stale screenshots with current palette",
+      "category": "qa"
+    },
+    {
+      "hash": "49b2647",
+      "timestamp": "2026-10-06T16:31:34+08:00",
+      "subject": "fix combat report earned values, add wallet/total labels",
+      "category": "fix"
+    },
+    {
+      "hash": "e3dc91b",
+      "timestamp": "2026-10-06T17:38:35+08:00",
+      "subject": "fix loadout wiring and PLAYER_HP import, cache-bust module scripts",
+      "category": "fix"
+    },
+    {
+      "hash": "fdb4cc2",
+      "timestamp": "2026-10-06T17:49:58+08:00",
+      "subject": "add no-cache dev server, cache-bust all ESM imports",
+      "category": "feature"
+    },
+    {
+      "hash": "4fe8756",
+      "timestamp": "2026-10-06T22:30:08+08:00",
+      "subject": "wire Google sign-in backend (gtoken, session, auth routes, store methods)",
+      "category": "feature"
+    },
+    {
+      "hash": "5e6e62a",
+      "timestamp": "2026-10-06T23:35:12+08:00",
+      "subject": "wire Google sign-in UI: button in header, GIS wrapper, session UI",
+      "category": "feature"
+    },
+    {
+      "hash": "e25bb75",
+      "timestamp": "2026-10-07T07:42:28+08:00",
+      "subject": "integrate auth into store, add auth.test (14 cases), fix in-memory round helper",
+      "category": "feature"
+    },
+    {
+      "hash": "d277869",
+      "timestamp": "2026-10-07T08:23:36+08:00",
+      "subject": "clean up UI: session report with single AAPL headline, simplified recent sessions, header with icon buttons, sign-out in Customize",
+      "category": "design"
+    },
+    {
+      "hash": "1938ce8",
+      "timestamp": "2026-10-07T17:15:33+08:00",
+      "subject": "rename to Aim2Stock, add big AIM2STOCK logo, footer with X + Discord socials, fix Supabase Prefer=return=representation",
+      "category": "fix"
+    },
+    {
+      "hash": "b24bcb6",
+      "timestamp": "2026-10-07T17:23:24+08:00",
+      "subject": "fix boot base URL fallback: stop probing legacy 127.0.0.1:3000",
+      "category": "fix"
+    },
+    {
+      "hash": "9d50788",
+      "timestamp": "2026-10-07T17:29:53+08:00",
+      "subject": "tidy boot base-URL helper: 4-space indent, blank-line separator",
+      "category": "design"
+    },
+    {
+      "hash": "80d058e",
+      "timestamp": "2026-10-07T18:43:30+08:00",
+      "subject": "add Vercel deployment: serverless api/index.js wrapper, vercel.json routing, README deploy guide",
+      "category": "feature"
+    },
+    {
+      "hash": "d8e4246",
+      "timestamp": "2026-10-07T19:53:37+08:00",
+      "subject": "fix footer: hoist out of #menu overlay, fixed bottom, always visible; add Sandra/yomek handles",
+      "category": "fix"
+    },
+    {
+      "hash": "4fa5cbe",
+      "timestamp": "2026-10-07T19:54:51+08:00",
+      "subject": "vercel.json: switch from routes to rewrites (current API)",
+      "category": "build"
+    },
+    {
+      "hash": "03c6f8a",
+      "timestamp": "2026-10-07T19:56:28+08:00",
+      "subject": "vercel.json: drop /api prefix from rewrites, route directly to api/index.js",
+      "category": "build"
+    },
+    {
+      "hash": "5016f30",
+      "timestamp": "2026-10-07T19:57:40+08:00",
+      "subject": "vercel.json: use :path* wildcard (Vercel path syntax) instead of (.*)",
+      "category": "build"
+    },
+    {
+      "hash": "5260954",
+      "timestamp": "2026-10-07T20:00:22+08:00",
+      "subject": "vercel.json: @vercel/static src from 'client/**' to 'client' so files serve from root",
+      "category": "build"
+    },
+    {
+      "hash": "86284f2",
+      "timestamp": "2026-10-07T20:02:47+08:00",
+      "subject": "vercel.json: rewrite / to /client/index.html (static files serve under /client/)",
+      "category": "build"
+    },
+    {
+      "hash": "e746d6e",
+      "timestamp": "2026-10-07T20:33:35+08:00",
+      "subject": "vercel.json: rewrite /css /js /src /img /favicon /vendor /sw.js /manifest.json from /client/* so static assets resolve",
+      "category": "build"
+    },
+    {
+      "hash": "afcbb8d",
+      "timestamp": "2026-10-08T03:51:32+08:00",
+      "subject": "ui cleanup: remove Market/active Market/PAPER dups, add Open balance button in Portfolio, fix chart intraday timeVisible per range",
+      "category": "fix"
+    },
+    {
+      "hash": "ad16128",
+      "timestamp": "2026-10-08T03:52:10+08:00",
+      "subject": "add footer-fix screenshot",
+      "category": "feature"
+    },
+    {
+      "hash": "a3316c8",
+      "timestamp": "2026-10-08T04:34:23+08:00",
+      "subject": "fix order ticket layout: prevent position size pct-row from collapsing; add priceFormat precision for chart axis labels",
+      "category": "fix"
+    },
+    {
+      "hash": "1246011",
+      "timestamp": "2026-10-08T04:35:02+08:00",
+      "subject": "update visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "3b97a24",
+      "timestamp": "2026-10-08T05:58:43+08:00",
+      "subject": "fix workspace Market header: drop kicker+metrics row; stack order-ticket fields vertically so leverage slider doesn't collide with MAX button; hide LWC lastValueLabel (white-on-yellow readability)",
+      "category": "fix"
+    },
+    {
+      "hash": "633f25b",
+      "timestamp": "2026-10-08T05:58:51+08:00",
+      "subject": "update visual smoke screenshots after workspace header + order-ticket fixes",
+      "category": "qa"
+    },
+    {
+      "hash": "a9a1925",
+      "timestamp": "2026-10-08T06:05:57+08:00",
+      "subject": "refresh visual smoke screenshots after latest fixes",
+      "category": "qa"
+    },
+    {
+      "hash": "9363442",
+      "timestamp": "2026-10-08T21:44:43+08:00",
+      "subject": "fix layout: hide footer in game; workspace Market becomes absolute overlay over chart; crosshair row-pair/toggle styles so labels and controls stop overlapping",
+      "category": "fix"
+    },
+    {
+      "hash": "f6ee6bb",
+      "timestamp": "2026-10-08T21:45:09+08:00",
+      "subject": "refresh visual smoke screenshots after layout fixes",
+      "category": "qa"
+    },
+    {
+      "hash": "01917d9",
+      "timestamp": "2026-10-08T21:53:31+08:00",
+      "subject": "fix order ticket readout: stack entry/margin/notional/liquidation rows vertically with horizontal label/value; let position-size pct-buttons wrap to second row when narrow",
+      "category": "fix"
+    },
+    {
+      "hash": "dc72726",
+      "timestamp": "2026-10-08T21:53:44+08:00",
+      "subject": "refresh visual smoke screenshots after order ticket readout fixes",
+      "category": "qa"
+    },
+    {
+      "hash": "56015d0",
+      "timestamp": "2026-10-08T23:37:35+08:00",
+      "subject": "fix crosshair pane: re-nest .xcolrows inside .xprev so absolute positioning stays scoped to preview canvas; bound #chpreview to a fixed height so Color/Outlines/etc controls render cleanly below the preview instead of overlapping the CROSSHAIR title",
+      "category": "fix"
+    },
+    {
+      "hash": "7a0299f",
+      "timestamp": "2026-10-10T02:39:17+08:00",
+      "subject": "fix post-login token crediting (call auth.restore on load), show email in Profile (playerView email), add 25/50/75/MAX % buttons to Spot market, normalize ESM import version strings to single instance",
+      "category": "fix"
+    },
+    {
+      "hash": "cc81e08",
+      "timestamp": "2026-10-10T03:27:02+08:00",
+      "subject": "fix balance not refreshing after Google sign-in (call refresh() after setPlayerId); fix getOrCreatePlayer concurrent-insert race via resolution=merge-duplicates UPSERT",
+      "category": "fix"
+    },
+    {
+      "hash": "baba21f",
+      "timestamp": "2026-10-10T03:43:40+08:00",
+      "subject": "bump cache-bust version to 20261009-1 so browsers re-fetch fixed auth/store modules (restore + refresh after login)",
+      "category": "build"
+    },
+    {
+      "hash": "73968cd",
+      "timestamp": "2026-10-10T04:11:51+08:00",
+      "subject": "fix stale refresh clobbering Google balance: sequence-guard refresh() so a late guest-id request never overwrites the signed-in player",
+      "category": "fix"
+    },
+    {
+      "hash": "fc831e0",
+      "timestamp": "2026-10-10T04:13:29+08:00",
+      "subject": "chore: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "9fb2246",
+      "timestamp": "2026-10-10T04:37:06+08:00",
+      "subject": "fix sign-in never rebinding player id: call store.bootstrap() (was dead code) so applyAuthState subscribes to auth; fix merge data loss (PATCH balances/unlocks by player_id, not nonexistent id column)",
+      "category": "fix"
+    },
+    {
+      "hash": "30bdf18",
+      "timestamp": "2026-10-10T04:38:36+08:00",
+      "subject": "chore: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "6723bc4",
+      "timestamp": "2026-10-10T04:42:07+08:00",
+      "subject": "chore: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "9b7219c",
+      "timestamp": "2026-10-13T02:47:57+08:00",
+      "subject": "fix mission claims target respawns and market status",
+      "category": "fix"
+    },
+    {
+      "hash": "ac2e79b",
+      "timestamp": "2026-10-13T02:54:19+08:00",
+      "subject": "remove mode stripe and smooth long market charts",
+      "category": "build"
+    },
+    {
+      "hash": "41ce0bb",
+      "timestamp": "2026-10-13T03:00:48+08:00",
+      "subject": "stabilize chart range switching and zoom bounds",
+      "category": "fix"
+    },
+    {
+      "hash": "b6847f8",
+      "timestamp": "2026-10-13T03:07:13+08:00",
+      "subject": "move mini market chart to Lightweight Charts 5 area series",
+      "category": "build"
+    },
+    {
+      "hash": "439dae1",
+      "timestamp": "2026-10-13T03:11:46+08:00",
+      "subject": "fix area series live updates",
+      "category": "fix"
+    },
+    {
+      "hash": "556ff1b",
+      "timestamp": "2026-10-13T06:51:18+08:00",
+      "subject": "redesign compact market trading terminal",
+      "category": "design"
+    },
+    {
+      "hash": "b32c09a",
+      "timestamp": "2026-10-13T06:58:41+08:00",
+      "subject": "exclude local installer from Vercel upload",
+      "category": "build"
+    },
+    {
+      "hash": "39d7f47",
+      "timestamp": "2026-10-13T06:59:03+08:00",
+      "subject": "ignore local Vercel metadata",
+      "category": "build"
+    },
+    {
+      "hash": "e085499",
+      "timestamp": "2026-10-13T07:17:39+08:00",
+      "subject": "finish trading terminal runtime flows",
+      "category": "build"
+    },
+    {
+      "hash": "4599949",
+      "timestamp": "2026-10-13T07:20:18+08:00",
+      "subject": "bust terminal stylesheet cache",
+      "category": "build"
+    },
+    {
+      "hash": "8e4501e",
+      "timestamp": "2026-10-13T07:44:04+08:00",
+      "subject": "balance dashboard panel heights",
+      "category": "build"
+    },
+    {
+      "hash": "e8d5ed2",
+      "timestamp": "2026-10-13T07:46:33+08:00",
+      "subject": "bust dashboard layout stylesheet cache",
+      "category": "design"
+    },
+    {
+      "hash": "b1b60eb",
+      "timestamp": "2026-10-13T12:39:19+08:00",
+      "subject": "replace market area chart with usable candles",
+      "category": "build"
+    },
+    {
+      "hash": "512b073",
+      "timestamp": "2026-10-13T12:39:47+08:00",
+      "subject": "bust market chart stylesheet cache",
+      "category": "build"
+    },
+    {
+      "hash": "90b9ed8",
+      "timestamp": "2026-10-13T14:16:00+08:00",
+      "subject": "disable unstable production quote SSE",
+      "category": "build"
+    },
+    {
+      "hash": "af42ec2",
+      "timestamp": "2026-10-14T02:25:37+08:00",
+      "subject": "fix paper trading and add NVDA market",
+      "category": "fix"
+    },
+    {
+      "hash": "10f7f59",
+      "timestamp": "2026-10-14T02:32:41+08:00",
+      "subject": "populate NVDA watchlist quote",
+      "category": "build"
+    },
+    {
+      "hash": "bcd8270",
+      "timestamp": "2026-10-15T08:24:49+08:00",
+      "subject": "add persistent X update archive",
+      "category": "feature"
+    },
+    {
+      "hash": "6d8f2a3",
+      "timestamp": "2026-10-15T08:43:28+08:00",
+      "subject": "refine public update archive format",
+      "category": "design"
+    },
+    {
+      "hash": "c39f559",
+      "timestamp": "2026-10-15T09:27:42+08:00",
+      "subject": "release v0.2.1",
+      "category": "build"
+    },
+    {
+      "hash": "aba67fc",
+      "timestamp": "2026-10-19T15:30:00+08:00",
+      "subject": "feat: add AIM2STOCK X account link",
+      "category": "feature"
+    },
+    {
+      "hash": "f7dcde5",
+      "timestamp": "2026-10-21T19:54:58+08:00",
+      "subject": "feat: add verified A2S holding rewards",
+      "category": "feature"
+    },
+    {
+      "hash": "da3f01e",
+      "timestamp": "2026-10-21T19:55:04+08:00",
+      "subject": "test: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "c5fb7d6",
+      "timestamp": "2026-10-21T19:55:25+08:00",
+      "subject": "feat: add A2S holding dashboard and NVDA boost UI",
+      "category": "feature"
+    },
+    {
+      "hash": "ef0e2ae",
+      "timestamp": "2026-10-21T19:59:14+08:00",
+      "subject": "test: refresh visual smoke screenshots after final verification",
+      "category": "qa"
+    },
+    {
+      "hash": "fe3c54e",
+      "timestamp": "2026-10-21T21:25:58+08:00",
+      "subject": "fix holding hierarchy and farm ticker flow",
+      "category": "fix"
+    },
+    {
+      "hash": "62b82aa",
+      "timestamp": "2026-10-21T21:26:09+08:00",
+      "subject": "test: refresh screenshots after holding and farm fixes",
+      "category": "qa"
+    },
+    {
+      "hash": "2b132f9",
+      "timestamp": "2026-10-21T22:13:16+08:00",
+      "subject": "feat: open dual farm tickers and stable missions",
+      "category": "feature"
+    },
+    {
+      "hash": "cc62c60",
+      "timestamp": "2026-10-21T22:43:29+08:00",
+      "subject": "fix: redesign farm ticker selector",
+      "category": "fix"
+    },
+    {
+      "hash": "bb84a57",
+      "timestamp": "2026-10-21T22:43:30+08:00",
+      "subject": "test: refresh dashboard screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "baeb29a",
+      "timestamp": "2026-10-21T23:11:21+08:00",
+      "subject": "fix: bust farm picker stylesheet cache",
+      "category": "fix"
+    },
+    {
+      "hash": "19e2da7",
+      "timestamp": "2026-10-21T23:16:16+08:00",
+      "subject": "fix: stack training layout on narrow screens",
+      "category": "fix"
+    },
+    {
+      "hash": "f75b95f",
+      "timestamp": "2026-10-21T23:24:15+08:00",
+      "subject": "fix: give training cards readable vertical space",
+      "category": "fix"
+    },
+    {
+      "hash": "fb22b6b",
+      "timestamp": "2026-10-22T00:24:08+08:00",
+      "subject": "fix: keep targets in the front spawn corridor",
+      "category": "fix"
+    },
+    {
+      "hash": "c137985",
+      "timestamp": "2026-10-22T00:26:12+08:00",
+      "subject": "fix: refresh game module cache after spawn change",
+      "category": "fix"
+    },
+    {
+      "hash": "4cf4fe5",
+      "timestamp": "2026-10-22T21:53:07+08:00",
+      "subject": "feat: migrate auth and wallets to Privy",
+      "category": "feature"
+    },
+    {
+      "hash": "0c7b5ff",
+      "timestamp": "2026-10-22T21:53:18+08:00",
+      "subject": "test: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "fea87d5",
+      "timestamp": "2026-10-22T21:57:25+08:00",
+      "subject": "fix: make Privy build portable on Vercel",
+      "category": "fix"
+    },
+    {
+      "hash": "a6a7302",
+      "timestamp": "2026-10-22T21:57:38+08:00",
+      "subject": "test: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "027eb45",
+      "timestamp": "2026-10-22T22:34:38+08:00",
+      "subject": "fix: link external wallets for Privy users",
+      "category": "fix"
+    },
+    {
+      "hash": "ccdb02a",
+      "timestamp": "2026-10-22T22:34:39+08:00",
+      "subject": "test: refresh visual smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "8e3bfed",
+      "timestamp": "2026-10-22T22:51:59+08:00",
+      "subject": "feat: clarify account state in header",
+      "category": "feature"
+    },
+    {
+      "hash": "0b9250a",
+      "timestamp": "2026-10-22T22:52:00+08:00",
+      "subject": "test: refresh account header screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "578ab25",
+      "timestamp": "2026-10-22T23:03:57+08:00",
+      "subject": "feat: separate mode selection from launch",
+      "category": "feature"
+    },
+    {
+      "hash": "6482b86",
+      "timestamp": "2026-10-22T23:03:58+08:00",
+      "subject": "test: cover mode selection flow",
+      "category": "qa"
+    },
+    {
+      "hash": "084922c",
+      "timestamp": "2026-10-23T02:06:48+08:00",
+      "subject": "feat: open crosshair settings from pause",
+      "category": "feature"
+    },
+    {
+      "hash": "935c071",
+      "timestamp": "2026-10-23T02:06:49+08:00",
+      "subject": "test: cover pause crosshair settings",
+      "category": "qa"
+    },
+    {
+      "hash": "fd29f4b",
+      "timestamp": "2026-10-23T02:22:17+08:00",
+      "subject": "fix: align pause controls and loadout select",
+      "category": "fix"
+    },
+    {
+      "hash": "fcc4b2c",
+      "timestamp": "2026-10-23T02:22:18+08:00",
+      "subject": "test: refresh control styling screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "11541ac",
+      "timestamp": "2026-10-23T03:00:30+08:00",
+      "subject": "fix: preserve session reward totals",
+      "category": "fix"
+    },
+    {
+      "hash": "4b7fb61",
+      "timestamp": "2026-10-23T03:00:30+08:00",
+      "subject": "test: refresh reward flow screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "ece6d75",
+      "timestamp": "2026-10-23T11:33:38+08:00",
+      "subject": "fix: expose paper tickers in spot selector",
+      "category": "fix"
+    },
+    {
+      "hash": "a3226a3",
+      "timestamp": "2026-10-23T11:33:39+08:00",
+      "subject": "test: refresh terminal screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "a47f117",
+      "timestamp": "2026-11-02T23:47:27+08:00",
+      "subject": "fix: improve buy menu clarity and cursor",
+      "category": "fix"
+    },
+    {
+      "hash": "a7036e5",
+      "timestamp": "2026-11-02T23:47:28+08:00",
+      "subject": "test: refresh UI smoke screenshots",
+      "category": "qa"
+    },
+    {
+      "hash": "ed78e58",
+      "timestamp": "2026-11-04T04:40:37+08:00",
+      "subject": "fix: clarify weapon loadout states",
+      "category": "fix"
+    },
+    {
+      "hash": "8ea27b2",
+      "timestamp": "2026-11-04T04:40:48+08:00",
+      "subject": "test: refresh weapon buy visual smoke",
+      "category": "qa"
+    },
+    {
+      "hash": "a64f2ff",
+      "timestamp": "2026-11-04T09:36:17+08:00",
+      "subject": "feat: activate TSLA and MSFT as full farm/trade tickers",
+      "category": "feature"
+    },
+    {
+      "hash": "a283e92",
+      "timestamp": "2026-11-04T09:36:23+08:00",
+      "subject": "test: refresh screenshots after TSLA/MSFT activation",
+      "category": "qa"
+    },
+    {
+      "hash": "c32c693",
+      "timestamp": "2026-11-04T09:48:26+08:00",
+      "subject": "fix: clean Market chrome and unclip Assets scroll",
+      "category": "fix"
+    },
+    {
+      "hash": "40af0ab",
+      "timestamp": "2026-11-04T09:48:27+08:00",
+      "subject": "test: refresh screenshots after Market chrome cleanup",
+      "category": "qa"
+    },
+    {
+      "hash": "adb6800",
+      "timestamp": "2026-11-04T09:52:34+08:00",
+      "subject": "fix: drop Multiplier matrix and Missions kickers",
+      "category": "fix"
+    },
+    {
+      "hash": "3d86b58",
+      "timestamp": "2026-11-04T09:52:35+08:00",
+      "subject": "test: refresh screenshots after kicker cleanup",
+      "category": "qa"
+    },
+    {
+      "hash": "97872ab",
+      "timestamp": "2026-11-04T09:54:53+08:00",
+      "subject": "fix: missions overlay popup and drop claimed intro counter",
+      "category": "fix"
+    },
+    {
+      "hash": "a6d9966",
+      "timestamp": "2026-11-04T09:54:54+08:00",
+      "subject": "test: refresh screenshots after missions overlay",
+      "category": "qa"
+    },
+    {
+      "hash": "2e908a0",
+      "timestamp": "2026-11-05T15:16:42+08:00",
+      "subject": "fix: simplify mission status labels",
+      "category": "fix"
+    },
+    {
+      "hash": "26aa363",
+      "timestamp": "2026-11-06T07:10:23+08:00",
+      "subject": "fix: prevent mode cards from clipping at smaller scales",
+      "category": "fix"
+    },
+    {
+      "hash": "52ccb9c",
+      "timestamp": "2026-11-06T07:24:06+08:00",
+      "subject": "feat: add selectable session durations",
+      "category": "feature"
+    },
+    {
+      "hash": "232b79f",
+      "timestamp": "2026-11-08T18:54:01+08:00",
+      "subject": "feat: theme farming visuals by ticker",
+      "category": "feature"
+    },
+    {
+      "hash": "2f12643",
+      "timestamp": "2026-11-08T19:39:18+08:00",
+      "subject": "fix: tint scenery textures by farm ticker",
+      "category": "fix"
+    },
+    {
+      "hash": "ad1df3d",
+      "timestamp": "2026-11-08T20:29:21+08:00",
+      "subject": "fix: move spawn marker and quiet target drills",
+      "category": "fix"
+    },
+    {
+      "hash": "2e49842",
+      "timestamp": "2026-11-08T20:45:36+08:00",
+      "subject": "fix: make token rewards feel immediate",
+      "category": "fix"
+    },
+    {
+      "hash": "9feac32",
+      "timestamp": "2026-11-10T15:52:07+08:00",
+      "subject": "feat: add calibrated multi-domain rank model",
+      "category": "feature"
+    },
+    {
+      "hash": "194065b",
+      "timestamp": "2026-11-10T15:58:51+08:00",
+      "subject": "fix: stretch balance rank progression",
+      "category": "fix"
+    },
+    {
+      "hash": "7f189d4",
+      "timestamp": "2026-11-10T16:44:40+08:00",
+      "subject": "feat: integrate 24-point rank progression",
+      "category": "feature"
+    },
+    {
+      "hash": "040eae6",
+      "timestamp": "2026-11-10T17:16:34+08:00",
+      "subject": "fix: bust rank profile stylesheet cache",
+      "category": "fix"
+    },
+    {
+      "hash": "91c4bde",
+      "timestamp": "2026-11-10T17:23:28+08:00",
+      "subject": "feat: add animated updates button",
+      "category": "feature"
+    },
+    {
+      "hash": "f1f38d3",
+      "timestamp": "2026-11-13T17:25:08+08:00",
+      "subject": "fix: refine training profile hover details",
+      "category": "fix"
+    },
+    {
+      "hash": "ee333a5",
+      "timestamp": "2026-11-13T17:43:44+08:00",
+      "subject": "feat: match rank profile reference layout",
+      "category": "feature"
+    }
+  ]
+}
