@@ -901,7 +901,7 @@ export function boot() {
       progress: progressFor(balanceValue, BALANCE_THRESHOLDS_USD, balancePoint, true),
     });
     if (rows) {
-      rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
+      rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row${item.label === 'Trading Balance' ? ' rank-domain-balance' : ''}" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
         <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b></div>
         <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="width:${Math.round(item.progress * 100)}%"></i></div>
         <div class="rank-domain-meta"><span>${item.current}</span></div>
