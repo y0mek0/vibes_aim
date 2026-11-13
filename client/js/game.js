@@ -852,10 +852,16 @@ export function boot() {
     const overallBar = root.querySelector('[data-rank-overall-bar]');
     const overallNextEl = root.querySelector('[data-rank-overall-next]');
     const overallSquare = root.querySelector('[data-rank-overall-square]');
+    const overallBadge = root.querySelector('.rank-overall-badge');
     if (overallName) overallName.textContent = overall.rank.displayName;
     if (overallRatingEl) overallRatingEl.textContent = `${overall.rating.toFixed(2)} / ${TOTAL_RANK_POINTS}`;
+    if (overallBadge) {
+      const ratingLabel = `Current Overall rank: ${overall.rank.displayName}. Weighted rating: ${overall.rating.toFixed(2)} / ${TOTAL_RANK_POINTS}`;
+      overallBadge.dataset.tooltip = ratingLabel;
+      overallBadge.setAttribute('aria-label', ratingLabel);
+    }
     if (overallBar) overallBar.style.width = `${Math.round(overall.progress * 100)}%`;
-    if (overallNextEl) overallNextEl.textContent = overallNext ? `Next: ${overallNext.displayName}` : 'Maximum rank';
+    if (overallNextEl) overallNextEl.textContent = overallNext ? overallNext.displayName : 'Maximum rank';
     if (overallSquare) {
       overallSquare.style.background = overall.rank.color;
       overallSquare.style.color = overall.rank.textColor;
@@ -896,9 +902,9 @@ export function boot() {
     });
     if (rows) {
       rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
-        <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b><em>${item.point}/${TOTAL_RANK_POINTS}</em></div>
-        <div class="rank-domain-bar"><i style="width:${Math.round(item.progress * 100)}%"></i></div>
-        <div class="rank-domain-meta"><span>${item.current}</span><span>Next ${item.next}</span></div>
+        <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b></div>
+        <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="width:${Math.round(item.progress * 100)}%"></i></div>
+        <div class="rank-domain-meta"><span>${item.current}</span></div>
         <div class="rank-domain-used">${item.used}</div>
       </article>`).join('');
     }

@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261023-8">
-<link rel="stylesheet" href="css/style.css?v=20261110-3">
+<link rel="stylesheet" href="css/style.css?v=20261110-4">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -250,11 +250,11 @@
         <section class="rank-profile" data-rank-profile aria-labelledby="rank-profile-title">
           <div class="rank-profile-top">
             <div><span class="section-kicker">Training profile</span><h2 id="rank-profile-title">Overall rank</h2><p class="rank-profile-note">24 points · Balance carries 4× weight · aim uses the top 3 of the latest 100 qualifying scores.</p></div>
-            <div class="rank-overall-badge"><span class="rank-square rank-overall-square" data-rank-overall-square aria-hidden="true"></span><div><strong data-rank-overall-name>Mark I</strong><b data-rank-overall-rating>1.00 / 24</b></div></div>
+            <div class="rank-overall-badge" tabindex="0" aria-label="Current Overall rank and weighted rating"><span class="rank-square rank-overall-square" data-rank-overall-square aria-hidden="true"></span><div><strong data-rank-overall-name>Mark I</strong><b data-rank-overall-rating>1.00 / 24</b></div></div>
           </div>
-          <div class="rank-overall-progress"><div class="rank-progress-track"><i data-rank-overall-bar style="width:0%"></i></div><span data-rank-overall-next>Next: Mark II</span></div>
+          <div class="rank-overall-progress"><div class="rank-progress-track"><i data-rank-overall-bar style="width:0%"></i></div><span class="rank-overall-next" data-rank-overall-next>Mark II</span></div>
           <div class="rank-domain-list" data-rank-rows></div>
-          <div class="rank-profile-foot"><span>Only completed 5-minute sessions enter aim rank.</span><div class="rank-legend" data-rank-legend aria-label="Rank legend"></div></div>
+          <div class="rank-profile-foot"><button type="button" class="rank-info-trigger" aria-label="How rank calculation works" aria-describedby="rank-info-tooltip"><span class="rank-info-icon" aria-hidden="true">i</span><span class="rank-info-tooltip" id="rank-info-tooltip" role="tooltip">Ranked runs: 5 min · completed sessions only.</span></button><div class="rank-legend" data-rank-legend aria-label="Rank legend"></div></div>
         </section>
         <div class="stats-layout">
           <section class="stats-records-panel">

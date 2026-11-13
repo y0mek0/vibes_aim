@@ -12,7 +12,7 @@ assert.match(game, /RANK_STAGES\.filter/);
 assert.match(game, /data-rank-rows/);
 assert.match(game, /BALANCE_THRESHOLDS_USD\[balancePoint\]/);
 assert.match(html, /data-rank-profile/);
-assert.match(html, /Only completed 5-minute sessions enter aim rank/);
+assert.match(html, /Ranked runs: 5 min · completed sessions only/);
 assert.match(html, /class="rank-legend"/);
 assert.match(terminal, /window\.__aim2stockPortfolioValue/);
 assert.match(terminal, /window\.renderMenuStats\(\)/);
