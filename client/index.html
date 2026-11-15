@@ -249,20 +249,36 @@
       <section class="dashboard-stats-panel" data-dashboard-section-target="stats">
         <section class="rank-profile" data-rank-profile aria-labelledby="rank-profile-title">
           <div class="rank-profile-top">
-            <h2 class="rank-overall-label" id="rank-profile-title">Overall Rank</h2>
+            <div class="rank-profile-heading"><span class="section-kicker">Training Profile</span><h2 class="rank-overall-label" id="rank-profile-title">Overall Rank</h2></div>
             <div class="rank-overall-badge" tabindex="0" aria-label="Current Overall rank and weighted rating"><span class="rank-square rank-overall-square" data-rank-overall-square aria-hidden="true"></span><div><strong data-rank-overall-name>Mark I</strong><b data-rank-overall-rating>1.00 / 24</b></div></div>
           </div>
           <div class="rank-overall-progress"><div class="rank-progress-track"><i data-rank-overall-bar style="width:0%"></i></div><span class="rank-overall-next" data-rank-overall-next>Mark II</span></div>
           <div class="rank-domain-list" data-rank-rows></div>
-          <div class="rank-profile-foot"><button type="button" class="rank-info-trigger" aria-label="How rank calculation works" aria-describedby="rank-info-tooltip"><span class="rank-info-icon" aria-hidden="true">i</span><span class="rank-info-tooltip" id="rank-info-tooltip" role="tooltip">Ranked runs: 5 min · completed sessions only.</span></button><div class="rank-legend" data-rank-legend aria-label="Rank legend"></div></div>
+          <div class="rank-profile-foot">
+            <span class="rank-runs-note">Ranked runs: 5 min · completed sessions only</span>
+            <div class="rank-profile-controls">
+              <details class="rank-menu" name="rank-profile-menu" data-rank-menu="calculation">
+                <summary>Rank calculation</summary>
+                <div class="rank-menu-panel rank-calculation-panel">
+                  <section class="rank-calculation-block"><h3>Aim ranks</h3><p>Only completed 5-minute sessions qualify. Each mode uses the average of your top 3 scores from the latest 100 qualifying sessions.</p></section>
+                  <section class="rank-calculation-block"><h3>Trading Balance</h3><p>Based on your current total portfolio value in USD.</p></section>
+                  <section class="rank-calculation-block"><h3>Overall Rank</h3><p>Overall score = (Gridshot + Flick Shot + Tracking + Range Bots + 4 × Trading Balance) / 8. Aim ranks hold their best achieved level; Balance and Overall follow current portfolio value.</p></section>
+                </div>
+              </details>
+              <details class="rank-menu" name="rank-profile-menu" data-rank-menu="all-ranks">
+                <summary>All ranks</summary>
+                <div class="rank-menu-panel rank-stages-panel"><div class="rank-table-scroll"><table class="rank-threshold-table"><caption>Minimum threshold for each rank in every progression category</caption><thead><tr><th scope="col">Rank</th><th scope="col">Overall rating</th><th scope="col">Gridshot score</th><th scope="col">Flick Shot score</th><th scope="col">Tracking score</th><th scope="col">Range Bots score</th><th scope="col">Trading Balance (USD)</th></tr></thead><tbody data-rank-stage-list></tbody></table></div></div>
+              </details>
+            </div>
+          </div>
         </section>
         <div class="stats-layout">
           <section class="stats-records-panel">
-            <div class="panel-heading compact"><div><span class="section-kicker">Records</span><h2>Records by mode</h2></div><span class="panel-meta">Personal bests</span></div>
+            <div class="panel-heading compact"><div><span class="section-kicker">Records</span><h2>Records by mode</h2></div></div>
             <div class="mode-record-grid" data-mode-records></div>
           </section>
           <section class="stats-sessions-panel">
-            <div class="panel-heading compact"><div><span class="section-kicker">History</span><h2>Recent sessions</h2></div><span class="panel-meta">Last six runs</span></div>
+            <div class="panel-heading compact"><div><span class="section-kicker">History</span><h2>Recent sessions</h2></div></div>
             <div class="session-window-grid" data-session-history></div>
           </section>
         </div>
@@ -297,16 +313,7 @@
       </div>
     </section>
   </div>
-  <div id="updates-panel" class="updates-backdrop" hidden>
-    <section class="updates-modal" role="dialog" aria-modal="true" aria-labelledby="updates-title">
-      <header class="updates-head"><div><span class="section-kicker">Latest changes</span><h2 id="updates-title">Updates</h2></div><button type="button" class="modal-close" id="updates-close" aria-label="Close updates">×</button></header>
-      <div class="updates-list">
-        <article class="updates-item"><span class="updates-item-kicker">TRAINING PROFILE</span><h3>24-point rank progression</h3><p>Eight belt colors now split into Mark I through Apex III across four aim modes, Balance and Overall.</p></article>
-        <article class="updates-item"><span class="updates-item-kicker">RANK RULES</span><h3>Complete sessions count</h3><p>Only completed 5-minute sessions qualify. Aim uses the top three scores from the latest 100 qualifying runs.</p></article>
-        <article class="updates-item"><span class="updates-item-kicker">PAPER MARKET</span><h3>Balance stays live</h3><p>Trading Balance and Overall recalculate from the current portfolio value as holdings change.</p></article>
-      </div>
-    </section>
-  </div>
+
   </div>
   <div id="buy" class="overlay"><div class="card buyphase">
   <div class="buy-head"><div><h2>Choose your weapon</h2></div><div class="credits">∞ CREDITS</div></div>
@@ -467,20 +474,9 @@
     setCustomizeOpen(true);
     tab.click();
   };
-  const updatesPanel = document.getElementById('updates-panel');
-  const updatesOpen = document.getElementById('updates-open');
-  const updatesClose = document.getElementById('updates-close');
-  const setUpdatesOpen = (open) => {
-    if (!updatesPanel) return;
-    updatesPanel.hidden = !open;
-    updatesOpen?.setAttribute('aria-expanded', String(open));
-    if (open) updatesClose?.focus();
-  };
-  updatesOpen?.addEventListener('click', () => setUpdatesOpen(true));
-  updatesClose?.addEventListener('click', () => setUpdatesOpen(false));
-  updatesPanel?.addEventListener('click', (event) => { if (event.target === updatesPanel) setUpdatesOpen(false); });
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && updatesPanel && !updatesPanel.hidden) setUpdatesOpen(false); });
-
+  document.getElementById('updates-open')?.addEventListener('click', () => {
+    window.location.href = 'updates.html';
+  });
 </script>
 <!-- boot banner: shown until the server is reachable, then hidden -->
 <div id="vibes-boot" hidden>

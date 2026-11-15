@@ -908,8 +908,25 @@ export function boot() {
         <div class="rank-domain-used">${item.used}</div>
       </article>`).join('');
     }
-    const legend = root.querySelector('[data-rank-legend]');
-    if (legend) legend.innerHTML = RANK_STAGES.filter((_, index) => index % 3 === 0).map((stage) => `<span><i style="background:${stage.color}"></i>${stage.name} <b>I · II · III</b></span>`).join('');
+    const stageList = root.querySelector('[data-rank-stage-list]');
+    if (stageList) {
+      const aimThresholds = [
+        AIM_SCORE_THRESHOLDS.gridshot,
+        AIM_SCORE_THRESHOLDS.flick,
+        AIM_SCORE_THRESHOLDS.tracking,
+        AIM_SCORE_THRESHOLDS.bots,
+      ];
+      stageList.innerHTML = RANK_STAGES.map((stage) => {
+        const index = stage.point - 1;
+        const aimValues = aimThresholds.map((thresholds) => formatScore(thresholds[index]));
+        return `<tr>
+          <th scope="row"><span class="rank-table-rank"><i style="background:${stage.color}"></i>${stage.displayName}</span></th>
+          <td data-label="Overall rating">≥ ${stage.point.toFixed(2)} / ${TOTAL_RANK_POINTS}</td>
+          <td data-label="Gridshot score">${aimValues[0]}</td><td data-label="Flick Shot score">${aimValues[1]}</td><td data-label="Tracking score">${aimValues[2]}</td><td data-label="Range Bots score">${aimValues[3]}</td>
+          <td data-label="Trading Balance (USD)">${formatUsd(BALANCE_THRESHOLDS_USD[index])}</td>
+        </tr>`;
+      }).join('');
+    }
   }
   function renderMenuStats() {
     renderRankProfile();
