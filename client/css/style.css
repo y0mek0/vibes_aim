@@ -1526,6 +1526,8 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .rank-profile { position: relative; z-index: 2; }
 #menu .rank-profile-foot { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,.1); color: var(--dash-muted); font: 10px var(--font-mono); }
 #menu .rank-runs-note { color: var(--dash-soft); white-space: nowrap; }
+#menu .dashboard-stats-panel { padding-bottom: 48px; }
+#menu .rank-domain-bar i { min-width: 2px; }
 #results .res-tokens { color: #f6d447; text-shadow: none; }
 #results .res-tokens-num,
 #results .res-tokens-lbl,

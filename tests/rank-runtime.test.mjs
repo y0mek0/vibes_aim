@@ -17,6 +17,7 @@ assert.match(html, /data-rank-profile/);
 assert.match(html, /class="rank-runs-note">Ranked runs: 1 min · completed sessions only/);
 assert.match(html, /id="res-session-meta"/);
 assert.match(html, /id="res-rank-meta"/);
+assert.match(game, /renderRankProfile\(\);/);
 assert.match(html, /data-rank-menu="calculation"/);
 assert.match(html, /<summary>Rank calculation<\/summary>/);
 assert.match(html, /data-rank-menu="all-ranks"/);

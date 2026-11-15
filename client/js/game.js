@@ -610,6 +610,7 @@ export function boot() {
     });
     saveHistory();
     if (qualified) updateAimRankProgress(mode);
+    renderRankProfile();
     if (rankMeta) {
       if (qualified) {
         const snapshot = rankSnapshot();
