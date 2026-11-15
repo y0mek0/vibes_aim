@@ -1452,7 +1452,9 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 
 /* The score is local and instant; this subtle state shows that token minting
    is being confirmed by the server rather than making the reward look stuck. */
-.tb-left .tb-score.reward-pending { color: var(--teal); }
+.tb-left .tb-score { color: rgba(255,255,255,.86); text-shadow: none; }
+.tb-left .tb-sub { color: #111; text-shadow: none; }
+.tb-left .tb-sub * { color: #111; text-shadow: none; }
 
 @media (max-width: 900px) {
   #menu .stats-layout { grid-template-columns: 1fr; }
@@ -1488,7 +1490,7 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .rank-progress-track,
 #menu .rank-domain-bar { overflow: hidden; height: 4px; flex: 1; background: rgba(255,255,255,.12); border-radius: 8px; }
 #menu .rank-progress-track i,
-#menu .rank-domain-bar i { display: block; height: 100%; background: var(--rank-color, #f6d447); border-radius: inherit; transition: width .25s ease; }
+#menu .rank-domain-bar i { display: block; height: 100%; width: var(--rank-progress, 0%); background: var(--rank-color, #f6d447); border-radius: inherit; transition: width .25s ease; }
 #menu .rank-overall-progress .rank-progress-track i { background: #f6d447; }
 #menu .rank-overall-progress span { color: var(--dash-soft); font: 12px var(--font-mono); white-space: nowrap; }
 #menu .rank-overall-next { font-weight: 600 !important; }

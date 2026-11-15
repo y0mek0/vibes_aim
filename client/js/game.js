@@ -926,7 +926,7 @@ export function boot() {
     if (rows) {
       rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row${item.label === 'Trading Balance' ? ' rank-domain-balance' : ''}" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
         <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b></div>
-        <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="width:${Math.round(item.progress * 100)}%"></i></div>
+        <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="--rank-progress:${Math.round(item.progress * 100)}%"></i></div>
         <div class="rank-domain-meta"><span>${item.current}</span></div>
         <div class="rank-domain-used">${item.used}</div>
       </article>`).join('');
@@ -996,12 +996,10 @@ export function boot() {
       const d = MODE_DEFS[id], hs = modeHistory(id);
       const best = hs.length ? Math.max(...hs.map(h => h.score)) : null;
       const selected = id === selectedMode;
-      const desc = id === 'flick'
-        ? `One target at a time, random position. ${flickTargetsForDuration(sessionDuration)} targets — true flick reaction time.`
-        : d.desc;
+      const desc = d.desc;
       const el = document.createElement('div'); el.className = 'mode mode-' + id + (selected ? ' mode-selected' : '');
       el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-pressed', String(selected));
-      const statLabel = best !== null ? `best ${best}` : selected ? 'selected · press play' : 'click to select';
+      const statLabel = selected ? `time ${sessionDuration}s` : best !== null ? `best ${best}` : 'click to select';
       el.innerHTML = `<div class="mode-idx">0${mi}</div><div class="mode-body"><h3>${d.name}</h3><p>${desc}</p></div><div class="mode-footer"><div class="stats">${statLabel}</div>${selected ? `<button type="button" class="mode-play" aria-label="Start ${d.name}">Play</button>` : ''}</div>`;
       el.addEventListener('click', () => selectMode(id));
       const play = el.querySelector('.mode-play');
