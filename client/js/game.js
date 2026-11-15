@@ -17,7 +17,7 @@ import { createStalker } from './core/stalker.js?v=20261013-4';
 import { deadzone, stanceSpeed, moveForSpeed, frictionSpeed, bloomDecay,
   shotReady, burstTiming, jumpAirTime, JUMP_V0, GRAV, CAM_STAND, CAM_CROUCH, ACCEL, AIR_ACCEL_FRAC,
   spawnDist, orbScale, gridConeHalfWidth, FORWARD_CONE_HALF_ANGLE_DEG } from './core/gunplay.js?v=20261021-6';
-import { createStats, createKillfeed } from './core/stats.js?v=20261108-1';
+import { createStats, createKillfeed } from './core/stats.js?v=20261116-2';
 import { enhanceCombos, syncCombos } from './ui/combo.js?v=20261013-4';
 import { freshCrosshair, migrateCrosshair, buildCode, parseCode, PRESET_COLORS } from './core/crosshair.js?v=20261013-4';
 import { audio } from './fx/audio.js?v=20261013-4';
@@ -567,8 +567,11 @@ export function boot() {
   }
   function updateAimRankProgress(m) {
     if (!AIM_RANK_MODES.includes(m)) return;
-    rankProgress.aim[m] = aimRankFromScores(m, qualifiedScores(m), rankProgress.aim[m]);
+    const before = Number(rankProgress.aim[m]) || 1;
+    const next = aimRankFromScores(m, qualifiedScores(m), before);
+    rankProgress.aim[m] = next;
     saveRankProgress();
+    return next !== before;
   }
   function portfolioValueUsd() {
     const exposed = Number(window.__aim2stockPortfolioValue?.total);
@@ -613,6 +616,7 @@ export function boot() {
     saveHistory();
     if (qualified) updateAimRankProgress(mode);
     renderRankProfile();
+    if (typeof window.renderMenuStats === 'function') window.renderMenuStats();
     if (rankMeta) {
       if (qualified) {
         const snapshot = rankSnapshot();

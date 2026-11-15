@@ -12,7 +12,7 @@ assert.match(game, /function playerRelativePoint\(distance, lateral = 0, vertica
 assert.match(game, /spawnFlickOrb\(\)/);
 assert.match(game, /spawnRangeBot\(\)/);
 assert.match(game, /qualifiedScores\(m\)/);
-assert.match(game, /rankProgress\.aim\[m\] = aimRankFromScores/);
+assert.match(game, /const next = aimRankFromScores/);
 assert.match(game, /RANK_STAGES\.map\(\(stage\) =>/);
 assert.match(game, /AIM_SCORE_THRESHOLDS\.gridshot/);
 assert.match(game, /formatUsd\(BALANCE_THRESHOLDS_USD\[index\]\)/);
