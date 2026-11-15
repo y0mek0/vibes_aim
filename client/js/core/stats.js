@@ -41,7 +41,7 @@ export function createStats() {
       const kps = elapsed > 1 ? (r.kills / elapsed) : null;
       set('st-score', String(r.score));
       set('st-kills', String(r.kills));
-      set('st-timer', mode === 'flick' ? `${r.kills} / 30` : Math.max(0, timeLeft).toFixed(1));
+      set('st-timer', Math.max(0, Math.ceil(timeLeft)));
       set('st-hs', hsp === null ? '—' : hsp + '%');
       set('st-acc', acc === null ? '—' : acc + '%');
       set('st-dmg', String(Math.round(r.damage)));
