@@ -231,13 +231,20 @@ export function createSupabaseStore({ url, serviceKey }) {
     },
     async addStable(playerId, amount) {
       const cur = await this.getOrCreatePlayer(playerId);
-      const next = Math.max(0, round6(Number(cur.stable) + amount));
+      const delta = Number(amount);
+      if (!Number.isFinite(delta)) return cur;
+      const next = Math.max(0, round6(Number(cur.stable) + delta));
       const now = new Date().toISOString();
       const rows = await rpc(TABLE.players,
-        `?${eqFilter('id', playerId)}`,
+        `?${eqFilter('id', playerId)}${delta < 0 ? `&stable=gte.${encodeURIComponent(-delta)}` : ''}`,
         { method: 'PATCH', body: { stable: next, updated_at: now },
           headers: { 'Prefer': 'return=representation' } });
-      return rows && rows[0] ? toPlayer(rows[0]) : { ...cur, stable: next, updated_at: now };
+      if (rows && rows[0]) return toPlayer(rows[0]);
+      if (delta < 0) {
+        const fresh = await this.getPlayer(playerId);
+        if (fresh) return fresh;
+      }
+      return { ...cur, stable: next, updated_at: now };
     },
     async recordAccuracy(playerId, accuracy) {
       const cur = await this.getOrCreatePlayer(playerId);
