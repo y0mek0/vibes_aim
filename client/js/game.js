@@ -885,7 +885,7 @@ export function boot() {
       const rank = rankByPoint(point);
       const thresholds = AIM_SCORE_THRESHOLDS[modeName];
       const nextThreshold = point < TOTAL_RANK_POINTS ? formatScore(thresholds[point]) : 'MAX';
-      const used = topScores(scores).map(formatScore).join(' · ') || 'Need 3 qualifying runs';
+      const used = topScores(scores).map(formatScore).join(' · ') || 'Need 1 qualifying run';
       return {
         label: labels[index], rank, point, current: formatScore(average), next: nextThreshold,
         used, progress: progressFor(average || 0, thresholds, point, average !== null),

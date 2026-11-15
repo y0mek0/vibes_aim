@@ -3,7 +3,7 @@
 // total portfolio value in USD, not profit or reward bonuses.
 
 export const RANK_CALIBRATION_VERSION = '2026-11-v3';
-export const QUALIFYING_SESSION_SECONDS = 300;
+export const QUALIFYING_SESSION_SECONDS = 60;
 export const RANK_SCORE_WINDOW = 100;
 export const RANK_SCORE_SAMPLE = 3;
 export const AIM_RANK_MODES = Object.freeze(['gridshot', 'flick', 'tracking', 'bots']);

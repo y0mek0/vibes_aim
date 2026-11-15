@@ -46,14 +46,14 @@ assert.equal(BALANCE_THRESHOLDS_USD[0], 200);
 assert.equal(BALANCE_THRESHOLDS_USD[21], 5_000_000);
 assert.equal(BALANCE_THRESHOLDS_USD[22], 10_000_000);
 assert.equal(BALANCE_THRESHOLDS_USD[23], 20_000_000);
-assert.equal(QUALIFYING_SESSION_SECONDS, 300);
+assert.equal(QUALIFYING_SESSION_SECONDS, 60);
 assert.equal(RANK_SCORE_WINDOW, 100);
 assert.equal(RANK_SCORE_SAMPLE, 3);
 
-assert.equal(qualifyingAimSession({ mode: 'gridshot', durationSeconds: 300, completed: true }), true);
+assert.equal(qualifyingAimSession({ mode: 'gridshot', durationSeconds: 60, completed: true }), true);
 assert.equal(qualifyingAimSession({ mode: 'gridshot', durationSeconds: 180, completed: true }), false);
-assert.equal(qualifyingAimSession({ mode: 'gridshot', durationSeconds: 300, completed: false }), false);
-assert.equal(qualifyingAimSession({ mode: 'unknown', durationSeconds: 300, completed: true }), false);
+assert.equal(qualifyingAimSession({ mode: 'gridshot', durationSeconds: 60, completed: false }), false);
+assert.equal(qualifyingAimSession({ mode: 'unknown', durationSeconds: 60, completed: true }), false);
 
 const scores = Array.from({ length: 105 }, (_, i) => i + 1);
 assert.deepEqual(topScores(scores), [105, 104, 103]);

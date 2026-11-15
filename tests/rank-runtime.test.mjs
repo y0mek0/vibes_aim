@@ -14,7 +14,7 @@ assert.match(game, /formatUsd\(BALANCE_THRESHOLDS_USD\[index\]\)/);
 assert.match(game, /data-rank-rows/);
 assert.match(game, /BALANCE_THRESHOLDS_USD\[balancePoint\]/);
 assert.match(html, /data-rank-profile/);
-assert.match(html, /class="rank-runs-note">Ranked runs: 5 min · completed sessions only/);
+assert.match(html, /class="rank-runs-note">Ranked runs: 1 min · completed sessions only/);
 assert.match(html, /data-rank-menu="calculation"/);
 assert.match(html, /<summary>Rank calculation<\/summary>/);
 assert.match(html, /data-rank-menu="all-ranks"/);
