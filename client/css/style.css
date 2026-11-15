@@ -1195,6 +1195,7 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
   border-top: 0;
   pointer-events: auto;
 }
+#menu .app-shell { padding-bottom: 0; }
 /* Hide footer while a game session is active so it doesn't cover the
    bottom HUD (HP bar, ammo counter, score). */
 body.playing .app-footer { display: none; }
@@ -1490,8 +1491,8 @@ canvas, #game, #crosshair, #hitmarker { -webkit-user-select: none; user-select: 
 #menu .rank-progress-track,
 #menu .rank-domain-bar { overflow: hidden; height: 4px; flex: 1; background: rgba(255,255,255,.12); border-radius: 8px; }
 #menu .rank-progress-track i,
-#menu .rank-domain-bar i { display: block; height: 100%; width: var(--rank-progress, 0%); background: var(--rank-color, #f6d447); border-radius: inherit; transition: width .25s ease; }
-#menu .rank-overall-progress .rank-progress-track i { background: #f6d447; }
+#menu .rank-domain-bar i { display: block !important; height: 100% !important; width: var(--rank-progress, 0%) !important; background: var(--rank-color, #f6d447) !important; border-radius: inherit; transition: width .25s ease; }
+#menu .rank-overall-progress .rank-progress-track i { background: #f6d447 !important; }
 #menu .rank-overall-progress span { color: var(--dash-soft); font: 12px var(--font-mono); white-space: nowrap; }
 #menu .rank-overall-next { font-weight: 600 !important; }
 #menu .rank-domain-list { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1.12fr); grid-template-rows: repeat(2,minmax(74px,auto)); grid-auto-flow: row; gap: 0 20px; }

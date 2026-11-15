@@ -883,7 +883,11 @@ export function boot() {
       overallBadge.dataset.tooltip = ratingLabel;
       overallBadge.setAttribute('aria-label', ratingLabel);
     }
-    if (overallBar) overallBar.style.width = `${Math.round(overall.progress * 100)}%`;
+    if (overallBar) {
+      const width = `${Math.round(overall.progress * 100)}%`;
+      overallBar.style.setProperty('--rank-progress', width);
+      overallBar.style.width = width;
+    }
     if (overallNextEl) overallNextEl.textContent = overallNext ? overallNext.displayName : 'Maximum rank';
     if (overallSquare) {
       overallSquare.style.background = overall.rank.color;
@@ -926,7 +930,7 @@ export function boot() {
     if (rows) {
       rows.innerHTML = rowData.map((item) => `<article class="rank-domain-row${item.label === 'Trading Balance' ? ' rank-domain-balance' : ''}" style="--rank-color:${item.rank.color};--rank-text:${item.rank.textColor}">
         <div class="rank-domain-head"><span class="rank-square" aria-hidden="true"></span><strong>${item.label}</strong><b>${item.rank.displayName}</b></div>
-        <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="--rank-progress:${Math.round(item.progress * 100)}%"></i></div>
+        <div class="rank-domain-bar" data-tooltip="Next ${item.next}" tabindex="0" aria-label="Next rank threshold: ${item.next}"><i style="--rank-progress:${Math.round(item.progress * 100)}%;width:${Math.round(item.progress * 100)}%"></i></div>
         <div class="rank-domain-meta"><span>${item.current}</span></div>
         <div class="rank-domain-used">${item.used}</div>
       </article>`).join('');
