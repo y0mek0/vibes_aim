@@ -6,6 +6,11 @@ const html = fs.readFileSync('client/index.html', 'utf8');
 const terminal = fs.readFileSync('client/js/terminal.js', 'utf8');
 
 assert.match(game, /qualifyingAimSession\(\{ mode, durationSeconds, completed: completedFullSession \}\)/);
+assert.match(game, /sessionDuration === QUALIFYING_SESSION_SECONDS/);
+assert.match(game, /durationSeconds >= QUALIFYING_SESSION_SECONDS/);
+assert.match(game, /function playerRelativePoint\(distance, lateral = 0, vertical = 0\)/);
+assert.match(game, /spawnFlickOrb\(\)/);
+assert.match(game, /spawnRangeBot\(\)/);
 assert.match(game, /qualifiedScores\(m\)/);
 assert.match(game, /rankProgress\.aim\[m\] = aimRankFromScores/);
 assert.match(game, /RANK_STAGES\.map\(\(stage\) =>/);

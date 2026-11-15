@@ -464,8 +464,16 @@ export function boot() {
   }
 
   // ---------- spawns (player-relative, distance band from Settings) ----------
-  let trackAnchor = 0;
   const bandDist = () => spawnDist(settings.dist);
+  let trackAnchor = 0;
+  function playerRelativePoint(distance, lateral = 0, vertical = 0) {
+    const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+    const rx = Math.cos(yaw), rz = -Math.sin(yaw);
+    return new THREE.Vector3(
+      clamp(pos.x + fx * distance + rx * lateral, -32, 32),
+      clamp(pos.y + vertical, 0.6, 4.5),
+      clamp(pos.z + fz * distance + rz * lateral, -63, 11));
+  }
   function spawnGridOrb() {
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     for (let i = 0; i < 40; i++) {
@@ -488,29 +496,23 @@ export function boot() {
     return T.spawnOrb(fp, armorHp(), orbScale(settings.orbSize));
   }
   function spawnFlickOrb() {
-    // Flick targets stay in the same strict forward corridor as Gridshot.
-    const az = (Math.random() * 2 - 1) * FORWARD_CONE_HALF_ANGLE_DEG * DEG, el = (Math.random() * 10 - 1) * DEG, d = bandDist();
-    const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
-    const lx = Math.sin(az) * d, dd = Math.cos(az) * d;
-    const p = new THREE.Vector3(
-      clamp(pos.x + fx * dd + rx * lx, -32, 32),
-      clamp(pos.y + Math.sin(el) * d, 0.6, 4.5),
-      clamp(pos.z + fz * dd + rz * lx, -63, 11));
+    // Keep flick targets in the same player-relative corridor as gridshot.
+    const d = bandDist();
+    const az = (Math.random() * 2 - 1) * FORWARD_CONE_HALF_ANGLE_DEG * DEG;
+    const el = (Math.random() * 10 - 1) * DEG;
+    const p = playerRelativePoint(Math.cos(az) * d, Math.sin(az) * d, Math.sin(el) * d - pos.y);
     FX.spark(p);
     return T.spawnOrb(p, armorHp(), orbScale(settings.orbSize));
   }
   function spawnRangeBot() {
     const d = bandDist();
     const lx = (Math.random() * 2 - 1) * gridConeHalfWidth(d);
-    return T.spawnBot(new THREE.Vector3(
-      clamp(pos.x - Math.sin(yaw) * d + Math.cos(yaw) * lx, -32, 32), 0,
-      clamp(pos.z - Math.cos(yaw) * d - Math.sin(yaw) * lx, -63, 11)), armorHp());
+    return T.spawnBot(playerRelativePoint(d, lx, -pos.y), armorHp());
   }
   function spawnTrackingBot() {
     trackAnchor = clamp(pos.x, -26, 26);
-    return T.spawnBot(new THREE.Vector3(
-      clamp(pos.x - Math.sin(yaw) * 10, -32, 32), 0,
-      clamp(pos.z - Math.cos(yaw) * 10, -63, 11)), armorHp());
+    const p = playerRelativePoint(10, 0, -pos.y);
+    return T.spawnBot(p, armorHp());
   }
 
   // ---------- flow ----------
@@ -603,7 +605,7 @@ export function boot() {
     const rankMeta = $('res-rank-meta');
     if (rankMeta) rankMeta.textContent = qualified
       ? 'RANK PROGRESS · CALCULATING…'
-      : 'RANK PROGRESS · COMPLETE THE 1 MIN SESSION TO QUALIFY';
+      : `RANK PROGRESS · COMPLETE THE ${Math.round(QUALIFYING_SESSION_SECONDS / 60)} MIN SESSION TO QUALIFY`;
     history.push({
       m: mode, gun: gun.id, score: r.score, acc, d: Date.now(),
       durationSeconds, qualified,
@@ -621,12 +623,13 @@ export function boot() {
         const progress = threshold && average !== null ? Math.min(100, Math.round((average / threshold) * 100)) : 100;
         rankMeta.textContent = `${MODE_DEFS[mode].name} RANK · ${rank.displayName} · ${progress}% TO NEXT`;
       } else {
-        rankMeta.textContent = 'RANK PROGRESS · COMPLETE THE 1 MIN SESSION TO QUALIFY';
+        rankMeta.textContent = `RANK PROGRESS · COMPLETE THE ${Math.round(QUALIFYING_SESSION_SECONDS / 60)} MIN SESSION TO QUALIFY`;
       }
     }
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
+    const displayedMinutes = Math.max(1, Math.round(durationSeconds / 60));
     const sessionMeta = $('res-session-meta');
-    if (sessionMeta) sessionMeta.textContent = `${Math.round(sessionDuration / 60)} MIN SESSION · ${qualified ? 'RANKED RUN' : 'UNRANKED'}`;
+    if (sessionMeta) sessionMeta.textContent = `${displayedMinutes} MIN SESSION · ${qualified ? 'RANKED RUN' : 'UNRANKED'}`;
     $('res-score').textContent = r.score;
     // Reward requests are independent from the render loop. Settle them before
     // reading the authoritative balance for this session report.
