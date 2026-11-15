@@ -88,7 +88,7 @@ html, body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding-bottom: 52px; /* leave room for the fixed app-footer */
+  padding-bottom: 0;
 }
 
 body { overflow-x: hidden; }
@@ -1186,19 +1186,13 @@ body.playing #vibes-chart, body.playing #vibes-open-terminal, body.playing #vibe
    and they crowded the top right corner. */
 #menu .nav-account { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-/* Footer with social links. Lives OUTSIDE the #menu overlay so it
-   remains visible during gameplay. The footer uses position:fixed so
-   it sits at the bottom of the viewport regardless of where the user
-   is on the page (the workspace has its own internal scroll containers).
-   z-index sits above all overlays so the handles are always tappable. */
+/* Footer controls remain available without adding a dark strip over the page. */
 .app-footer {
-  position: fixed; left: 0; right: 0; bottom: 0;
+  position: static;
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; padding: 10px 24px;
-  background: rgba(7, 8, 12, 0.88);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid var(--line);
-  z-index: 50;
+  background: transparent;
+  border-top: 0;
   pointer-events: auto;
 }
 /* Hide footer while a game session is active so it doesn't cover the
