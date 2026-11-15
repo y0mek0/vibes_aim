@@ -600,13 +600,32 @@ export function boot() {
     const completedFullSession = sessionDuration === QUALIFYING_SESSION_SECONDS
       && durationSeconds >= QUALIFYING_SESSION_SECONDS;
     const qualified = qualifyingAimSession({ mode, durationSeconds, completed: completedFullSession });
+    const rankMeta = $('res-rank-meta');
+    if (rankMeta) rankMeta.textContent = qualified
+      ? 'RANK PROGRESS · CALCULATING…'
+      : 'RANK PROGRESS · COMPLETE THE 1 MIN SESSION TO QUALIFY';
     history.push({
       m: mode, gun: gun.id, score: r.score, acc, d: Date.now(),
       durationSeconds, qualified,
     });
     saveHistory();
     if (qualified) updateAimRankProgress(mode);
+    if (rankMeta) {
+      if (qualified) {
+        const snapshot = rankSnapshot();
+        const current = snapshot.aimPoints[AIM_RANK_MODES.indexOf(mode)];
+        const rank = rankByPoint(current);
+        const average = topScoresAverage(qualifiedScores(mode));
+        const threshold = current < TOTAL_RANK_POINTS ? AIM_SCORE_THRESHOLDS[mode][current] : null;
+        const progress = threshold && average !== null ? Math.min(100, Math.round((average / threshold) * 100)) : 100;
+        rankMeta.textContent = `${MODE_DEFS[mode].name} RANK · ${rank.displayName} · ${progress}% TO NEXT`;
+      } else {
+        rankMeta.textContent = 'RANK PROGRESS · COMPLETE THE 1 MIN SESSION TO QUALIFY';
+      }
+    }
     $('res-mode').textContent = MODE_DEFS[mode].name + ' · ' + gun.name;
+    const sessionMeta = $('res-session-meta');
+    if (sessionMeta) sessionMeta.textContent = `${Math.round(sessionDuration / 60)} MIN SESSION · ${qualified ? 'RANKED RUN' : 'UNRANKED'}`;
     $('res-score').textContent = r.score;
     // Reward requests are independent from the render loop. Settle them before
     // reading the authoritative balance for this session report.

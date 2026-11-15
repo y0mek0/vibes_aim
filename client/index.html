@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/upstream.css?v=20261023-8">
-<link rel="stylesheet" href="css/style.css?v=20261115-1">
+<link rel="stylesheet" href="css/style.css?v=20261115-2">
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -339,6 +339,8 @@
   <div class="res-tokens">
     <span class="res-tokens-num" id="res-earned-aapl">+0.0000</span>
     <span class="res-tokens-lbl">Ticker units earned</span>
+    <span class="res-session-meta" id="res-session-meta">1 MIN SESSION · UNRANKED</span>
+    <span class="res-rank-meta" id="res-rank-meta">Rank progress will appear after a qualifying run.</span>
   </div>
   <div class="res-grid" id="res-grid"></div>
   <button class="btn" id="res-retry">Retry</button>
@@ -386,7 +388,7 @@
 <div id="privy-wallet-root" hidden></div>
 <script src="js/privy-wallet.bundle.js?v=20261022-4"></script>
 <script type="module" src="js/holding.js?v=20261022-4"></script>
-<script type="module" src="js/main.js?v=20261115-1"></script>
+<script type="module" src="js/main.js?v=20261115-2"></script>
 <script type="module">
   // Market and Missions are views inside the one shared dashboard shell.
   const panel = document.getElementById('vibes-terminal');

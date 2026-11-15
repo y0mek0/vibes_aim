@@ -15,6 +15,8 @@ assert.match(game, /data-rank-rows/);
 assert.match(game, /BALANCE_THRESHOLDS_USD\[balancePoint\]/);
 assert.match(html, /data-rank-profile/);
 assert.match(html, /class="rank-runs-note">Ranked runs: 1 min · completed sessions only/);
+assert.match(html, /id="res-session-meta"/);
+assert.match(html, /id="res-rank-meta"/);
 assert.match(html, /data-rank-menu="calculation"/);
 assert.match(html, /<summary>Rank calculation<\/summary>/);
 assert.match(html, /data-rank-menu="all-ranks"/);
@@ -38,7 +40,7 @@ assert.doesNotMatch(game, /<em>\$\{item\.point\}\/\$\{TOTAL_RANK_POINTS\}<\/em>/
 assert.match(html, /class="rank-overall-label" id="rank-profile-title">Overall Rank/);
 assert.doesNotMatch(html, /rank-info-tooltip/);
 assert.match(html, /data-rank-overall-next>Mark II/);
-assert.match(html, /style\.css\?v=20261113-\d+/);
+assert.match(html, /style\.css\?v=20261115-\d+/);
 assert.match(fs.readFileSync('client/css/style.css', 'utf8'), /\.rank-domain-list \{ display: grid; grid-template-columns: minmax\(0,1fr\) minmax\(0,1fr\) minmax\(0,1\.12fr\)/);
 assert.match(fs.readFileSync('client/css/style.css', 'utf8'), /\.rank-domain-balance \{ grid-column: 3; grid-row: 1 \/ span 2/);
 assert.match(game, /data-tooltip="Next \$\{item\.next\}" tabindex="0"/);
